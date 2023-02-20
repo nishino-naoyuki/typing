@@ -10,17 +10,17 @@ import org.springframework.web.servlet.ModelAndView;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 
 @Controller
-public class DashboardController {
-	Logger logger = LoggerFactory.getLogger(DashboardController.class);
-	
-	@RequestMapping(value= {"/dashboard"}, method=RequestMethod.GET)
-    public ModelAndView dashboad(
+public class MasterMainteController {
+	Logger logger = LoggerFactory.getLogger(MasterMainteController.class);
+
+
+	@RequestMapping(value= {"/mastermainte"}, method=RequestMethod.GET)
+    public ModelAndView signin(
     		ModelAndView mv
     		) throws SystemErrorException {
 		
-		logger.info("dashboard！");
-		
-        mv.setViewName("dashboard");
+        
+        mv.setViewName("mastermainte");
         
 		return mv;
 	}

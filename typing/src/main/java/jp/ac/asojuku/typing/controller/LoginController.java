@@ -103,6 +103,7 @@ public class LoginController {
 		redirectAttributes.addFlashAttribute("msg", errMsg);
 		redirectAttributes.addFlashAttribute("mail", form.getMail());
 		
-		return "redirect:signin";
+		return "redirect:dashboard";	//for test
+		//return "redirect:signin";
 	}
 }
