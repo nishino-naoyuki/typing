@@ -40,6 +40,9 @@ public class UserTblEntity implements Serializable {
 	/** name. */
 	private String name;
 
+	/** disp_name. */
+	private String dispName;
+
 	/** affiliation. */
 	private String affiliation;
 

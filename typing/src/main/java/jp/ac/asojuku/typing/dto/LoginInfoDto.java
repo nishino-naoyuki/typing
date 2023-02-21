@@ -9,4 +9,11 @@ public class LoginInfoDto {
 	private String name;
 	private String mail;
 	private RoleId role;
+	
+	public boolean isAdmin() {
+		return (role == RoleId.ADMIN );
+	}
+	public boolean isStudent() {
+		return (role == RoleId.STUDENT );
+	}
 }

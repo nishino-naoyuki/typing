@@ -73,7 +73,7 @@ public class FileController {
 		}
 
 		//登録処理
-        //userCSVService.insertByCSV(userList);
+        userService.insertByCSV(userList);
 
 		//処理件数を返す
         return outputResult(userList);

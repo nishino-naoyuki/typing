@@ -18,12 +18,20 @@
           <span class="nav-link-text ms-1">ダッシュボード</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item"　th:if="${session['loginInfo'].isStudent()}">
         <a class="nav-link " th:href="@{/qlist}">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-align-left-2 text-primary text-sm opacity-10"></i>
           </div>
           <span class="nav-link-text ms-1">練習問題検索</span>
+        </a>
+      </li>
+      <li class="nav-item" th:if="${session['loginInfo'].isAdmin()}">
+        <a class="nav-link " th:href="@{/qcreate}">
+          <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="ni ni-app text-success text-sm opacity-10"></i>
+          </div>
+          <span class="nav-link-text ms-1">問題検索</span>
         </a>
       </li>
       <li class="nav-item">
@@ -34,36 +42,36 @@
           <span class="nav-link-text ms-1">イベント</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" th:if="${session['loginInfo'].isAdmin()}">
         <a class="nav-link " th:href="@{/ranking}">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-trophy text-success text-sm opacity-10"></i>
           </div>
-          <span class="nav-link-text ms-1">ランキング（管理者のみ）</span>
+          <span class="nav-link-text ms-1">ランキング</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" th:if="${session['loginInfo'].isAdmin()}">
         <a class="nav-link " th:href="@{/qcreate}">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-app text-success text-sm opacity-10"></i>
           </div>
-          <span class="nav-link-text ms-1">問題作成（管理者のみ）</span>
+          <span class="nav-link-text ms-1">問題作成</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" th:if="${session['loginInfo'].isAdmin()}">
         <a class="nav-link " th:href="@{/event}">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-app text-success text-sm opacity-10"></i>
           </div>
-          <span class="nav-link-text ms-1">イベント管理（管理者のみ）</span>
+          <span class="nav-link-text ms-1">イベント管理</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" th:if="${session['loginInfo'].isAdmin()}">
         <a class="nav-link " th:href="@{/mastermainte}">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-settings text-success text-sm opacity-10"></i>
           </div>
-          <span class="nav-link-text ms-1">マスター管理（管理者のみ）</span>
+          <span class="nav-link-text ms-1">マスター管理</span>
         </a>
       </li>
     </ul>

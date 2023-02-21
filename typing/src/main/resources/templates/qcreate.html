@@ -1,0 +1,126 @@
+<!--
+=========================================================
+* Argon Dashboard 2 - v2.0.4
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/argon-dashboard
+* Copyright 2022 Creative Tim (https://www.creative-tim.com)
+* Licensed under MIT (https://www.creative-tim.com/license)
+* Coded by Creative Tim
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- ヘッダー -->
+  <div id="parent" th:replace="/common/head"></div>  
+</head>
+
+<body class="g-sidenav-show   bg-gray-100">
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>
+  <!-- サイドバー -->
+  <div id="parent" th:replace="/common/sidebar"></div>  
+  
+  <main class="main-content position-relative border-radius-lg ">
+    <!-- Navbar -->
+  	<div id="parent" th:replace="/common/nav"></div>  
+    <!-- End Navbar -->
+    <div class="container-fluid py-1">
+      <div class="row">
+        <div class="col-12 mb-4">
+          <div class="card">
+          	<div class="card-header">
+          	<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2>問題作成</h2></p>
+          	</div>
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="alert alert-danger" role="alert" id="alertmsg">
+			      <strong id="errrmessage"></strong>
+			    </div>
+				<div class="form-group form-check form-switch">
+					<input class="form-check-input" type="checkbox" id="practiceFlg" checked="">
+					<label class="form-check-label" for="flexSwitchCheckDefault">練習問題</label>
+				</div>
+				<div class="form-group">
+					<label for="example-text-input" class="form-control-label">タイトル</label>
+					<input class="form-control" type="text" value="" id="titlename">
+				</div>
+				<div class="form-group">
+					<label for="exampleFormControlTextarea1">問題文</label>
+					<textarea class="form-control" id="question" rows="10"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="exampleFormControlSelect2">難易度</label>
+					<select class="form-control" id="difficulty">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="4">4</option>
+						<option value="5">5</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<button type="button" id="createbutton" class="btn bg-gradient-primary">登録</button>
+				</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+	  <!--   FOOTER   -->
+	  <div id="parent" th:replace="/common/footer"></div>  
+    </div>
+  </main>
+  <!--   Core JS Files   -->
+  <div id="parent" th:replace="/common/corejs"></div>  
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+<script>
+    const insertButton = document.getElementById('createbutton');
+ 	const alertarea = document.getElementById('alertmsg');
+ 	
+ 	alertarea.style.display = "none";
+ 	
+ 	insertButton.addEventListener('click',()=>{
+		if( !confirm("問題を登録します。よろしいですか？")){
+			return;
+		}
+    	const paracticeCheck = document.getElementById('practiceFlg');
+    	const titleObj = document.getElementById('titlename');
+    	const questionObj = document.getElementById('question');
+    	const difficultyObj = document.getElementById('difficulty');
+ 
+ 		//alert(paracticeCheck.value);
+ 		//alert(titleObj.value);
+ 		//alert(questionObj.value);
+ 		//alert(difficultyObj.value);
+ 		const formData = new FormData();
+ 		formData.append('practiceFlg',(paracticeCheck.value=='on' ? true:false) );
+ 		formData.append('title',titleObj.value );
+ 		formData.append('question',questionObj.value );
+ 		formData.append('difficulty',difficultyObj.value );
+ 		 		
+        const url = /*[[@{/qcreate/insert}]]*/ "/qcreate/insert";
+        fetch(url,{method:"post",body: formData})
+        //レスポンスの受け取り
+        .then( response => response.json()).then(result => {
+ 			if( result.result != "OK"){
+ 				const errorText = document.getElementById('errrmessage');
+ 				var msgs = "";
+ 				for(var err of result.errorList ){
+ 					msgs += err.msg + "<BR>";
+ 				}
+ 				errorText.innerHTML = msgs;
+ 				alertarea.style.display = "block";
+ 			}else{
+ 				alert("登録完了\n【注意】このまま連続で登録をクリックすると同じものが登録されてしまいます！");
+ 			}
+ 		});
+ 	});
+</script>
+</html>

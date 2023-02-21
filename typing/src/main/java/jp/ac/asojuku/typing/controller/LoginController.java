@@ -75,14 +75,14 @@ public class LoginController {
 			) throws SystemErrorException {
 		String url;
 		
-		url = "redirect:dashboad";
+		url = "redirect:dashboard";
 		
 		//認証
 		LoginInfoDto loginInfo = userService.login(form.getMail(), form.getPassword());
 		if( loginInfo != null) {
 			//セッションにログイン情報を保存
 			session.setAttribute(SessionConst.LOGININFO,loginInfo);
-			url = "redirect:dashboad";
+			url = "redirect:dashboard";
 		}else {
 			url = fowardLoginError(redirectAttributes,form);
 		}
@@ -103,7 +103,6 @@ public class LoginController {
 		redirectAttributes.addFlashAttribute("msg", errMsg);
 		redirectAttributes.addFlashAttribute("mail", form.getMail());
 		
-		return "redirect:dashboard";	//for test
-		//return "redirect:signin";
+		return "redirect:signin";
 	}
 }
