@@ -105,7 +105,7 @@
  		formData.append('question',questionObj.value );
  		formData.append('difficulty',difficultyObj.value );
  		 		
-        const url = /*[[@{/qcreate/insert}]]*/ "/qcreate/insert";
+        const url = /*[[@{/question/insert}]]*/ "/question/insert";
         fetch(url,{method:"post",body: formData})
         //レスポンスの受け取り
         .then( response => response.json()).then(result => {

@@ -1,6 +1,7 @@
 package jp.ac.asojuku.typing.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,6 +9,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -46,6 +51,33 @@ public class QestionTblEntity implements Serializable {
 	/** count. */
 	private Integer count;
 
+	/** 作成日時. */
+	private Date createDate;
 
+	/** 更新日時. */
+	private Date updateDate;
 
+	/** イベント問題テーブル */
+	//@OneToMany
+	//@JoinColumn(name="qid",insertable=false ,updatable=false)
+	//private Set<EventQuestionEntity> eventQuestionSet;
+	
+
+	/**
+	 * コンストラクタ.
+	 */
+	public QestionTblEntity() {
+//		this.eventQuestionSet = new HashSet<EventQuestionEntity>();
+	}
+	
+	@PrePersist
+    public void onPrePersist() {
+		setCreateDate(new Date());
+		setUpdateDate(new Date());
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+    	setUpdateDate(new Date());
+    }
 }

@@ -19,7 +19,7 @@
         </a>
       </li>
       <li class="nav-item"　th:if="${session['loginInfo'].isStudent()}">
-        <a class="nav-link " th:href="@{/qlist}">
+        <a class="nav-link " th:href="@{/question/list}">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-align-left-2 text-primary text-sm opacity-10"></i>
           </div>
@@ -27,7 +27,7 @@
         </a>
       </li>
       <li class="nav-item" th:if="${session['loginInfo'].isAdmin()}">
-        <a class="nav-link " th:href="@{/qcreate}">
+        <a class="nav-link " th:href="@{/question/list}">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-app text-success text-sm opacity-10"></i>
           </div>
@@ -51,7 +51,7 @@
         </a>
       </li>
       <li class="nav-item" th:if="${session['loginInfo'].isAdmin()}">
-        <a class="nav-link " th:href="@{/qcreate}">
+        <a class="nav-link " th:href="@{/question/create}">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
             <i class="ni ni-app text-success text-sm opacity-10"></i>
           </div>

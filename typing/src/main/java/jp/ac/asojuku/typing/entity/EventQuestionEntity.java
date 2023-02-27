@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -49,5 +50,15 @@ public class EventQuestionEntity implements Serializable {
     @JoinColumn(name="qid",insertable=false ,updatable=false)
 	private QestionTblEntity qestionTbl;
 
-
+//	/** 解答テーブル. */
+//	@OneToMany
+//	@JoinColumn(name="qid",insertable=false ,updatable=false)
+//	private Set<AnsTblEntity> ansSet;
+//
+//	/**
+//	 * コンストラクタ.
+//	 */
+//	public EventQuestionEntity() {
+//		this.ansSet = new HashSet<AnsTblEntity>();
+//	}
 }

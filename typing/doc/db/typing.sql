@@ -40,7 +40,8 @@ CREATE TABLE EVENT_QUESTION
 	eqid int NOT NULL AUTO_INCREMENT,
 	-- イベント内での問題番号
 	no int NOT NULL COMMENT 'イベント内での問題番号',
-	eid int NOT NULL,
+	-- 練習問題の場合はNULLで登録
+	eid int COMMENT '練習問題の場合はNULLで登録',
 	qid int NOT NULL,
 	PRIMARY KEY (eqid)
 );
@@ -99,6 +100,10 @@ CREATE TABLE QUESTION_TBL
 	difficalty int NOT NULL COMMENT '難易度',
 	-- 問題文の文字数
 	count int NOT NULL COMMENT '問題文の文字数',
+	-- 問題の作成日
+	create_date timestamp NOT NULL COMMENT '問題の作成日',
+	-- 更新日
+	update_date timestamp NOT NULL COMMENT '更新日',
 	PRIMARY KEY (qid)
 );
 

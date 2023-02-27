@@ -49,6 +49,20 @@ public class Exchange {
 	public static Timestamp toTimestamp(LocalDate localDate) {
 		return Timestamp.valueOf(LocalDateTime.of(localDate,LocalTime.of(0,0,0)));
 	}
+
+	public static String toFormatString(Date date,String fmt) {
+		return toFormatString(date,fmt,"");
+	}
+	public static String toFormatString(Date date,String fmt,String defaultMsg) {
+		String dateString = defaultMsg;
+		
+		if( date != null ) {
+			SimpleDateFormat sdf = new SimpleDateFormat(fmt);
+			dateString = sdf.format(date);
+		}
+		
+		return dateString;
+	}
 	/**
 	 * LocalDateTimeを指定された文字列ん変換する
 	 * @param localDateTime

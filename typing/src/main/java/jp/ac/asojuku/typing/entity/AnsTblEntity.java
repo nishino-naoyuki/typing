@@ -38,9 +38,9 @@ public class AnsTblEntity implements Serializable {
 	private UserTblEntity userTbl;
 
 	/** イベント問題文. */
-	private Integer qid;
+	private Integer eqid;
 	@OneToOne
-    @JoinColumn(name="qid",insertable=false ,updatable=false)
+    @JoinColumn(name="eqid",insertable=false ,updatable=false)
 	private EventQuestionEntity eventQuestion;
 
 	/** answer. */
