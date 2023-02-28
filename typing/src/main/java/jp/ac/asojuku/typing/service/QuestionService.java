@@ -93,6 +93,7 @@ public class QuestionService {
 		return getDetailForm(qEntity,uid);
 	}
 	
+	/* ------- private method ------------ */
 	private QuestionDetailDto getDetailForm(QestionTblEntity qEntity,Integer uid) {
 		if( qEntity == null ) {
 			return null;

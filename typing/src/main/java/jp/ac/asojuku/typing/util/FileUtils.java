@@ -414,4 +414,13 @@ public class FileUtils {
 		
 		return path;
 	}
+	
+	/**
+	 * 一意なディレクトリを作成する
+	 * @param baseDir
+	 * @return
+	 */
+	public static String createUniqPath(String baseDir) {
+		return baseDir +"/" + Token.getCsrfToken();
+	}
 }

@@ -13,4 +13,6 @@ public class ScoringForm {
 	private Integer submitSecond;
 	private Integer keycount;
 	private Integer time;
+	private Integer qid;
+	private Integer eid;
 }

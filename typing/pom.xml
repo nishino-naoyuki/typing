@@ -97,6 +97,27 @@
 		    <artifactId>jackson-core</artifactId>
 		    <version>[2.9.10.1,)</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
+
+	  	<dependency>
+	  		<groupId>com.googlecode.java-diff-utils</groupId>
+	  		<artifactId>diffutils</artifactId>
+	  		<version>1.2.1</version>
+	  	</dependency>
+	  	<dependency>
+            <artifactId>lucene-core</artifactId>
+            <groupId>org.apache.lucene</groupId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <artifactId>lucene-analyzers</artifactId>
+            <groupId>org.apache.lucene</groupId>
+            <version>3.6.1</version>
+        </dependency>
+        <dependency>
+            <artifactId>lucene-spellchecker</artifactId>
+            <groupId>org.apache.lucene</groupId>
+            <version>3.6.1</version>
+        </dependency>
 	</dependencies>
 
 	<build>

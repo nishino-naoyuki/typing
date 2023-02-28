@@ -24,15 +24,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jp.ac.asojuku.typing.dto.LoginInfoDto;
 import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
+import jp.ac.asojuku.typing.dto.ScoringResultDto;
 import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.QuestionForm;
 import jp.ac.asojuku.typing.form.ScoringForm;
 import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.param.SessionConst;
+import jp.ac.asojuku.typing.param.TypingConst;
 import jp.ac.asojuku.typing.param.json.ErrorField;
+import jp.ac.asojuku.typing.param.json.OneScoringJson;
 import jp.ac.asojuku.typing.param.json.ResultJson;
 import jp.ac.asojuku.typing.service.QuestionService;
+import jp.ac.asojuku.typing.service.ScoringService;
 
 @Controller
 @RequestMapping("/question")
@@ -41,6 +45,9 @@ public class QuestionController {
 	
 	@Autowired
 	QuestionService questionService;
+	
+	@Autowired
+	ScoringService scoringService;
 	
 	@Autowired
 	HttpSession session;
@@ -134,20 +141,36 @@ public class QuestionController {
 			throw new PermitionException("権限無しエラー");
 		}
 		mv.addObject("detailDto", detailDto);
+		mv.addObject("eid", TypingConst.PRACTICE_EVENTID);	//練習用
 		mv.setViewName("qdetail");
 		
 		return mv;
 	}
 	
 
+	/**
+	 * 採点処理
+	 * @param mv
+	 * @param scoringForm
+	 * @return
+	 * @throws SystemErrorException
+	 * @throws PermitionException
+	 * @throws JsonProcessingException
+	 */
 	@RequestMapping(value= {"/scoring"}, method=RequestMethod.POST)
 	@ResponseBody
     public Object scoring(
     		ModelAndView mv,
     		ScoringForm scoringForm
-    		) throws SystemErrorException, PermitionException {
+    		) throws SystemErrorException, PermitionException, JsonProcessingException {
+
+		//ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto)session.getAttribute(SessionConst.LOGININFO);
 		
-		return "OK";
+		//採点を実施する
+		ScoringResultDto sResult = scoringService.typingScoring(loginInfo.getUid(), scoringForm);
+		
+		return getScoringJson(sResult,scoringForm);
 	}
 	
 	/* ---private method--- */
@@ -173,6 +196,25 @@ public class QuestionController {
         String jsonString = mapper.writeValueAsString(result);
 
         logger.trace("jsonString:{}",jsonString);
+
+        return jsonString;
+	}
+	
+	private String getScoringJson(ScoringResultDto result,ScoringForm scoringForm) throws JsonProcessingException {
+		OneScoringJson jsonObj = new OneScoringJson();
+		
+		jsonObj.setAccuracyScore(result.getAccuracyScore());
+		jsonObj.setEid(scoringForm.getEid());
+		jsonObj.setQid(scoringForm.getQid());
+		jsonObj.setResult("OK");
+		jsonObj.setSppedScore(result.getSppedScore());
+		jsonObj.setTotalScore(result.getTotalScore());
+		jsonObj.setUnjustFlag(result.isUnjustFlag());
+
+		ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(jsonObj);
+
+        logger.info("jsonString:{}",jsonString);
 
         return jsonString;
 	}

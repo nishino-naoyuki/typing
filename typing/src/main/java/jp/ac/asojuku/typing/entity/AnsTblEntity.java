@@ -56,7 +56,7 @@ public class AnsTblEntity implements Serializable {
 	private Integer correctFlg;
 
 	/** difflog. */
-	private String difflog;
+	private String log;
 
 	/** score. */
 	private Integer score;

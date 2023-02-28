@@ -27,8 +27,10 @@ CREATE TABLE ANS_TBL
 	ans_timestamp timestamp NOT NULL COMMENT '解答を出した日時',
 	-- 正解フラグ
 	correct_flg int NOT NULL COMMENT '正解フラグ',
-	-- diffコマンドの実行結果
-	difflog varchar(4000) NOT NULL COMMENT 'diffコマンドの実行結果',
+	-- 採点のlog
+	-- Json形式で格納する
+	log varchar(4000) NOT NULL COMMENT '採点のlog
+Json形式で格納する',
 	-- 得点
 	score int NOT NULL COMMENT '得点',
 	PRIMARY KEY (ansid)
@@ -43,7 +45,8 @@ CREATE TABLE EVENT_QUESTION
 	-- 練習問題の場合はNULLで登録
 	eid int COMMENT '練習問題の場合はNULLで登録',
 	qid int NOT NULL,
-	PRIMARY KEY (eqid)
+	PRIMARY KEY (eqid),
+	CONSTRAINT eidqid UNIQUE (eid, qid)
 );
 
 
