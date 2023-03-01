@@ -105,7 +105,7 @@ public class QuestionService {
 		dto.setTitle(qEntity.getTitle());
 		dto.setDifficulty(qEntity.getDifficalty());
 		//解答をセット
-		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(uid);
+		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(qEntity.getQid(),uid);
 		if( ansEntity != null ) {
 			dto.setAnswer(ansEntity.getAnswer());
 		}else {
@@ -142,10 +142,10 @@ public class QuestionService {
 		dto.setPracticeFlg(entity.getPracticeflg());
 		dto.setTitle(entity.getTitle());
 		dto.setKindName( (entity.getPracticeflg()==1?"練習用":"大会用") );
-		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(uid);
+		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(entity.getQid(),uid);
 		if( ansEntity != null ) {
 			dto.setSubmitTime(ansEntity.getAnsTimestamp());
-			dto.setSubmitTimeString(Exchange.toFormatString(ansEntity.getAnsTimestamp(), "yyyy/mm/dd hh:MM::mm"));
+			dto.setSubmitTimeString(Exchange.toFormatString(ansEntity.getAnsTimestamp(), "yyyy/MM/dd HH:mm:ss"));
 		}else {
 			dto.setSubmitTime(null);
 			dto.setSubmitTimeString("未解答");

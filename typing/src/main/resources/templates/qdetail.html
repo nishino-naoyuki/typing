@@ -85,10 +85,38 @@
 	  <!--   FOOTER   -->
 	  <div id="parent" th:replace="/common/footer"></div>  
     </div>
+    <button type="button" id="retDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-notification"></button>
+    <div class="modal fade" id="modal-notification" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
+      <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h6 class="modal-title" id="modal-title-notification">採点終了</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="py-3 text-center">
+              <i class="ni ni-bell-55 ni-3x"></i>
+              <h4 class="text-gradient text-danger mt-4" id="totalscore" >得点</h4>
+              <p id="scoredetail"></p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
   <!--   Core JS Files   -->
   <div id="parent" th:replace="/common/corejs"></div>  
   <script th:inline="javascript">
+  	//初期処理
+  	const retDialogTrigger = document.getElementById("retDialogTrigger");
+  	
+  	retDialogTrigger.style.display ="none";
+  	
   	const dispchangebtn = document.getElementById("dispchangebtn");
   	dispchangebtn.addEventListener('click',()=>{
   		let qestionobj = document.getElementById("question");
@@ -108,6 +136,7 @@
   	let keycount = 0;
   	let second = 0;
   	let nowTime;
+  	
   	const count = ()=>{
   		nowTime = new Date();
 
@@ -117,6 +146,7 @@
     	let str = '経過秒数 ' + minutes.toString().padStart(2, '0') + "分" + second.toString().padStart(2, '0')+ '秒';
     	pasttime.innerHTML  = str;
   	}
+  	
   	startbtn.addEventListener('click',()=>{
   		clearInterval(timer);
   		startTime = new Date();
@@ -129,12 +159,13 @@
   		let srcString = /*[[${detailDto.sentence}]]*/ "";
   		question.innerHTML = srcString.replace("\n","<BR>");
   	});
+  	
   	stopbtn.addEventListener('click',()=>{
   		clearInterval(timer);
   		textarea.disabled = true;
   		stopbtn.disabled = true;
   		startbtn.disabled = false;
-  		alert("本来はここでサーバー側で入力チェックが行われ、誤りがあるとメッセージとともにタイマーが再開される");
+  		//alert("本来はここでサーバー側で入力チェックが行われ、誤りがあるとメッセージとともにタイマーが再開される");
   		
  		const formData = new FormData();
  		formData.append('qid',/*[[${detailDto.qid}]]*/ );
@@ -162,18 +193,26 @@
  				errorText.innerHTML = msgs;
  				alertarea.style.display = "block";
  			}else{
- 				alert("登録完了\n【注意】このまま連続で登録をクリックすると同じものが登録されてしまいます！");
+ 				if( result.unjustFlag != true){
+	 				const totalscore = document.getElementById("totalscore");
+	 				totalscore.innerHTML = "得点 "+result.totalScore + "点";
+	 				const scoredetail = document.getElementById("scoredetail");
+	 				scoredetail.innerHTML = "<p>内訳</p>正確性："+result.accuracyScore + "点<br>" + "スピード："+result.sppedScore + "点";
+	 			}else{
+	 				const totalscore = document.getElementById("totalscore");
+	 				totalscore.innerHTML = "不正が疑われるため０点となりました";
+	 			}
+ 				retDialogTrigger.click();
  			}
  		});
   	});
+  	
   	const ShowLength = ( str )=>{
   		keycount++;
 	   document.getElementById("inputlength").innerHTML = "文字数:"+str.length + "文字";
-	   let underCount = str.length;
+
 	   let srcString = /*[[${detailDto.sentence}]]*/ "";
-	   srcString = "<span class='underline'>"+ srcString.substring(0,underCount)+"</span>" + srcString.substring(underCount,srcString.length);
-	   question.innerHTML = srcString.replace("\n","<BR>");
-	   /* 正しい文字を入れたら赤くなるバージョン 
+
 	   let srcStringArry = srcString.replace("<BR>","\n").split("");
 	   let ansStringArry = answer.value.split("");
 	   sameCount = 0;
@@ -187,7 +226,7 @@
 	   console.log(sameCount);
 	   srcString = "<span class='samestr'>"+ srcString.substring(0,sameCount)+"</span>" + srcString.substring(sameCount,srcString.length);
 	   question.innerHTML = srcString.replace("\n","<BR>");
-	   */
+
 	}
   </script>
   <!-- Github buttons -->

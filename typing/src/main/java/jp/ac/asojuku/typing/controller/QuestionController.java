@@ -168,6 +168,9 @@ public class QuestionController {
 		LoginInfoDto loginInfo = (LoginInfoDto)session.getAttribute(SessionConst.LOGININFO);
 		
 		//採点を実施する
+		if( scoringForm.getEid() <= 0) {
+			scoringForm.setEid(null);
+		}
 		ScoringResultDto sResult = scoringService.typingScoring(loginInfo.getUid(), scoringForm);
 		
 		return getScoringJson(sResult,scoringForm);

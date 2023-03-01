@@ -1,6 +1,7 @@
 package jp.ac.asojuku.typing.util;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -94,5 +95,22 @@ public class Exchange {
 		}
 		
 		return dateString;
+	}
+	/**
+	 * 年月日時分秒を指定しＤａｔｅオブジェクトを取得する
+	 * @param year
+	 * @param month
+	 * @param day
+	 * @param hour
+	 * @param minuts
+	 * @param second
+	 * @return
+	 * @throws ParseException
+	 */
+	public static Date toDate(Integer year,Integer month,Integer day,Integer hour,Integer minuts,Integer second) throws ParseException {
+		String dateString = String.format("%04d/%02d/%02d %02d:%02d:%02d", year,month,day,hour,minuts,second);
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		return sdf.parse(dateString);
 	}
 }

@@ -22,8 +22,18 @@ public class EventQuestionSpecifications {
 	    }
 
 	  public static Specification<EventQuestionEntity> eidEquals(Integer eid) {
-	        return eid == null ? null : new Specification<EventQuestionEntity>() {
-				@Override
+	        return eid == null ? 
+        	new Specification<EventQuestionEntity>() {
+			@Override
+				public Predicate toPredicate(Root<EventQuestionEntity> root, CriteriaQuery<?> query,
+						CriteriaBuilder cb) {
+					// TODO 自動生成されたメソッド・スタブ
+					return cb.isNull(root.get("eid"));
+				}
+	        }
+	        		: 
+        	new Specification<EventQuestionEntity>() {
+			@Override
 				public Predicate toPredicate(Root<EventQuestionEntity> root, CriteriaQuery<?> query,
 						CriteriaBuilder cb) {
 					// TODO 自動生成されたメソッド・スタブ
