@@ -57,6 +57,8 @@ CREATE TABLE EVENT_TBL
 	name varchar(256) NOT NULL COMMENT 'イベント名',
 	-- 公開日時
 	public_date timestamp NOT NULL COMMENT '公開日時',
+	-- イベントの開始日
+	start_date timestamp NOT NULL COMMENT 'イベントの開始日',
 	-- 終了日時
 	finish_date timestamp NOT NULL COMMENT '終了日時',
 	-- 主催者名

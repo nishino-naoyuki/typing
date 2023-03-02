@@ -17,173 +17,152 @@
 
 <head>
   <!-- ヘッダー -->
+  <link th:href="@{/assets/css/jquery.dataTables.min.css}" rel="stylesheet" />
+  <link th:href="@{/assets/css/eventcreate.css}" rel="stylesheet" />
   <div id="parent" th:replace="/common/head"></div>  
+  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+	    let table = new DataTable('#qlistTable');
+	});
+  </script>
 </head>
 
 <body class="g-sidenav-show   bg-gray-100">
-  <div class="min-height-300 bg-primary position-absolute w-100"></div>
-  <!-- サイドバー -->
-  <div id="parent" th:replace="/common/sidebar"></div>  
-  
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>  
   <main class="main-content position-relative border-radius-lg ">
-    <!-- Navbar -->
-  	<div id="parent" th:replace="/common/nav"></div>  
-    <!-- End Navbar -->
-    <div class="container-fluid py-1">
-      <div class="row">
-        <div class="col-12 mb-4">
-          	<div class="card-header">
-          		<div class="row">
-	          		<div class="col-8">
-	          			<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2>イベント作成</h2></p>
-	          		</div>
-	          		<div class="col-4 justify-content-end">
-	          			<button type="button" class="btn bg-gradient-primary">イベント作成</button>
-	          		</div>
-          		</div>
-          	</div>
-            <div class="card-body p-3">
-			  <form>
-	              <div class="row">
-					<div class="nav-wrapper position-relative end-0">
-						<ul class="nav nav-pills nav-fill p-1" role="tablist">
-							<li class="nav-item">
-								<a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab" href="#registeruser" role="tab" aria-controls="profile" aria-selected="true">
-								基本情報
-								</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#searchuser" role="tab" aria-controls="dashboard" aria-selected="false">
-								問題登録
-								</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#contact" role="tab" aria-controls="dashboard" aria-selected="false">
-								オプション
-								</a>
-							</li>
-						</ul>
+<div class="container-fluid py-1">
+  <div class="row">
+    <div class="col-12 mb-4">
+    	<div class="card">
+      	<div class="card-header">
+      		<div class="row">
+       		<div class="col-8">
+       			<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2>イベント作成</h2></p>
+       		</div>
+       		<div class="col-4 justify-content-end">
+       			<button type="button" class="btn bg-gradient-primary">イベント作成</button>
+       		</div>
+      		</div>
+      	</div>
+        <div class="card-body p-3">
+ 		 <form>
+           <div class="row">
+			<div class="nav-wrapper position-relative end-0">
+				<ul class="nav nav-pills nav-fill p-1" role="tablist">
+					<li class="nav-item">
+						<a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab" href="#registeruser" role="tab" aria-controls="profile" aria-selected="true">
+						基本情報
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#searchuser" role="tab" aria-controls="dashboard" aria-selected="false">
+						問題登録
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#contact" role="tab" aria-controls="dashboard" aria-selected="false">
+						オプション
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div class="tab-content" id="myTabContent">
+				<div class="tab-pane fade show active" id="registeruser" role="tabpanel" aria-labelledby="home-tab">
+					<div class="form-group col-6">
+						<label for="example-text-input" class="form-control-label">イベント名</label>
+						<input class="form-control" type="text" value="" id="eventname">
 					</div>
-					<div class="tab-content" id="myTabContent">
-						<div class="tab-pane fade show active" id="registeruser" role="tabpanel" aria-labelledby="home-tab">
-							<div class="form-group col-6">
-								<label for="example-text-input" class="form-control-label">イベント名</label>
-								<input class="form-control" type="text" value="" id="example-text-input">
-							</div>
-							<div class="form-group col-6">
-								<label for="example-text-input" class="form-control-label">公開期間</label>
-								<div class="d-flex">
-									<input type="datetime-local" class="form-control" name="publicstartdatetime">～<input type="datetime-local" class="form-control" name="publicstartdatetime">
-								</div>
-							</div>
-							<div class="form-group col-6">
-								<label for="example-text-input" class="form-control-label">主催者名</label>
-								<input class="form-control" type="text" value="" id="example-text-input">
-							</div>
+					<div class="form-group col-6">
+						<label for="example-text-input" class="form-control-label">情報公開開始日時</label>
+						<div class="d-flex">
+							<input type="datetime-local" class="form-control" name="publicstartdatetime" id="publicstartdatetime">
 						</div>
-						<div class="tab-pane fade" id="searchuser" role="tabpanel" aria-labelledby="profile-tab">
-							<div class="row">
-				              	<div class="col-5">
-				              		<button type="button" class="btn bg-gradient-primary">選択した問題を追加</button>
-				                	<table id="example" class="display" style="width:100%">
-										<thead>
-											<tr>
-												<th></th>
-												<th>問題名</th>
-												<th>難易度</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												<td><input type="checkbox" name="qgroup"></td>
-												<td><a href="detail.html" target="assignment" rel="noopener noreferrer" >[問題1]問題1のタイトル</a></td>
-												<td>1</td>
-											</tr>
-											<tr>
-												<td><input type="checkbox" name="qgroup"></td>
-												<td><a href="detail.html" target="assignment" rel="noopener noreferrer">[問題2]問題2のタイトル</a></td>
-												<td>1</td>
-											</tr>
-											<tr>
-												<td><input type="checkbox" name="qgroup"></td>
-												<td><a href="detail.html" target="assignment" rel="noopener noreferrer">[問題3]問題3のタイトル</a></td>
-												<td>1</td>
-											</tr>
-											<tr>
-												<td><input type="checkbox" name="qgroup"></td>
-												<td><a href="detail.html" target="assignment" rel="noopener noreferrer">[問題4]問題4のタイトル</a></td>
-												<td>2</td>
-											</tr>
-											<tr>
-												<td><input type="checkbox" name="qgroup"></td>
-												<td><a href="detail.html" target="assignment" rel="noopener noreferrer">[問題5]問題5のタイトル</a></td>
-												<td>2</td>
-											</tr>
-											<tr>
-												<td><input type="checkbox" name="qgroup"></td>
-												<td><a href="detail.html" target="assignment" rel="noopener noreferrer">[問題6]問題6のタイトル</a></td>
-												<td>5</td>
-											</tr>
-										</tbody>
-										<tfoot>
-											<tr>
-												<th>No.</th>
-												<th>問題名</th>
-												<th>難易度</th>
-											</tr>
-										</tfoot>
-									</table>
-				              	</div><!-- col -->
-				              	<div class="col-7">
-									<div class="form-group">
-										<label for="exampleFormControlTextarea1">出題問題</label>
-										<ol class="drag-list">
-											<li id="item1" draggable="true">問題１のタイトル</li>
-											<li id="item2" draggable="true">問題２のタイトル</li>
-											<li id="item3" draggable="true">問題３のタイトル</li>
-											<li id="item3" draggable="true">問題４のタイトル</li>
-											<li id="item3" draggable="true">問題５のタイトル</li>
-											<li id="item3" draggable="true">問題６のタイトル</li>
-											<li id="item3" draggable="true">問題７のタイトル</li>
-											<li id="item3" draggable="true">問題８のタイトル</li>
-											<li id="item3" draggable="true">問題９のタイトル</li>
-											<li id="item3" draggable="true">問題１０のタイトル</li>
-										</ol>
-									</div>
-				              	</div><!-- col -->
-							</div>
+						<label for="example-text-input" class="form-control-label">イベント開始日時</label>
+						<div class="d-flex">
+							<input type="datetime-local" class="form-control" name="startdatetime" id="startdatetime">
 						</div>
-						<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-							<div class="row mt-5 align-items-center">
-								<div class="form-group col-3">
-									<div class="form-check form-switch">
-										<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked="">
-										<label class="form-check-label" for="flexSwitchCheckDefault">ランキングを参加者に見せる</label>
-									</div>
-								</div>
-								<div class="form-group col-3">
-									<label for="example-text-input" class="form-control-label">ランキングを見せなくする時間</label>
-									<input class="form-control" type="text" value="" id="example-text-input">分前
-								</div>
-							</div>
-							<div class="form-check form-switch">
-								<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked="">
-								<label class="form-check-label" for="flexSwitchCheckDefault">大会終了後も公開する</label>
-							</div>
-							<div class="form-group col-6">
-								<label for="example-text-input" class="form-control-label">参加者フィルター</label>
-								<input class="form-control" type="text" value="" id="example-text-input">
-							</div>
+						<label for="example-text-input" class="form-control-label">イベント終了日時</label>
+						<div class="d-flex">
+							<input type="datetime-local" class="form-control" name="enddatetime" id="enddatetime">
 						</div>
 					</div>
-	            </div>
-			</form>
-          </div>
+					<div class="form-group col-6">
+						<label for="example-text-input" class="form-control-label">主催者名</label>
+						<input class="form-control" type="text" value="" id="example-text-input">
+					</div>
+				</div>
+				<div class="tab-pane fade" id="searchuser" role="tabpanel" aria-labelledby="profile-tab">
+					<div class="row">
+		             	<div class="col-7">
+		             		<button type="button" class="btn bg-gradient-primary" id="addquestion">選択した問題を追加</button>
+			            <table id="qlistTable" class="display" style="width:100%">
+						<thead>
+							<tr>
+								<th></th>
+								<th>問題名</th>
+								<th>難易度</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="element,status:${qList}">
+								<td><input class="qidcheckbox" type="checkbox" name="qgroup" th:value="${element.qid}" th:data-title="${element.title}"></td>
+								<td><a th:href="|@{/question/detail}?id=${element.qid}|" target="qestiondetail" rel="noopener noreferrer"  th:text="${element.title}"　></a></td>
+								<td th:text="${element.difficulty}"></td>
+							</tr>
+						</tbody>
+					<tfoot>
+						<tr>
+							<th>No.</th>
+							<th>問題名</th>
+							<th>難易度</th>
+						</tr>
+					</tfoot>
+				</table>
+         	</div><!-- col -->
+         	<div class="col-5">
+				<div class="form-group">
+					<label for="exampleFormControlTextarea1">出題問題</label>
+					<ol class="drag-list" id="draglist">
+						<li id="item1" draggable="true">問題１のタイトル</li>
+					</ol>
+				</div>
+         	</div><!-- col -->
+		</div><!-- row -->
+	</div><!-- searchuser -->
+		<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+			<div class="row mt-5 align-items-center">
+				<div class="form-group col-3">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked="">
+						<label class="form-check-label" for="flexSwitchCheckDefault">ランキングを参加者に見せる</label>
+					</div>
+				</div>
+				<div class="form-group col-3">
+					<label for="example-text-input" class="form-control-label">ランキングを見せなくする時間</label>
+					<input class="form-control" type="text" value="" id="example-text-input">分前
+				</div>
+			</div>
+			<div class="form-check form-switch">
+				<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked="">
+				<label class="form-check-label" for="flexSwitchCheckDefault">大会終了後も公開する</label>
+			</div>
+			<div class="form-group col-6">
+				<label for="example-text-input" class="form-control-label">参加者フィルター</label>
+				<input class="form-control" type="text" value="" id="example-text-input">
+			</div>
+		</div>
+	</div>
         </div>
-      </div>
-	  <!--   FOOTER   -->
-	  <div id="parent" th:replace="/common/footer"></div>  
-    </div>
+</form>
+     </div>
+   </div>
+   </div>
+ </div>
+<!--   FOOTER   -->
+<div id="parent" th:replace="/common/footer"></div>  
+ </div>
   </main>
   <!--   Core JS Files   -->
   <div id="parent" th:replace="/common/corejs"></div>  
@@ -191,4 +170,58 @@
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
+  <script>
+  const addquestion = document.getElementById('addquestion');
+  addquestion.addEventListener('click',()=>{
+  	let elements = document.getElementsByClassName("qidcheckbox");
+  	let addScript = "";
+  	for(let i=0; i < elements.length;i++){
+  		if( elements[i].checked ){
+  			addScript += "<li id='"+elements[i].value+"' draggable='true'>"+elements[i].dataset.title+"</li>";
+  			alert(addScript);
+  		}
+  	}
+  	const draglist = document.getElementById('draglist');
+  	draglist.innerHTML += addScript;
+  });
+  
+  document.querySelectorAll('.drag-list li').forEach (elm => {
+		elm.ondragstart = function () {
+			event.dataTransfer.setData('text/plain', event.target.id);
+		};
+		elm.ondragover = function () {
+			event.preventDefault();
+			let rect = this.getBoundingClientRect();
+			if ((event.clientY - rect.top) < (this.clientHeight / 2)) {
+				//マウスカーソルの位置が要素の半分より上
+				this.style.borderTop = '2px solid blue';
+				this.style.borderBottom = '';
+			} else {
+				//マウスカーソルの位置が要素の半分より下
+				this.style.borderTop = '';
+				this.style.borderBottom = '2px solid blue';
+			}
+		};
+		elm.ondragleave = function () {
+			this.style.borderTop = '';
+			this.style.borderBottom = '';
+		};
+		elm.ondrop = function () {
+			event.preventDefault();
+			let id = event.dataTransfer.getData('text/plain');
+			let elm_drag = document.getElementById(id);
+
+			let rect = this.getBoundingClientRect();
+			if ((event.clientY - rect.top) < (this.clientHeight / 2)) {
+				//マウスカーソルの位置が要素の半分より上
+				this.parentNode.insertBefore(elm_drag, this);
+			} else {
+				//マウスカーソルの位置が要素の半分より下
+				this.parentNode.insertBefore(elm_drag, this.nextSibling);
+			}
+			this.style.borderTop = '';
+			this.style.borderBottom = '';
+		};
+	});
+  </script>
 </html>

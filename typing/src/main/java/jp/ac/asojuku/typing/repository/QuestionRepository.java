@@ -17,4 +17,6 @@ public interface QuestionRepository
 			+ "where ((:role=0 and q.practiceflg=1) or :role=1) "
 			+ "order by q.title")
 	List<QestionTblEntity> getQList(@Param("role")Integer role);
+	
+	List<QestionTblEntity> findByPracticeflgOrderByTitle(Integer flg);
 }

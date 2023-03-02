@@ -74,6 +74,15 @@ public class QuestionService {
 		}
 		return list;
 	}
+
+	public List<QuestionOutlineDto> listForEvent(){
+		List<QuestionOutlineDto> list = new ArrayList<>();
+		List<QestionTblEntity> entityList =  questionRepository.findByPracticeflgOrderByTitle(0);
+		for(QestionTblEntity entity : entityList) {
+			list.add(getFrom(entity));
+		}
+		return list;
+	}
 	
 	/**
 	 * 練習問題の詳細を取得する
@@ -150,6 +159,17 @@ public class QuestionService {
 			dto.setSubmitTime(null);
 			dto.setSubmitTimeString("未解答");
 		}
+		
+		return dto;
+	}
+	private QuestionOutlineDto getFrom(QestionTblEntity entity) {
+		QuestionOutlineDto dto = new QuestionOutlineDto();
+		
+		dto.setQid(entity.getQid());
+		dto.setDifficulty(entity.getDifficalty());
+		dto.setPracticeFlg(entity.getPracticeflg());
+		dto.setTitle(entity.getTitle());
+		dto.setKindName( (entity.getPracticeflg()==1?"練習用":"大会用") );
 		
 		return dto;
 	}

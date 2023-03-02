@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -40,6 +41,9 @@ public class EventTblEntity implements Serializable {
 
 	/** public_date. */
 	private Date publicDate;
+
+	/** start_date. */
+	private Date startDate;
 
 	/** finish_date. */
 	private Date finishDate;

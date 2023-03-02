@@ -12,11 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.LoginInfoDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.param.SessionConst;
 import jp.ac.asojuku.typing.service.EventService;
+import jp.ac.asojuku.typing.service.QuestionService;
+import jp.ac.asojuku.typing.service.ScoringService;
 
 @Controller
 @RequestMapping("/event")
@@ -26,20 +29,38 @@ public class EventController {
 	HttpSession session;
 	@Autowired
 	EventService eventService;
+	@Autowired
+	QuestionService questionService;
+	/**
+	 * イベントリストの表示
+	 * @param mv
+	 * @return
+	 * @throws SystemErrorException
+	 */
+	@RequestMapping(value = { "/list" }, method = RequestMethod.GET)
+	public ModelAndView list(ModelAndView mv) throws SystemErrorException {
 
-	@RequestMapping(value= {"/list"}, method=RequestMethod.GET)
-    public ModelAndView list(
-    		ModelAndView mv
-    		) throws SystemErrorException {
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
 
-		//ログイン情報を取得する
-		LoginInfoDto loginInfo = (LoginInfoDto)session.getAttribute(SessionConst.LOGININFO);
-		
-		//List<QuestionOutlineDto> qList = eventService.list(loginInfo.getUid(), loginInfo.getRole());
-        
-		//mv.addObject("qList", qList);
+		List<EventOutlineDto> eList = eventService.getList(loginInfo.getUid(), loginInfo.getMail(),
+				loginInfo.getRole());
+
+		mv.addObject("eList", eList);
 		mv.setViewName("elist");
-		
+
 		return mv;
 	}
+	
+	@RequestMapping(value = { "/create" }, method = RequestMethod.GET)
+	public ModelAndView create(ModelAndView mv) {
+		
+		List<QuestionOutlineDto> qList = questionService.listForEvent();
+        
+		mv.addObject("qList", qList);
+		
+		mv.setViewName("ecreate");
+		return mv;
+	}
+	
 }
