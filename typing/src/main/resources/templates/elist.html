@@ -63,14 +63,14 @@
 					</thead>
 					<tbody>
 						<tr th:each="element,status:${eList}">
-							<td><a th:href="|@{/event/detail}?id=${element.eid}|" target="qestiondetail" rel="noopener noreferrer" th:text="${element.name}"　></a></td>
+							<td><a th:href="|@{/event/detail}?eid=${element.eid}|" target="qestiondetail" rel="noopener noreferrer" th:text="${element.name}"　></a></td>
 							<td th:if="${session['loginInfo'].isAdmin()}" th:text="${element.getPublicDateString()}"></td>
 							<td th:text="${element.getStartDateString()}"></td>
 							<td th:text="${element.getEndDateString()}"></td>
 							<td th:text="${element.getStateString()}"></td>
 							<td th:if="${session['loginInfo'].isStudent()}">
-								<button id="joinbutton" class="btn bg-gradient-primary btn-sm" th:if="${element.isDidaplyEntryButton()}">参加登録</button>
-								<div th:if="${element.join}">参加済み</div>
+								<button id="joinbutton" class="btn bg-gradient-primary btn-sm" th:if="${element.isDidaplyEntryButton()}" th:data-token="${element.token}" >参加登録</button>
+								<div th:if="${element.joinFlag}">参加済み</div>
 							</td>
 							<td th:if="${session['loginInfo'].isAdmin()}"　th:text="${element.ownerName}"></td>
 						</tr>
@@ -95,11 +95,84 @@
 	  <!--   FOOTER   -->
 	  <div id="parent" th:replace="/common/footer"></div>  
     </div>
+    <button type="button" id="retOKDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-notification-OK"></button>
+    <button type="button" id="retNGDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-notification-NG"></button>
+    <div class="modal fade" id="modal-notification-NG" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
+      <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h6 class="modal-title" id="modal-title-notification">エラー</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="py-3 text-center">
+              <i class="ni ni-fat-remove ni-3x"></i>
+              <h4 class="text-gradient text-danger mt-4" id="errtitle" >エラーが発生しました。</h4>
+              <p id="errmsg">画面をリロードしてもう一度試してみてください。</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal-notification-OK" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
+      <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h6 class="modal-title" id="modal-title-notification">登録完了</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="py-3 text-center">
+              <i class="ni ni-satisfied ni-3x"></i>
+              <h4 class="text-gradient text-danger mt-4" id="totalscore" >登録完了しました</h4>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
   <!--   Core JS Files   -->
   <div id="parent" th:replace="/common/corejs"></div>  
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
-
+<script>
+  	const retOKDialogTrigger = document.getElementById("retOKDialogTrigger");
+  	const retNGDialogTrigger = document.getElementById("retNGDialogTrigger");   	
+  	retOKDialogTrigger.style.display ="none";	
+  	retNGDialogTrigger.style.display ="none";
+  	
+	const joinbutton = document.getElementById('joinbutton');
+	joinbutton.addEventListener('click',()=>{
+	
+		const formData = new FormData();
+		formData.append('token',joinbutton.dataset.token );
+		 		
+       const url = /*[[@{/event/entry}]]*/ "/event/entry";
+       fetch(url,{method:"post",body: formData})
+       //レスポンスの受け取り
+       .then( response => response.json()).then(result => {
+			const errmsg = document.getElementById("errtitle");
+			if( result.result != "OK"){
+				retNGDialogTrigger.click();
+				errmsg.innerHTML = "エラーが発生しました。";
+			}else if( result.result == "EXIST"){
+				errmsg.innerHTML = "既に登録済みです。";
+			}else{
+				retOKDialogTrigger.click();
+				joinbutton.disabled = true;
+			}
+		});
+	});
+</script>
 </html>

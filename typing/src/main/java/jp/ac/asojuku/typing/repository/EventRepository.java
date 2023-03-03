@@ -11,6 +11,6 @@ import jp.ac.asojuku.typing.entity.EventTblEntity;
 public interface EventRepository 
 	extends JpaSpecificationExecutor<EventTblEntity>, JpaRepository<EventTblEntity, Integer>{
 	
-	List<EventTblEntity> findByPublicDateLessThanEqualOrderByStartDateDesc(Date pDate);
+	List<EventTblEntity> findByPublicDateLessThanEqualAndPublicEndDateGreaterThanEqualOrderByStartDateDesc(Date pDate1,Date pDate2);
 	List<EventTblEntity> findAllByOrderByPublicDateDesc();
 }

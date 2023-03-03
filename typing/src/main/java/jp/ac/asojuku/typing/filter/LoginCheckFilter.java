@@ -20,7 +20,7 @@ import jp.ac.asojuku.typing.config.SystemConfig;
 import jp.ac.asojuku.typing.dto.LoginInfoDto;
 import jp.ac.asojuku.typing.param.SessionConst;
 
-//@Component
+@Component
 public class LoginCheckFilter implements Filter{
 	private static final Logger logger = LoggerFactory.getLogger(LoginCheckFilter.class);
 	@Autowired
@@ -53,7 +53,7 @@ public class LoginCheckFilter implements Filter{
 		if( loginInfo == null ) {
 			//ログイン画面へ転送
 			logger.info("Filter!!! servletPath="+servletPath);
-			((HttpServletResponse)response).sendRedirect( "/");
+			((HttpServletResponse)response).sendRedirect( "/signin");
 			return;
 		}
 		

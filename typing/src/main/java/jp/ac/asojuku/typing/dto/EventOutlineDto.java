@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class EventOutlineDto {
-	private Integer eId;
+	private Integer eid;
 	private String name;
 	private Date publicDateTime;
 	private Date startDateTime;
@@ -16,6 +16,7 @@ public class EventOutlineDto {
 	private EventState eventState;
 	private String ownerName;
 	private boolean joinFlag;
+	private String token;
 	
 	public String getPublicDateString() {
 		return Exchange.toFormatString(publicDateTime, "yyyy/MM/dd HH:mm:ss");

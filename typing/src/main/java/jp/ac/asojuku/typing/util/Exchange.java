@@ -33,6 +33,10 @@ public class Exchange {
 	public static Date toDate(final LocalDate localDate) {
 		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	}
+	public static Date toDate(String dateString,String fmt) throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat(fmt);
+		return sdf.parse(dateString);
+	}
 	
 	/**
 	 * LocalDateTimeをTimestampに変換する

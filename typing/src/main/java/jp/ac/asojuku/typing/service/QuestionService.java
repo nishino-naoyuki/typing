@@ -16,11 +16,13 @@ import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
+import jp.ac.asojuku.typing.entity.EventUserEntity;
 import jp.ac.asojuku.typing.entity.QestionTblEntity;
 import jp.ac.asojuku.typing.form.QuestionForm;
 import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.repository.AnsTblRepository;
 import jp.ac.asojuku.typing.repository.EventQuestionRepository;
+import jp.ac.asojuku.typing.repository.EventUserRepository;
 import jp.ac.asojuku.typing.repository.QuestionRepository;
 import jp.ac.asojuku.typing.repository.specifications.AnsSpecifications;
 import jp.ac.asojuku.typing.repository.specifications.EventQuestionSpecifications;
@@ -39,6 +41,9 @@ public class QuestionService {
 	
 	@Autowired
 	AnsTblRepository ansTblRepository;
+	
+	@Autowired
+	EventUserRepository eventUserRepository;
 	
 	/**
 	 * 問題を1件挿入
@@ -75,6 +80,10 @@ public class QuestionService {
 		return list;
 	}
 
+	/**
+	 * イベント作成時にイベント用の問題リストを取得する
+	 * @return
+	 */
 	public List<QuestionOutlineDto> listForEvent(){
 		List<QuestionOutlineDto> list = new ArrayList<>();
 		List<QestionTblEntity> entityList =  questionRepository.findByPracticeflgOrderByTitle(0);
@@ -100,6 +109,22 @@ public class QuestionService {
 				).orElse(null);
 		
 		return getDetailForm(qEntity,uid);
+	}
+	
+	
+	/**
+	 * @param uid
+	 * @param eid
+	 */
+	public void entryEvent(Integer uid,Integer eid) {
+		
+		EventUserEntity entity = new EventUserEntity();
+		
+		entity.setDelFlg(0);
+		entity.setEid(eid);
+		entity.setUid(uid);
+		
+		eventUserRepository.save(entity);
 	}
 	
 	/* ------- private method ------------ */
@@ -130,10 +155,10 @@ public class QuestionService {
 		for(EventQuestionEntity eqEntity :eqList) {
 			EventOutlineDto eventDto = new EventOutlineDto();
 			if( eqEntity.getEventTbl() != null ) {
-				eventDto.setEId(eqEntity.getEventTbl().getEid());
+				eventDto.setEid(eqEntity.getEventTbl().getEid());
 				eventDto.setName(eqEntity.getEventTbl().getName());
 			}else {
-				eventDto.setEId(null);
+				eventDto.setEid(null);
 				eventDto.setName("練習用");
 			}
 			eventList.add(eventDto);

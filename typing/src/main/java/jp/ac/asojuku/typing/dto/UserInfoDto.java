@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class UserInfoDto {
+	private Integer uid;
 	private Integer roleId;	
 	private String mail;
 	private String name;

@@ -47,6 +47,9 @@ public class EventTblEntity implements Serializable {
 
 	/** finish_date. */
 	private Date finishDate;
+	
+	/** public_end_date. */
+	private Date publicEndDate;
 
 	/** ower_name. */
 	private String owerName;

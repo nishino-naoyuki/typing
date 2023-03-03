@@ -7,5 +7,6 @@ package jp.ac.asojuku.typing.param;
  */
 public class SessionConst {
 	public static String LOGININFO = "loginInfo";
+	public static String EIDMAP = "eidmap";
 
 }
