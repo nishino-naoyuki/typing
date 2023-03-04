@@ -69,7 +69,7 @@
 							<td th:text="${element.getEndDateString()}"></td>
 							<td th:text="${element.getStateString()}"></td>
 							<td th:if="${session['loginInfo'].isStudent()}">
-								<button id="joinbutton" class="btn bg-gradient-primary btn-sm" th:if="${element.isDidaplyEntryButton()}" th:data-token="${element.token}" >参加登録</button>
+								<button id="joinbutton" class="btn bg-gradient-primary btn-sm joinbutton" th:if="${element.isDidaplyEntryButton()}" th:data-token="${element.token}" >参加登録</button>
 								<div th:if="${element.joinFlag}">参加済み</div>
 							</td>
 							<td th:if="${session['loginInfo'].isAdmin()}"　th:text="${element.ownerName}"></td>
@@ -152,27 +152,29 @@
   	retOKDialogTrigger.style.display ="none";	
   	retNGDialogTrigger.style.display ="none";
   	
-	const joinbutton = document.getElementById('joinbutton');
-	joinbutton.addEventListener('click',()=>{
-	
-		const formData = new FormData();
-		formData.append('token',joinbutton.dataset.token );
-		 		
-       const url = /*[[@{/event/entry}]]*/ "/event/entry";
-       fetch(url,{method:"post",body: formData})
-       //レスポンスの受け取り
-       .then( response => response.json()).then(result => {
-			const errmsg = document.getElementById("errtitle");
-			if( result.result != "OK"){
-				retNGDialogTrigger.click();
-				errmsg.innerHTML = "エラーが発生しました。";
-			}else if( result.result == "EXIST"){
-				errmsg.innerHTML = "既に登録済みです。";
-			}else{
-				retOKDialogTrigger.click();
-				joinbutton.disabled = true;
-			}
+	const joinbuttons = document.getElementsByClassName('joinbutton');
+	for(let i=0; i<joinbuttons.length;i++){
+		joinbuttons[i].addEventListener('click',()=>{
+		
+			const formData = new FormData();
+			formData.append('token',event.target.dataset.token );
+			 		
+	       const url = /*[[@{/event/entry}]]*/ "/event/entry";
+	       fetch(url,{method:"post",body: formData})
+	       //レスポンスの受け取り
+	       .then( response => response.json()).then(result => {
+				const errmsg = document.getElementById("errtitle");
+				if( result.result != "OK"){
+					retNGDialogTrigger.click();
+					errmsg.innerHTML = "エラーが発生しました。";
+				}else if( result.result == "EXIST"){
+					errmsg.innerHTML = "既に登録済みです。";
+				}else{
+					retOKDialogTrigger.click();
+					joinbutton.disabled = true;
+				}
+			});
 		});
-	});
+	}
 </script>
 </html>

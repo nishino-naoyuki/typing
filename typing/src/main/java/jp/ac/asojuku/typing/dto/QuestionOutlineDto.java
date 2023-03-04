@@ -18,4 +18,6 @@ public class QuestionOutlineDto {
 	private Integer practiceFlg;
 	private String kindName;
 	private String submitTimeString;
+	private String score;
+	private Integer no;
 }

@@ -16,19 +16,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
+import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
+import jp.ac.asojuku.typing.dto.RankingDto;
 import jp.ac.asojuku.typing.dto.UserInfoDto;
+import jp.ac.asojuku.typing.dto.summary.RankingSummary;
+import jp.ac.asojuku.typing.entity.AnsTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.EventTblEntity;
 import jp.ac.asojuku.typing.entity.EventUserEntity;
+import jp.ac.asojuku.typing.entity.UserTblEntity;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.EventCreateForm;
 import jp.ac.asojuku.typing.param.EventState;
 import jp.ac.asojuku.typing.param.RoleId;
+import jp.ac.asojuku.typing.repository.AnsTblRepository;
 import jp.ac.asojuku.typing.repository.EventQuestionRepository;
 import jp.ac.asojuku.typing.repository.EventRepository;
 import jp.ac.asojuku.typing.repository.EventUserRepository;
 import jp.ac.asojuku.typing.repository.QuestionRepository;
+import jp.ac.asojuku.typing.repository.UserRepository;
 import jp.ac.asojuku.typing.util.Exchange;
 import jp.ac.asojuku.typing.util.Token;
 
@@ -49,14 +56,72 @@ public class EventService {
 	
 	@Autowired
 	QuestionRepository questionRepository;
+
+	@Autowired
+	AnsTblRepository ansTblRepository;
 	
+	@Autowired
+	UserRepository userRepository;
+	
+	/**
+	 * 個人成績を取得する
+	 * @param eid
+	 * @param uid
+	 * @return
+	 */
+	public PersonalEventInfoDto getPersonalEventInfo(Integer eid,Integer uid) {
+		PersonalEventInfoDto peiDto = new PersonalEventInfoDto();
+		////////////////////////
+		//ランキングを取得する
+		List<RankingSummary> rankingSummaryList = ansTblRepository.findRankingSummary(eid);
+		int ranking = 1;
+		for(RankingSummary summary : rankingSummaryList) {
+			if(summary.getUid() == uid) {
+				peiDto.setRank(ranking);
+				peiDto.setTotalScore(summary.getScore());
+				int submitCount = ansTblRepository.getAnsCountByEidUid(eid, uid);
+				peiDto.setSubmitCount(submitCount);
+				break;
+			}
+			ranking++;
+		}
+		return peiDto;
+	}
+	/**
+	 * ランキングを取得する
+	 * @param eid
+	 * @return
+	 */
+	public List<RankingDto> getRankingAll(Integer eid){
+		List<RankingSummary> rankingSummaryList = ansTblRepository.findRankingSummary(eid);
+		
+		List<RankingDto> rankingList = new ArrayList<>();
+		int ranking = 1;
+		for(RankingSummary summary : rankingSummaryList) {
+			RankingDto rDto = new RankingDto();
+
+			UserTblEntity userEntity = userRepository.getOne(summary.getUid());
+			rDto.setUid(summary.getUid());
+			rDto.setScore(summary.getScore());
+			rDto.setRanking(ranking);
+			rDto.setName(userEntity.getName());
+			rDto.setDispName(userEntity.getDispName());
+			rDto.setMail(userEntity.getMail());
+			rDto.setAffiliation(userEntity.getAffiliation());
+			
+			rankingList.add(rDto);
+			ranking++;
+		}
+		
+		return rankingList;
+	}
 	/**
 	 * イベントの詳細情報を取得する
 	 * @param eid
 	 * @param roleId
 	 * @return
 	 */
-	public EventInfoDto getDetail(Integer eid,RoleId roleId) {
+	public EventInfoDto getDetail(Integer eid,Integer uid,RoleId roleId) {
 		
 		EventTblEntity entity = eventRepository.getOne(eid);
 		
@@ -65,7 +130,7 @@ public class EventService {
 		List<EventUserEntity> euEntityList = eventUserRepository.findByEidOrderByUid(eid);
 
 		
-		return getFrom(entity,eqEntityList,euEntityList,roleId);
+		return getFrom(entity,eqEntityList,euEntityList,uid,roleId);
 	}
 	/**
 	 * 指定のユーザーが指定のイベントに既に登録されているかを取得
@@ -134,6 +199,7 @@ public class EventService {
 			EventTblEntity entity,
 			List<EventQuestionEntity> eqEntityList,
 			List<EventUserEntity> euEntityList,
+			Integer uid,
 			RoleId roleId) {
 		EventInfoDto dto = new EventInfoDto();
 		
@@ -160,18 +226,40 @@ public class EventService {
 			dto.setRankingDisplay(false);
 		}
 		
+		//終了済みかどうかをセットする
+		if( roleId == RoleId.ADMIN ||
+			(roleId == RoleId.STUDENT && now.before(entity.getFinishDate()))) {
+			dto.setPastEvent(false);
+		}else {
+			dto.setPastEvent(true);
+		}
+		
 		//問題リストをセット
 		List<QuestionOutlineDto> qList = new ArrayList<>();
 		if( roleId == RoleId.ADMIN || 
-		   (roleId == RoleId.STUDENT && now.after(entity.getStartDate()))) {
+		   (roleId == RoleId.STUDENT && now.after(entity.getStartDate()) && now.before(entity.getFinishDate()) )
+		   ) {
+			dto.setDisplayQuestion(true);
 			for( EventQuestionEntity eqEntity : eqEntityList) {
 				QuestionOutlineDto qDto = new QuestionOutlineDto();
 				//全てはセットしない
-				qDto.setQid(eqEntity.getQestionTbl().getQid());
+				Integer qid = eqEntity.getQestionTbl().getQid();
+				qDto.setQid(qid);
+				qDto.setNo(eqEntity.getNo());
 				qDto.setDifficulty(eqEntity.getQestionTbl().getDifficalty());
 				qDto.setPracticeFlg(eqEntity.getQestionTbl().getPracticeflg());
 				qDto.setTitle(eqEntity.getQestionTbl().getTitle());
+				AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(qid,uid);
+				if( ansEntity != null ) {
+					qDto.setScore( String.valueOf(ansEntity.getScore()) );
+				}else {
+					qDto.setScore("未解答");
+				}
+				
+				qList.add(qDto);
 			}
+		}else {
+			dto.setDisplayQuestion(false);
 		}
 		dto.setQList(qList);
 		
@@ -186,6 +274,7 @@ public class EventService {
 				uDto.setDispName(euEntity.getUserTbl().getDispName());
 				uDto.setAffiliation(euEntity.getUserTbl().getAffiliation());
 				uDto.setUid(euEntity.getUserTbl().getUid());
+				uList.add(uDto);
 			}
 		}
 		dto.setUList(uList);

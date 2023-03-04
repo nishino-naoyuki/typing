@@ -12,6 +12,9 @@ public class EventInfoDto {
 	private Date startDateTime;
 	private Date endDateTime;
 	private boolean rankingDisplay;
-	List<QuestionOutlineDto> qList;
-	List<UserInfoDto> uList;
+	private boolean displayQuestion;
+	private boolean pastEvent;
+	private List<QuestionOutlineDto> qList;
+	private List<UserInfoDto> uList;
+	private RankingDto userRanking;
 }

@@ -23,7 +23,8 @@
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-	    let table = new DataTable('#qlistTable');
+	    let qtable = new DataTable('#qlistTable');
+	    let utable = new DataTable('#ulistTable');
 	});
   </script>
 </head>
@@ -58,49 +59,60 @@
 								<div class="nav-wrapper position-relative end-0">
 									<ul class="nav nav-pills nav-fill p-1" role="tablist">
 										<li class="nav-item">
-											<a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab" href="#registeruser" role="tab" aria-controls="profile" aria-selected="true">
+											<a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab" href="#qlisttab" role="tab" aria-controls="profile" aria-selected="true">
 											問題一覧
 											</a>
 										</li>
-										<li class="nav-item">
+										<li class="nav-item"　th:if="${session['loginInfo'].isStudent()}">
 											<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#searchuser" role="tab" aria-controls="dashboard" aria-selected="false">
 											個別情報
 											</a>
 										</li>
-										<li class="nav-item">
-											<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#contact" role="tab" aria-controls="dashboard" aria-selected="false">
+										<li class="nav-item"　th:if="${eventDetail.rankingDisplay}">
+											<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#ranking" role="tab" aria-controls="dashboard" aria-selected="false">
 											ランキング
+											</a>
+										</li>
+										<li class="nav-item" th:if="${session['loginInfo'].isAdmin()}">
+											<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#userlist" role="tab" aria-controls="dashboard" aria-selected="false">
+											参加ユーザー
 											</a>
 										</li>
 									</ul>
 								</div>
 								<div class="tab-content" id="myTabContent">
-									<div class="tab-pane fade show active mb-3" id="registeruser" role="tabpanel" aria-labelledby="home-tab">
-										<table id="qlistTable" class="display" style="width:100%">
+									<div class="tab-pane fade show active mb-3" id="qlisttab" role="tabpanel" aria-labelledby="home-tab">
+										<div class="mb-3" th:if="${!eventDetail.displayQuestion}">
+											<h2 th:if="${!eventDetail.pastEvent}">このイベントは開始前です</h2>
+											<h2 th:if="${eventDetail.pastEvent}">このイベントは既に終了しています</h2>
+										</div>
+										<table id="qlistTable" class="display mb-3" style="width:100%" th:if="${eventDetail.displayQuestion}">
 											<thead>
 												<tr>
+													<th>No.</th>
 													<th>問題名</th>
 													<th>難易度</th>
-													<th>提出済</th>
+													<th>スコア</th>
 												</tr>
 											</thead>
 											<tbody>
 												<tr th:each="element,status:${eventDetail.qList}">
+													<td th:text="${element.no}"></td>
 													<td><a th:href="|@{/question/detail}?id=${element.qid}|" target="qestiondetail" rel="noopener noreferrer" th:text="${element.title}"　></a></td>
 													<td th:text="${element.difficulty}"></td>
-													<td th:text="${element.submitTimeString}"></td>
+													<td th:text="${element.score}"></td>
 												</tr>
 											</tbody>
 											<tfoot>
 												<tr>
 													<th>問題名</th>
 													<th>難易度</th>
-													<th>提出済</th>
+													<th>スコア</th>
 												</tr>
 											</tfoot>
 										</table>
 									</div>
-									<div class="tab-pane fade" id="searchuser" role="tabpanel" aria-labelledby="profile-tab">
+									<div class="tab-pane fade" id="searchuser" role="tabpanel" aria-labelledby="profile-tab"　th:if="${session['loginInfo'].isStudent()}">
 									<div class="row mt-4">
 										<div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
 											<div class="card p-3">
@@ -108,29 +120,8 @@
 													<div class="row">
 														<div class="col-8">
 															<div class="numbers">
-																<p class="text-sm mb-0 text-uppercase font-weight-bold">入力文字数</p>
-																<h5 class="font-weight-bolder">
-																12,000文字
-																</h5>
-															</div>
-														</div>
-														<div class="col-4 text-end">
-															<div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
-																<i class="ni ni-laptop text-lg opacity-10" aria-hidden="true"></i>
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div><!-- end col-xl-3 col-sm-6 mb-xl-0 mb-4 -->
-										<div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-											<div class="card p-3">
-												<div class="card-body p-3">
-													<div class="row">
-														<div class="col-8">
-															<div class="numbers">
 																<p class="text-sm mb-0 text-uppercase font-weight-bold">現在の得点</p>
-																<h5 class="font-weight-bolder">
+																<h5 class="font-weight-bolder" id="totalscorecard" th:text="|${peiDto.totalScore}点|">
 																2405点
 																</h5>
 															</div>
@@ -151,7 +142,7 @@
 														<div class="col-8">
 															<div class="numbers">
 																<p class="text-sm mb-0 text-uppercase font-weight-bold">提出回数</p>
-																<h5 class="font-weight-bolder">
+																<h5 class="font-weight-bolder" id="countcard" th:text="|${peiDto.submitCount}回|">
 																5回
 																</h5>
 															</div>
@@ -171,8 +162,9 @@
 													<div class="row">
 														<div class="col-8">
 															<div class="numbers">
-																<p class="text-sm mb-0 text-uppercase font-weight-bold">現在の順位</p>
-																<h5 class="font-weight-bolder">
+																<p class="text-sm mb-0 text-uppercase font-weight-bold" th:if="${!eventDetail.pastEvent}">現在の順位</p>
+																<p class="text-sm mb-0 text-uppercase font-weight-bold" th:if="${eventDetail.pastEvent}">最終順位</p>
+																<h5 class="font-weight-bolder" id="rankingcard" th:text="|${peiDto.rank}位|">
 																10位
 																</h5>
 															</div>
@@ -188,7 +180,67 @@
 										</div><!-- end col-xl-3 col-sm-6 mb-xl-0 mb-4 -->
 									</div>
 									</div>
-									<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">.c..</div>
+									<div class="tab-pane fade" id="ranking" role="tabpanel" aria-labelledby="contact-tab"　th:if="${eventDetail.rankingDisplay}">
+										<table id="ulistTable" class="display" style="width:100%">
+											<thead>
+												<tr>
+													<th>順位</th>
+													<th>表示名</th>
+													<th th:if="${session['loginInfo'].isAdmin()}">メールアドレス</th>
+													<th　th:if="${session['loginInfo'].isAdmin()}">名前</th>
+													<th>所属</th>
+													<th>得点</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr th:each="element,status:${rankingList}">
+													<td th:text="${element.ranking}"></td>
+													<td><a th:href="|@{/user/detail}?id=${element.uid}|" target="userdetail" rel="noopener noreferrer" th:text="${element.dispName}"　></a></td>
+													<td th:if="${session['loginInfo'].isAdmin()}"　th:text="${element.mail}"></td>
+													<td th:if="${session['loginInfo'].isAdmin()}"　th:text="${element.name}"></td>
+													<td th:text="${element.affiliation}"></td>
+													<td th:text="${element.score}"></td>
+												</tr>
+											</tbody>
+											<tfoot>
+												<tr>
+													<th>表示名</th>
+													<th>メールアドレス</th>
+													<th>名前</th>
+													<th>所属</th>
+												</tr>
+											</tfoot>
+										</table>
+									</div>
+									<div class="tab-pane fade" id="userlist" role="tabpanel" aria-labelledby="contact-tab"　th:if="${session['loginInfo'].isAdmin()}">
+										<table id="ulistTable" class="display" style="width:100%">
+											<thead>
+												<tr>
+													<th>表示名</th>
+													<th >メールアドレス</th>
+													<th>名前</th>
+													<th>所属</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr th:each="element,status:${eventDetail.uList}">
+													<td><a th:href="|@{/user/detail}?id=${element.uid}|" target="userdetail" rel="noopener noreferrer" th:text="${element.dispName}"　></a></td>
+													<td th:text="${element.mail}"></td>
+													<td th:text="${element.name}"></td>
+													<td th:text="${element.affiliation}"></td>
+												</tr>
+											</tbody>
+											<tfoot>
+												<tr>
+													<th>表示名</th>
+													<th>メールアドレス</th>
+													<th>名前</th>
+													<th>所属</th>
+												</tr>
+											</tfoot>
+										</table>
+									</div>
+									
 								</div>
 		            		</div>
 		            	</div>

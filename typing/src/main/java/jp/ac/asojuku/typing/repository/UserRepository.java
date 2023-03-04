@@ -1,5 +1,6 @@
 package jp.ac.asojuku.typing.repository;
 
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,5 +16,5 @@ public interface UserRepository
 	
 	@Query("select u from UserTblEntity u where mail = :mail and delFlg=0")
 	public UserTblEntity getUserByMil(@Param("mail")String mail);
-
+	
 }

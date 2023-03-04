@@ -26,7 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.LoginInfoDto;
+import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
+import jp.ac.asojuku.typing.dto.RankingDto;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.EventCreateForm;
 import jp.ac.asojuku.typing.param.RoleId;
@@ -134,7 +136,7 @@ public class EventController {
 		Integer eid = eidMap.get(token);
 		String result = "OK";
 		if( eid != null ) {
-			if( eventService.isExistEventUser(eid, eid) ) {
+			if( eventService.isExistEventUser(loginInfo.getUid(), eid) ) {
 				result = "EXIST";
 			}else {
 				questionService.entryEvent(loginInfo.getUid(), eid);
@@ -155,9 +157,16 @@ public class EventController {
 		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
 		
 		//詳細情報を取得する
-		EventInfoDto eventDetail = eventService.getDetail(eid, loginInfo.getRole());
+		EventInfoDto eventDetail = eventService.getDetail(eid,loginInfo.getUid(), loginInfo.getRole());
+		List<RankingDto> rankingList =  eventService.getRankingAll(eid);
+		
+		if( loginInfo.getRole() == RoleId.STUDENT ) {
+			PersonalEventInfoDto peiDto = eventService.getPersonalEventInfo(eid, loginInfo.getUid());
+			mv.addObject("peiDto", peiDto);			
+		}
 		
 		mv.addObject("eventDetail", eventDetail);
+		mv.addObject("rankingList", rankingList);
 
 		mv.setViewName("edetail");
 		return mv;
