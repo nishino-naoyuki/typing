@@ -7,4 +7,5 @@ public class PersonalEventInfoDto {
 	private Integer submitCount = 0;
 	private Integer totalScore = 0;
 	private Integer rank = 0;
+	private String getTime;
 }

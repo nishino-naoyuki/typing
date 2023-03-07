@@ -1,5 +1,7 @@
 package jp.ac.asojuku.typing.dto.summary;
 
+import java.math.BigDecimal;
+
 import lombok.Data;
 
 @Data
@@ -13,6 +15,6 @@ public class RankingSummary {
 	}
 	
 	public RankingSummary(Object[] objects) {
-	    this((Integer) objects[0], (Integer) objects[1]);
+	    this((Integer) ((BigDecimal)objects[0]).intValue(), (Integer) objects[1]);
 	 }
 }

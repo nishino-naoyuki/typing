@@ -1,6 +1,7 @@
 package jp.ac.asojuku.typing.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,16 +28,20 @@ import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.LoginInfoDto;
 import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
+import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.dto.RankingDto;
+import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.EventCreateForm;
 import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.param.SessionConst;
 import jp.ac.asojuku.typing.param.json.ErrorField;
+import jp.ac.asojuku.typing.param.json.RankingListJson;
 import jp.ac.asojuku.typing.param.json.ResultJson;
 import jp.ac.asojuku.typing.service.EventService;
 import jp.ac.asojuku.typing.service.QuestionService;
+import jp.ac.asojuku.typing.util.Exchange;
 
 @Controller
 @RequestMapping("/event")
@@ -149,6 +154,13 @@ public class EventController {
 	}
 
 
+	/**
+	 * イベント詳細
+	 * @param mv
+	 * @param eid
+	 * @return
+	 * @throws SystemErrorException
+	 */
 	@RequestMapping(value = { "/detail" }, method = RequestMethod.GET)
 	public ModelAndView detail(
 			ModelAndView mv,@ModelAttribute("eid")Integer eid) throws SystemErrorException {
@@ -171,7 +183,118 @@ public class EventController {
 		mv.setViewName("edetail");
 		return mv;
 	}
+
+	@RequestMapping(value = { "/personalInfo" }, method = RequestMethod.POST)
+	@ResponseBody
+	public Object getPersonalInfo(
+			@ModelAttribute("eid")Integer eid
+			) throws JsonProcessingException {
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+		PersonalEventInfoDto peiDto = eventService.getPersonalEventInfo(eid, loginInfo.getUid());
+
+		ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(peiDto);
+
+        logger.info("jsonString:{}",jsonString);
+
+        return jsonString;
+	}
+
+	@RequestMapping(value = { "/rankingInfo" }, method = RequestMethod.POST)
+	@ResponseBody
+	public Object getRankinglInfo(
+			@ModelAttribute("eid")Integer eid
+			) throws JsonProcessingException {
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+		
+		RankingListJson jsonObj = new RankingListJson();
+		if( eventService.isRankingDisplay(loginInfo.getRole(),eid) ) {
+			// ランキング情報を取得する
+			List<RankingDto> rankingList =  eventService.getRankingAll(eid);
+			
+			jsonObj.setGetTime(Exchange.toFormatString(new Date()));
+			jsonObj.setRankingList(rankingList);
+			jsonObj.setIsDisplay(true);
+		}else {
+			jsonObj.setIsDisplay(false);
+		}
+		
+		ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(jsonObj);
+
+        logger.info("jsonString:{}",jsonString);
+
+        return jsonString;
+	}
 	
+	/**
+	 * 学生用表示　ランキング
+	 * @param mv
+	 * @param eid
+	 * @param etitle
+	 * @return
+	 * @throws SystemErrorException
+	 * @throws PermitionException
+	 */
+	@RequestMapping(value = { "/rankingforstudent" }, method = RequestMethod.GET)
+	public ModelAndView getRnakingForStudent(
+			ModelAndView mv,
+			@ModelAttribute("eid")Integer eid,
+			@ModelAttribute("etitle")String etitle
+			) throws SystemErrorException, PermitionException {
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+		if( loginInfo.getRole() == RoleId.STUDENT ) {
+			//学生が見ようとする場合はエラーとする（フィルターではじいてはいるが念のため）
+			logger.info("権限無しページを閲覧しようとした。ユーザーID：" + loginInfo.getUid());
+			throw new PermitionException("権限無しエラー");
+		}
+		
+		List<RankingDto> rankingList =  eventService.getRankingAll(eid);
+
+		mv.addObject("gettime", Exchange.toFormatString(new Date()));
+		mv.addObject("rankingList", rankingList);
+		mv.addObject("etitle", etitle);
+		mv.addObject("eid", eid);
+
+		mv.setViewName("ranking");
+		
+		return mv;
+	}
+	/**
+	 * イベント所属の問題を取得する
+	 * 
+	 * @param mv
+	 * @param eqid
+	 * @return
+	 * @throws SystemErrorException
+	 * @throws PermitionException
+	 */
+	@RequestMapping(value = { "/question" }, method = RequestMethod.GET)
+	public ModelAndView eventQuestion(
+			ModelAndView mv, @ModelAttribute("eqid") Integer eqid)
+			throws SystemErrorException, PermitionException {
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+
+		QuestionDetailDto detailDto = eventService.getQuestion(loginInfo.getUid(), loginInfo.getRole(), eqid);
+
+		if (detailDto == null) {
+			logger.info("権限無しページを閲覧しようとした。ユーザーID：" + loginInfo.getUid() + " 問題ID：" + eqid);
+			throw new PermitionException("権限無しエラー");
+		}
+		mv.addObject("detailDto", detailDto);
+		mv.addObject("eid", detailDto.getEid());
+		mv.setViewName("qdetail");
+
+		return mv;
+	}
 	/* ----private---- */
 	/**
 	 * トークンとイベントIDのペアをセッションに保存する

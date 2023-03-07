@@ -55,6 +55,9 @@ public class Exchange {
 		return Timestamp.valueOf(LocalDateTime.of(localDate,LocalTime.of(0,0,0)));
 	}
 
+	public static String toFormatString(Date date) {
+		return toFormatString(date,"yyyy年MM月dd日 HH時mm分ss秒","");
+	}
 	public static String toFormatString(Date date,String fmt) {
 		return toFormatString(date,fmt,"");
 	}

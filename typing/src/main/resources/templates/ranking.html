@@ -1,0 +1,174 @@
+<!--
+=========================================================
+* Argon Dashboard 2 - v2.0.4
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/argon-dashboard
+* Copyright 2022 Creative Tim (https://www.creative-tim.com)
+* Licensed under MIT (https://www.creative-tim.com/license)
+* Coded by Creative Tim
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- ヘッダー -->
+  <link th:href="@{/assets/css/jquery.dataTables.min.css}" rel="stylesheet" />
+  <div id="parent" th:replace="/common/head"></div>  
+  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+  <script th:inline="javascript">
+  	let rtable;
+  	const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
+	const formData = new FormData();
+	formData.append('eid',/*[[${eid}]]*/ );
+    document.addEventListener('DOMContentLoaded', function () {
+	    rtable = new DataTable('#rlistTable',{
+	   	      "paging": true,
+	   	      "lengthChange": true,
+	   	      "lengthMenu": [ 10, 3, 5, 25, 50, 100 ],
+	   	      "searching": false,
+	   	      "ordering": false,
+	   	      "info": true,
+	   	      "autoWidth": true,
+	   	      "responsive": true
+	   	      });
+	});
+  </script>
+</head>
+
+<body class="g-sidenav-show   bg-gray-100">
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>
+  
+  <main class="main-content position-relative border-radius-lg ">
+    <div class="container-fluid py-1">
+      <div class="row">
+        <div class="col-12 mb-4">
+          <div class="card">
+           	<div class="card-header">
+           		<div class="row">
+					<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2 th:text="|${etitle} ランキング|"></h2></p>
+           		</div>
+           	</div>
+            <div class="card-body p-2">
+              <div class="row">
+				<div class="d-flex justify-content-end">
+					<h6 id="gettimeforranking" th:text="|${gettime} 現在|"></h6>
+				</div>
+				<table id="rlistTable" class="display" style="width:100%">
+					<thead>
+						<tr>
+							<th>順位</th>
+							<th>表示名</th>
+							<th>所属</th>
+							<th>得点</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="element,status:${rankingList}">
+							<td th:if="${element.ranking == 1}"><h3><i class="ni ni-trophy icon-gold"></i></h3></td>
+							<td th:if="${element.ranking != 1}" th:text="${element.ranking}"></td>
+							
+							<td th:if="${element.ranking == 1}"><h3 th:text="${element.dispName}"></h3></td>
+							<td th:if="${element.ranking == 2}"><h4 th:text="${element.dispName}"></h4></td>
+							<td th:if="${element.ranking == 3}"><h5 th:text="${element.dispName}"></h5></td>
+							<td th:if="${element.ranking > 3}" th:text="${element.dispName}"></td>
+							
+							<td th:text="${element.affiliation}"></td>
+							<td th:text="${element.score}"></td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th>順位</th>
+							<th>表示名</th>
+							<th>所属</th>
+							<th>得点</th>
+						</tr>
+					</tfoot>
+				</table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+	  <!--   FOOTER   -->
+	  <div id="parent" th:replace="/common/footer"></div>  
+    </div>
+    </div>
+  </main>
+  <!--   Core JS Files   -->
+  <div id="parent" th:replace="/common/corejs"></div>  
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+<script th:inline="javascript">
+const gettimeforranking = document.getElementById("gettimeforranking");
+setInterval(()=>{
+	rtable.clear();
+  	rtable.destroy();
+	
+	const formData = new FormData();
+	formData.append('eid',/*[[${eid}]]*/ );
+	
+    const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
+ 	fetch(url,{method:"post",body: formData})
+       //レスポンスの受け取り
+       .then( response => response.json()).then(result => {
+		 gettimeforranking.innerHTML = result.getTime+" 現在";
+		 let rankingList = result.rankingList;
+   		  rtable = $('#rlistTable').DataTable({
+	   	      "paging": true,
+	   	      "lengthChange": true,
+	   	      "lengthMenu": [ 10, 3, 5, 25, 50, 100 ],
+	   	      "searching": false,
+	   	      "ordering": false,
+	   	      "info": true,
+	   	      "autoWidth": true,
+	   	      "responsive": true,
+				"data":rankingList,
+				"language": {
+	                "url": /*[[@{/DataTables-1.10.16/Japanese.json}]]*/ 'Japanese.json'
+	            },
+	            "columns": [
+	            	{
+	            		data:"ranking" ,
+	                	render: function ( data, type, row ) {
+	                		if( data == 1 ){
+	                			return '<h3><i class="ni ni-trophy icon-gold"></i></h3>';
+	                		}else{
+	                			return data;
+	                		}
+	                		
+	                	}
+	            	},
+	            	{
+	            		data:"dispName" ,
+	            		type:"ranking",
+	                	render: function ( data, type, row ) {
+	                		if( row.ranking == 1 ){
+	                			return '<h3>'+data+'</h3>';
+	                		}else if( row.ranking == 2 ){
+	                			return '<h4>'+data+'</h4>';
+	                		}else if( row.ranking == 3 ){
+	                			return '<h5>'+data+'</h5>';
+	                		}else{
+	                			return data;
+	                		}
+	                		
+	                	}
+	            	},
+	                { data: "affiliation" },
+	                { data: "score" }
+	            ]
+	   	    });
+   			rtable.draw();
+
+		})
+		}, 30000);
+</script>
+</html>

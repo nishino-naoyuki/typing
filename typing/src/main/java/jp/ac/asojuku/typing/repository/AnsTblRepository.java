@@ -25,10 +25,11 @@ public interface AnsTblRepository
 			+ "order by a.ans_timestamp DESC LIMIT 1",nativeQuery = true)
 	public AnsTblEntity getRecentlyOne(@Param("qid")Integer qid,@Param("uid")Integer uid);
 
-	@Query(value="select sum(a.score) as tscore,a.uid "
-			+ "from ANS_TBL a "
-			+ "left join EVENT_QUESTION eq ON a.eqid=eq.eqid "
-			+ "where eq.eid=:eid group by a.uid order by sum(a.score)"
+	@Query(value="select sum(COALESCE(a.score,0)) as tscore,eu.uid "
+			+ "from EVENT_USER eu "
+			+ "LEFT JOIN USER_TBL u ON eu.uid = u.uid "
+			+ "LEFT JOIN ANS_TBL a ON eu.uid=a.uid "
+			+ "where u.role = 0 AND eu.eid=:eid group by eu.uid order by sum(a.score) DESC"
 			,nativeQuery = true)
 	public List<Object[]> getRanking(@Param("eid")Integer eid);
 	default List<RankingSummary> findRankingSummary(Integer eid) {

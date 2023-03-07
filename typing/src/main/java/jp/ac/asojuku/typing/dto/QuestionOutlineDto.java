@@ -20,4 +20,5 @@ public class QuestionOutlineDto {
 	private String submitTimeString;
 	private String score;
 	private Integer no;
+	private Integer eqid;
 }

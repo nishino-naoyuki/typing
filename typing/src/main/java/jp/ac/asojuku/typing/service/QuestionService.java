@@ -30,20 +30,8 @@ import jp.ac.asojuku.typing.repository.specifications.QuestionSpecifications;
 import jp.ac.asojuku.typing.util.Exchange;
 
 @Service
-public class QuestionService {
+public class QuestionService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(QuestionService.class);
-	
-	@Autowired
-	QuestionRepository questionRepository;
-	
-	@Autowired
-	EventQuestionRepository eventQuestionRepository;
-	
-	@Autowired
-	AnsTblRepository ansTblRepository;
-	
-	@Autowired
-	EventUserRepository eventUserRepository;
 	
 	/**
 	 * 問題を1件挿入
@@ -128,45 +116,6 @@ public class QuestionService {
 	}
 	
 	/* ------- private method ------------ */
-	private QuestionDetailDto getDetailForm(QestionTblEntity qEntity,Integer uid) {
-		if( qEntity == null ) {
-			return null;
-		}
-		QuestionDetailDto dto = new QuestionDetailDto();
-		
-		dto.setQid(qEntity.getQid());
-		dto.setSentence(qEntity.getSentence());
-		dto.setTitle(qEntity.getTitle());
-		dto.setDifficulty(qEntity.getDifficalty());
-		//解答をセット
-		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(qEntity.getQid(),uid);
-		if( ansEntity != null ) {
-			dto.setAnswer(ansEntity.getAnswer());
-		}else {
-			dto.setAnswer("");
-		}
-		//どの大会に使われているか？
-		List<EventQuestionEntity> eqList = eventQuestionRepository.findAll(
-				Specification
-				.where( EventQuestionSpecifications.qidEquals(qEntity.getQid()) ),
-				Sort.by(Sort.Direction.ASC,"no"));
-		
-		List<EventOutlineDto> eventList = new ArrayList<>();
-		for(EventQuestionEntity eqEntity :eqList) {
-			EventOutlineDto eventDto = new EventOutlineDto();
-			if( eqEntity.getEventTbl() != null ) {
-				eventDto.setEid(eqEntity.getEventTbl().getEid());
-				eventDto.setName(eqEntity.getEventTbl().getName());
-			}else {
-				eventDto.setEid(null);
-				eventDto.setName("練習用");
-			}
-			eventList.add(eventDto);
-		}
-		dto.setEventList(eventList);
-		
-		return dto;		
-	}
 	
 	private QuestionOutlineDto getFrom(QestionTblEntity entity,Integer uid) {
 		QuestionOutlineDto dto = new QuestionOutlineDto();

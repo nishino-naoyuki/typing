@@ -9,14 +9,13 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
+import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.dto.RankingDto;
 import jp.ac.asojuku.typing.dto.UserInfoDto;
@@ -30,39 +29,44 @@ import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.EventCreateForm;
 import jp.ac.asojuku.typing.param.EventState;
 import jp.ac.asojuku.typing.param.RoleId;
-import jp.ac.asojuku.typing.repository.AnsTblRepository;
-import jp.ac.asojuku.typing.repository.EventQuestionRepository;
-import jp.ac.asojuku.typing.repository.EventRepository;
-import jp.ac.asojuku.typing.repository.EventUserRepository;
-import jp.ac.asojuku.typing.repository.QuestionRepository;
-import jp.ac.asojuku.typing.repository.UserRepository;
 import jp.ac.asojuku.typing.util.Exchange;
 import jp.ac.asojuku.typing.util.Token;
 
 @Service
-public class EventService {
+public class EventService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(EventService.class);
 	private final String DATE_FMT = "yyyy-MM-dd'T'HH:mm";
 	private final Integer RANKING_DISP = 1;
-	
-	@Autowired
-	EventRepository eventRepository;
-	
-	@Autowired
-	EventUserRepository eventUserRepository;
-	
-	@Autowired
-	EventQuestionRepository eventQuestionRepository;
-	
-	@Autowired
-	QuestionRepository questionRepository;
-
-	@Autowired
-	AnsTblRepository ansTblRepository;
-	
-	@Autowired
-	UserRepository userRepository;
-	
+		
+	/**
+	 * ランキングが表示可能かどうかを返す
+	 * @param role
+	 * @param eid
+	 * @return
+	 */
+	public boolean isRankingDisplay(RoleId role,Integer eid) {
+		EventTblEntity entity = eventRepository.getOne(eid);
+		boolean isDisp = false;
+		
+		//管理者は常に見れる
+		if( role == RoleId.ADMIN ) {
+			return true;
+		}
+		
+		Date now = new Date();		
+		//ランキングを表示するかどうかを確認する
+		if( entity.getRankingdisplay() == RANKING_DISP) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(entity.getFinishDate());
+			calendar.add(Calendar.MINUTE, -entity.getHiderankingtime());
+			if( now.before(calendar.getTime())) {
+				//表示する設定で時間内
+				isDisp = true;
+			}
+		}
+		
+		return isDisp;
+	}
 	/**
 	 * 個人成績を取得する
 	 * @param eid
@@ -81,6 +85,7 @@ public class EventService {
 				peiDto.setTotalScore(summary.getScore());
 				int submitCount = ansTblRepository.getAnsCountByEidUid(eid, uid);
 				peiDto.setSubmitCount(submitCount);
+				peiDto.setGetTime(Exchange.toFormatString(new Date()));
 				break;
 			}
 			ranking++;
@@ -192,9 +197,53 @@ public class EventService {
 			throw new SystemErrorException(e.getMessage());
 		}
 	}
+
+	/**
+	 * 大会に登録されている問題を取得する
+	 * 
+	 * @param eqid
+	 * @return
+	 */
+	public QuestionDetailDto getQuestion(Integer uid,RoleId role,Integer eqid) {
+		if(role == RoleId.STUDENT && !isDisplay(uid,eqid)) {
+			//表示不可能な場合はnullを返す
+			return null;
+		}
+		
+		EventQuestionEntity eqEntity = eventQuestionRepository.getOne(eqid);
+		QuestionDetailDto detailDto =  getDetailForm( eqEntity.getQestionTbl(),uid);
+		detailDto.setEid(eqEntity.getEid());
+		
+		return detailDto;
+	}
+	
+	/**
+	 * 指定したユーザーと大会の問題が表示可能かを返す
+	 * @param uid
+	 * @param eqid
+	 * @return
+	 */
+	public boolean isDisplay(Integer uid,Integer eqid) {
+		
+		EventQuestionEntity eqEntity = eventQuestionRepository.getOne(eqid);
+		EventTblEntity eventEntity = eqEntity.getEventTbl();
+		Date now = new Date();
+		if( eventEntity.getStartDate().after(now) || eventEntity.getFinishDate().before(now)) {
+			//開始前、終了後は見れない
+			return false;
+		}
+		EventUserEntity euEntity =  eventUserRepository.findByUidAndEid(uid, eventEntity.getEid());
+		if( euEntity == null ) {
+			//そのユーザーは登録していない
+			return false;
+		}
+		
+		return true;
+	}
 	
 	
 	/* ----prvate---- */
+	
 	private EventInfoDto getFrom(
 			EventTblEntity entity,
 			List<EventQuestionEntity> eqEntityList,
@@ -207,24 +256,9 @@ public class EventService {
 		dto.setName(entity.getName());
 		dto.setStartDateTime(entity.getStartDate());
 		dto.setEndDateTime(entity.getFinishDate());
-		
-		Date now = new Date();		
 		//ランキングを表示するかどうかを確認する
-		if( entity.getRankingdisplay() == RANKING_DISP) {
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(entity.getFinishDate());
-			calendar.add(Calendar.MINUTE, -entity.getHiderankingtime());
-			if( now.before(calendar.getTime())) {
-				//表示する設定で時間内
-				dto.setRankingDisplay(true);
-			}else {
-				//表示する設定で時間外
-				dto.setRankingDisplay(false);
-			}
-		}else {
-			//表示しない設定
-			dto.setRankingDisplay(false);
-		}
+		dto.setRankingDisplay(isRankingDisplay(roleId,entity.getEid()));
+		Date now = new Date();		
 		
 		//終了済みかどうかをセットする
 		if( roleId == RoleId.ADMIN ||
@@ -245,6 +279,7 @@ public class EventService {
 				//全てはセットしない
 				Integer qid = eqEntity.getQestionTbl().getQid();
 				qDto.setQid(qid);
+				qDto.setEqid(eqEntity.getEqid());
 				qDto.setNo(eqEntity.getNo());
 				qDto.setDifficulty(eqEntity.getQestionTbl().getDifficalty());
 				qDto.setPracticeFlg(eqEntity.getQestionTbl().getPracticeflg());

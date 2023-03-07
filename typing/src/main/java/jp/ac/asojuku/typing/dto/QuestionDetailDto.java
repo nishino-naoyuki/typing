@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class QuestionDetailDto {
+	private Integer eid;
 	private Integer qid;
 	private String title;
 	private String sentence;

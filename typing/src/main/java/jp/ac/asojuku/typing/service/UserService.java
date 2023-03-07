@@ -27,10 +27,8 @@ import jp.ac.asojuku.typing.param.ErrorCode;
 import jp.ac.asojuku.typing.param.RoleId;
 
 @Service
-public class UserService {
+public class UserService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(UserService.class);
-	@Autowired 
-	UserRepository userRepository;
 
 	/**
 	 * ログイン処理

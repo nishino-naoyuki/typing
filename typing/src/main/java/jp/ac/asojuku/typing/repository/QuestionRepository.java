@@ -12,7 +12,7 @@ import jp.ac.asojuku.typing.entity.QestionTblEntity;
 public interface QuestionRepository 
 	extends JpaSpecificationExecutor<QestionTblEntity>, JpaRepository<QestionTblEntity, Integer>{
 
-	@Query("select q from QestionTblEntity q "
+	@Query("select distinct q from QestionTblEntity q "
 			+ "left join EventQuestionEntity eq on q.qid=eq.qid "
 			+ "where ((:role=0 and q.practiceflg=1) or :role=1) "
 			+ "order by q.title")

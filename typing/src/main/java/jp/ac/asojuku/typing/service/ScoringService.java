@@ -18,6 +18,7 @@ import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.QestionTblEntity;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.ScoringForm;
+import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.repository.AnsTblRepository;
 import jp.ac.asojuku.typing.repository.EventQuestionRepository;
 import jp.ac.asojuku.typing.repository.QuestionRepository;
@@ -29,16 +30,8 @@ import jp.ac.asojuku.typing.service.scoring.TypingScoring;
 import jp.ac.asojuku.typing.util.Exchange;
 
 @Service
-public class ScoringService {
+public class ScoringService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(ScoringService.class);
-	@Autowired
-	QuestionRepository questionRepository;
-	
-	@Autowired
-	EventQuestionRepository eventQuestionRepository;
-	
-	@Autowired
-	AnsTblRepository ansTblRepository;
 
 	/**
 	 * 採点処理
@@ -67,7 +60,7 @@ public class ScoringService {
 			//採点する
 			result =  scoring.doScoring(typingAnsSheet);
 			
-			//DBに登録
+			//学生の場合はDBに登録
 			EventQuestionEntity eqEntity = eventQuestionRepository.findOne(
 					Specification.
 						where(EventQuestionSpecifications.qidEquals(scoringForm.getQid())).
@@ -79,6 +72,7 @@ public class ScoringService {
 				
 				ansTblRepository.save(ansEntity);
 			}
+			
 		}catch(Exception e) {
 			logger.error(e.getMessage());
 			throw new SystemErrorException(e.getMessage());
