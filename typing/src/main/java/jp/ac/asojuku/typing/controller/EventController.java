@@ -184,6 +184,11 @@ public class EventController {
 		return mv;
 	}
 
+	/**
+	 * @param eid
+	 * @return
+	 * @throws JsonProcessingException
+	 */
 	@RequestMapping(value = { "/personalInfo" }, method = RequestMethod.POST)
 	@ResponseBody
 	public Object getPersonalInfo(
@@ -202,6 +207,11 @@ public class EventController {
         return jsonString;
 	}
 
+	/**
+	 * @param eid
+	 * @return
+	 * @throws JsonProcessingException
+	 */
 	@RequestMapping(value = { "/rankingInfo" }, method = RequestMethod.POST)
 	@ResponseBody
 	public Object getRankinglInfo(

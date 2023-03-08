@@ -68,31 +68,6 @@ public class EventService extends ServiceBase{
 		return isDisp;
 	}
 	/**
-	 * 個人成績を取得する
-	 * @param eid
-	 * @param uid
-	 * @return
-	 */
-	public PersonalEventInfoDto getPersonalEventInfo(Integer eid,Integer uid) {
-		PersonalEventInfoDto peiDto = new PersonalEventInfoDto();
-		////////////////////////
-		//ランキングを取得する
-		List<RankingSummary> rankingSummaryList = ansTblRepository.findRankingSummary(eid);
-		int ranking = 1;
-		for(RankingSummary summary : rankingSummaryList) {
-			if(summary.getUid() == uid) {
-				peiDto.setRank(ranking);
-				peiDto.setTotalScore(summary.getScore());
-				int submitCount = ansTblRepository.getAnsCountByEidUid(eid, uid);
-				peiDto.setSubmitCount(submitCount);
-				peiDto.setGetTime(Exchange.toFormatString(new Date()));
-				break;
-			}
-			ranking++;
-		}
-		return peiDto;
-	}
-	/**
 	 * ランキングを取得する
 	 * @param eid
 	 * @return
@@ -211,7 +186,7 @@ public class EventService extends ServiceBase{
 		}
 		
 		EventQuestionEntity eqEntity = eventQuestionRepository.getOne(eqid);
-		QuestionDetailDto detailDto =  getDetailForm( eqEntity.getQestionTbl(),uid);
+		QuestionDetailDto detailDto =  getDetailForm(  eqEntity.getQestionTbl(),uid,eqEntity.getEid() );
 		detailDto.setEid(eqEntity.getEid());
 		
 		return detailDto;
@@ -284,7 +259,7 @@ public class EventService extends ServiceBase{
 				qDto.setDifficulty(eqEntity.getQestionTbl().getDifficalty());
 				qDto.setPracticeFlg(eqEntity.getQestionTbl().getPracticeflg());
 				qDto.setTitle(eqEntity.getQestionTbl().getTitle());
-				AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(qid,uid);
+				AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(entity.getEid(),qid,uid);
 				if( ansEntity != null ) {
 					qDto.setScore( String.valueOf(ansEntity.getScore()) );
 				}else {

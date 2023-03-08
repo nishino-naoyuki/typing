@@ -1,6 +1,7 @@
 package jp.ac.asojuku.typing.service;
 
 import java.text.ParseException;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jp.ac.asojuku.typing.dto.ScoringResultDto;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
+import jp.ac.asojuku.typing.entity.EventTblEntity;
 import jp.ac.asojuku.typing.entity.QestionTblEntity;
+import jp.ac.asojuku.typing.exception.EventFinishedException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.ScoringForm;
 import jp.ac.asojuku.typing.param.RoleId;
@@ -40,10 +43,14 @@ public class ScoringService extends ServiceBase{
 	 * @param scoringForm
 	 * @return
 	 * @throws SystemErrorException
+	 * @throws EventFinishedException 
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public ScoringResultDto typingScoring(Integer uid,ScoringForm scoringForm) throws SystemErrorException {
+	public ScoringResultDto typingScoring(Integer uid,ScoringForm scoringForm) throws SystemErrorException, EventFinishedException {
 		
+		if( !isInTime(scoringForm.getEid()) ) {
+			throw new EventFinishedException("このイベントは既に終了しています");
+		}
 		ScoringResultDto result = null;
 		try {
 			//問題情報を取得（本当はフォームで送ったほうが良いが、通信のデータ量を考慮し、ここで最新のものを取得しておく）
@@ -60,7 +67,7 @@ public class ScoringService extends ServiceBase{
 			//採点する
 			result =  scoring.doScoring(typingAnsSheet);
 			
-			//学生の場合はDBに登録
+			//DBに登録
 			EventQuestionEntity eqEntity = eventQuestionRepository.findOne(
 					Specification.
 						where(EventQuestionSpecifications.qidEquals(scoringForm.getQid())).
@@ -80,6 +87,32 @@ public class ScoringService extends ServiceBase{
 		
 		
 		return result;
+	}
+	
+	/**
+	 * 時間ないかどうかの取得
+	 * @param eid
+	 * @return
+	 */
+	public boolean isInTime(Integer eid) {
+		boolean inTime = true;
+		
+		EventTblEntity eventEntity = null;
+		if( eid != null) {
+			eventEntity = eventRepository.getOne(eid);
+		}
+
+		if( eventEntity == null ) {
+			//eventEntityがnullは練習問題
+			return true;
+		}
+		
+		Date now = new Date();
+		if( now.after( eventEntity.getFinishDate() ) ) {
+			//終了時間を超えての採点
+			inTime = false;
+		}
+		return inTime;
 	}
 	
 	/**

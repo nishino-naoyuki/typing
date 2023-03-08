@@ -14,4 +14,6 @@ public interface EventUserRepository
 	EventUserEntity findByUidAndEid(Integer uid,Integer eid);
 	
 	List<EventUserEntity> findByEidOrderByUid(Integer eid);
+	
+	List<EventUserEntity> findByUidOrderByEid(Integer uid);
 }

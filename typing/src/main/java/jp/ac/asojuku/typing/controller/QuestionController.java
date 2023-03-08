@@ -25,6 +25,7 @@ import jp.ac.asojuku.typing.dto.LoginInfoDto;
 import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.dto.ScoringResultDto;
+import jp.ac.asojuku.typing.exception.EventFinishedException;
 import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.QuestionForm;
@@ -156,13 +157,14 @@ public class QuestionController {
 	 * @throws SystemErrorException
 	 * @throws PermitionException
 	 * @throws JsonProcessingException
+	 * @throws EventFinishedException 
 	 */
 	@RequestMapping(value= {"/scoring"}, method=RequestMethod.POST)
 	@ResponseBody
     public Object scoring(
     		ModelAndView mv,
     		ScoringForm scoringForm
-    		) throws SystemErrorException, PermitionException, JsonProcessingException {
+    		) throws SystemErrorException, PermitionException, JsonProcessingException, EventFinishedException {
 
 		//ログイン情報を取得する
 		LoginInfoDto loginInfo = (LoginInfoDto)session.getAttribute(SessionConst.LOGININFO);

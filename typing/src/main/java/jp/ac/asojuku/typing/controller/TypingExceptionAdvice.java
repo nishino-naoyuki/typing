@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import jp.ac.asojuku.typing.exception.EventFinishedException;
 import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 
@@ -22,5 +23,11 @@ public class TypingExceptionAdvice {
 	public String permitionExceptionHandle(PermitionException e) {
 		logger.error("SystemErrorException",e.getMessage());
 		return "/error/404.html";
+	}
+	
+	@ExceptionHandler(EventFinishedException.class)
+	public String eventFinishedExceptionHandle(PermitionException e) {
+		logger.error("EventFinishedException",e.getMessage());
+		return "/error/alreadfinished.html";
 	}
 }

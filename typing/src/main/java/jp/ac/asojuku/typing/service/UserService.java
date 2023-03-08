@@ -1,35 +1,58 @@
 package jp.ac.asojuku.typing.service;
 
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.exceptions.CsvFieldAssignmentException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-
-import jp.ac.asojuku.typing.controller.DashboardController;
 import jp.ac.asojuku.typing.csv.UserCSV;
 import jp.ac.asojuku.typing.dto.CreateUserDto;
 import jp.ac.asojuku.typing.dto.LoginInfoDto;
+import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
+import jp.ac.asojuku.typing.dto.UserDetailInfoDto;
+import jp.ac.asojuku.typing.entity.EventUserEntity;
 import jp.ac.asojuku.typing.entity.UserTblEntity;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
-import jp.ac.asojuku.typing.repository.UserRepository;
 import jp.ac.asojuku.typing.util.Digest;
-import jp.ac.asojuku.typing.param.ErrorCode;
 import jp.ac.asojuku.typing.param.RoleId;
 
 @Service
 public class UserService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(UserService.class);
 
+	/**
+	 * @param uid
+	 * @return
+	 */
+	public UserDetailInfoDto getUserDetail(Integer uid) {
+		UserTblEntity userEntity =  userRepository.getOne(uid);
+		//参加した大会の履歴を取得する
+		List<EventUserEntity> euList = eventUserRepository.findByUidOrderByEid(uid);
+		List<PersonalEventInfoDto> peiList = new ArrayList<>();
+		for( EventUserEntity euEntity : euList) {
+			PersonalEventInfoDto peiDto = getPersonalEventInfo(
+											euEntity.getEid(),euEntity.getUid()
+											);
+			peiList.add(peiDto);
+		}
+		//値をセット
+		UserDetailInfoDto dto = new UserDetailInfoDto();
+		dto.setName(userEntity.getName());
+		dto.setMail(userEntity.getMail());
+		dto.setDispName(userEntity.getDispName());
+		dto.setAffiliation(userEntity.getAffiliation());
+		dto.setUid(userEntity.getUid());
+		dto.setPersonalEventInfoList(peiList);
+		
+		return dto;
+	}
+	
 	/**
 	 * ログイン処理
 	 * @param mail

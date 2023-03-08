@@ -204,7 +204,9 @@
 	 			}
  				retDialogTrigger.click();
  			}
- 		});
+ 		}).catch((err) => {
+ 			alert("採点されませんでした。既にイベントが終了している可能性があります。元の画面に戻ってリロードしてください");
+ 		});;
   	});
   	
   	const ShowLength = ( str )=>{

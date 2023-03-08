@@ -32,6 +32,7 @@
 	   	      "info": true,
 	   	      "autoWidth": false,
 	   	      "responsive": true});
+	   	      
 	    let utable = new DataTable('#ulistTable',{
 	   	      "paging": true,
 	   	      "lengthChange": true,
@@ -40,16 +41,84 @@
 	   	      "info": true,
 	   	      "autoWidth": false,
 	   	      "responsive": true});
-	    rtable = new DataTable('#rlistTable',{
-	   	      "paging": true,
-	   	      "lengthChange": true,
-	   	      "searching": true,
-	   	      "ordering": true,
-	   	      "info": true,
-	   	      "autoWidth": false,
-	   	      "responsive": true});
+	   	      
+	   	 initRankingTable();
 	});
   </script>
+  
+	<script th:inline="javascript" th:if="${eventDetail.rankingDisplay && session['loginInfo'].isAdmin()}">
+		const initRankingTable = ()=>{
+			const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
+		    rtable = new DataTable('#rlistTable',{
+		   	      "paging": true,
+		   	      "lengthChange": true,
+		   	      "searching": true,
+		   	      "ordering": true,
+		   	      "info": true,
+		   	      "autoWidth": false,
+		   	      "responsive": true,
+		   	      "ajax" : {
+			   	      	"url": url,
+			   	      	"type" : "post",
+			   	      	"data" : function( d ) {
+						      d.eid = /*[[${eid}]]*/0;
+						    },
+						"dataSrc": "rankingList"
+					},
+		            "columns": [
+		            	{ data:"ranking"},
+		            	{ data:"mail"},
+		            	{ data:"name"},
+		            	{
+		            		data:"dispName" ,
+		            		type:"uid",
+		                	render: function ( data, type, row ) {
+		                		const url = /*[[@{/user/detail}]]*/ "/user/detail";
+		                		return '<a href="'+url+'?id='+row.uid+'" target="userInfo">'+data+'</a>';
+		                	}
+		            	},
+		                { data: "affiliation" },
+		                { data: "score" }
+		            ]
+		   	  });
+		}
+	</script>
+	<script th:inline="javascript" th:if="${eventDetail.rankingDisplay && session['loginInfo'].isStudent()}">
+		const initRankingTable = ()=>{
+			const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
+		    rtable = new DataTable('#rlistTable',{
+		   	      "paging": true,
+		   	      "lengthChange": true,
+		   	      "searching": true,
+		   	      "ordering": true,
+		   	      "info": true,
+		   	      "autoWidth": false,
+		   	      "responsive": true,
+		   	      "ajax" : {
+			   	      	"url": url,
+			   	      	"type" : "post",
+			   	      	"data" : function( d ) {
+						      d.eid = /*[[${eid}]]*/0;
+						    },
+						"dataSrc": "rankingList"
+					},
+		            "columns": [
+		            	{ data:"ranking"},
+		            	{
+		            		data:"dispName" ,
+		            		type:"uid",
+		                	render: function ( data, type, row ) {
+		                		const url = /*[[@{/user/detail}]]*/ "/user/detail";
+		                		return '<a href="'+url+'?id='+row.uid+'" target="userInfo">'+data+'</a>';
+		                	}
+		            	},
+		                { data: "affiliation" },
+		                { data: "score" }
+		            ]
+		   	  });
+		}
+		
+</script>
 </head>
 
 <body class="g-sidenav-show   bg-gray-100">
@@ -108,6 +177,9 @@
 										<div class="mb-3" th:if="${!eventDetail.displayQuestion}">
 											<h2 th:if="${!eventDetail.pastEvent}">このイベントは開始前です</h2>
 											<h2 th:if="${eventDetail.pastEvent}">このイベントは既に終了しています</h2>
+										</div>
+										<div class="d-flex justify-content-end">
+											<a th:href="|@{/download/result}?eid=${eventDetail.eid}|" target="ranking" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success" id="csvbtn" >問題別結果CSV出力</button></a>
 										</div>
 										<table id="qlistTable" class="display mb-3" style="width:100%" th:if="${eventDetail.displayQuestion}">
 											<thead>
@@ -210,7 +282,7 @@
 										<div class="d-flex justify-content-end">
 											<h6 id="gettimeforranking"></h6>
 											<a th:href="|@{/event/rankingforstudent}?eid=${eventDetail.eid}&etitle=${eventDetail.name}|" target="ranking" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success mx-3" id="rnkbtn" >学生用ランキング表示</button></a>
-											<button type="button" class="btn bg-gradient-success" id="csvbtn" th:if="${session['loginInfo'].isAdmin()}">CSV出力</button>
+											<a th:href="|@{/download/ranking}?eid=${eventDetail.eid}|" target="ranking" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success" id="csvbtn" >ランキングCSV出力</button></a>
 										</div>
 										<table id="rlistTable" class="display" style="width:100%">
 											<thead>
@@ -320,98 +392,24 @@ setInterval(()=>{
 
 <script th:inline="javascript" th:if="${eventDetail.rankingDisplay && session['loginInfo'].isAdmin()}">
 setInterval(()=>{
-  	rtable.clear();
-  	rtable.destroy();
-	
-	const formData = new FormData();
-	formData.append('eid',/*[[${eventDetail.eid}]]*/ );
-	
-    const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
- 	fetch(url,{method:"post",body: formData})
-       //レスポンスの受け取り
-       .then( response => response.json()).then(result => {
-		 gettimeforranking.innerHTML = result.getTime+" 現在";
-		 let rankingList = result.rankingList;
-   		  rtable = $('#rlistTable').DataTable({
-	   	      "paging": true,
-	   	      "lengthChange": true,
-	   	      "searching": true,
-	   	      "ordering": true,
-	   	      "info": true,
-	   	      "autoWidth": false,
-	   	      "responsive": true,
-				"data":rankingList,
-				"language": {
-	                "url": /*[[@{/DataTables-1.10.16/Japanese.json}]]*/ 'Japanese.json'
-	            },
-	            "columns": [
-	            	{ data:"ranking"},
-	            	{ data:"mail"},
-	            	{ data:"name"},
-	            	{
-	            		data:"dispName" ,
-	            		type:"uid",
-	                	render: function ( data, type, row ) {
-	                		const url = /*[[@{/user/detail}]]*/ "/user/detail";
-	                		return '<a href="'+url+'?id='+row.uid+'" target="userInfo">'+data+'</a>';
-	                	}
-	            	},
-	                { data: "affiliation" },
-	                { data: "score" }
-	            ]
-	   	    });
-   			rtable.draw();
-		});
+	rtable.ajax.reload(
+		(json)=>{
+			gettimeforranking.innerHTML = json.getTime+" 現在";
+		},true
+	);
 }, 30000);
 </script>
 <script th:inline="javascript" th:if="${eventDetail.rankingDisplay && session['loginInfo'].isStudent()}">
 setInterval(()=>{
-  	rtable.clear();
-  	rtable.destroy();
-	
-	const formData = new FormData();
-	formData.append('eid',/*[[${eventDetail.eid}]]*/ );
-	
-    const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
- 	fetch(url,{method:"post",body: formData})
-       //レスポンスの受け取り
-       .then( response => response.json()).then(result => {
-		 gettimeforranking.innerHTML = result.getTime+" 現在";
-		 
-		 if( !result.isDisplay ){
-		 	gettimeforranking.innerHTML = "ランキングは非表示になりました";
-		 	return;
-		 }
-		 
-		 let rankingList = result.rankingList;
-   		  rtable = $('#rlistTable').DataTable({
-	   	      "paging": true,
-	   	      "lengthChange": true,
-	   	      "searching": true,
-	   	      "ordering": true,
-	   	      "info": true,
-	   	      "autoWidth": false,
-	   	      "responsive": true,
-				"data":rankingList,
-				"language": {
-	                "url": /*[[@{/DataTables-1.10.16/Japanese.json}]]*/ 'Japanese.json'
-	            },
-	            "columns": [
-	            	{ data:"ranking"},
-	            	{
-	            		data:"dispName" ,
-	            		type:"uid",
-	                	render: function ( data, type, row ) {
-	                		const url = /*[[@{/user/detail}]]*/ "/user/detail";
-	                		return '<a href="'+url+'?id='+row.uid+'" target="userInfo">'+data+'</a>';
-	                	}
-	            	},
-	                { data: "affiliation" },
-	                { data: "score" }
-	            ]
-	   	    });
-   			rtable.draw();
-		});
+	rtable.ajax.reload(
+		(json)=>{
+			if( json.isDisplay ){
+				gettimeforranking.innerHTML = json.getTime+" 現在";
+			}else{
+			 	gettimeforranking.innerHTML = "ランキングは非表示になりました";
+			}
+		},true
+	);
 }, 30000);
 </script>
 </html>

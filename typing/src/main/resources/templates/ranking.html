@@ -24,9 +24,7 @@
   <script th:inline="javascript">
   	let rtable;
   	const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
-	const formData = new FormData();
-	formData.append('eid',/*[[${eid}]]*/ );
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {	   	      
 	    rtable = new DataTable('#rlistTable',{
 	   	      "paging": true,
 	   	      "lengthChange": true,
@@ -35,105 +33,15 @@
 	   	      "ordering": false,
 	   	      "info": true,
 	   	      "autoWidth": true,
-	   	      "responsive": true
-	   	      });
-	});
-  </script>
-</head>
-
-<body class="g-sidenav-show   bg-gray-100">
-  <div class="min-height-300 bg-primary position-absolute w-100"></div>
-  
-  <main class="main-content position-relative border-radius-lg ">
-    <div class="container-fluid py-1">
-      <div class="row">
-        <div class="col-12 mb-4">
-          <div class="card">
-           	<div class="card-header">
-           		<div class="row">
-					<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2 th:text="|${etitle} ランキング|"></h2></p>
-           		</div>
-           	</div>
-            <div class="card-body p-2">
-              <div class="row">
-				<div class="d-flex justify-content-end">
-					<h6 id="gettimeforranking" th:text="|${gettime} 現在|"></h6>
-				</div>
-				<table id="rlistTable" class="display" style="width:100%">
-					<thead>
-						<tr>
-							<th>順位</th>
-							<th>表示名</th>
-							<th>所属</th>
-							<th>得点</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="element,status:${rankingList}">
-							<td th:if="${element.ranking == 1}"><h3><i class="ni ni-trophy icon-gold"></i></h3></td>
-							<td th:if="${element.ranking != 1}" th:text="${element.ranking}"></td>
-							
-							<td th:if="${element.ranking == 1}"><h3 th:text="${element.dispName}"></h3></td>
-							<td th:if="${element.ranking == 2}"><h4 th:text="${element.dispName}"></h4></td>
-							<td th:if="${element.ranking == 3}"><h5 th:text="${element.dispName}"></h5></td>
-							<td th:if="${element.ranking > 3}" th:text="${element.dispName}"></td>
-							
-							<td th:text="${element.affiliation}"></td>
-							<td th:text="${element.score}"></td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr>
-							<th>順位</th>
-							<th>表示名</th>
-							<th>所属</th>
-							<th>得点</th>
-						</tr>
-					</tfoot>
-				</table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-	  <!--   FOOTER   -->
-	  <div id="parent" th:replace="/common/footer"></div>  
-    </div>
-    </div>
-  </main>
-  <!--   Core JS Files   -->
-  <div id="parent" th:replace="/common/corejs"></div>  
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-</body>
-<script th:inline="javascript">
-const gettimeforranking = document.getElementById("gettimeforranking");
-setInterval(()=>{
-	rtable.clear();
-  	rtable.destroy();
-	
-	const formData = new FormData();
-	formData.append('eid',/*[[${eid}]]*/ );
-	
-    const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
- 	fetch(url,{method:"post",body: formData})
-       //レスポンスの受け取り
-       .then( response => response.json()).then(result => {
-		 gettimeforranking.innerHTML = result.getTime+" 現在";
-		 let rankingList = result.rankingList;
-   		  rtable = $('#rlistTable').DataTable({
-	   	      "paging": true,
-	   	      "lengthChange": true,
-	   	      "lengthMenu": [ 10, 3, 5, 25, 50, 100 ],
-	   	      "searching": false,
-	   	      "ordering": false,
-	   	      "info": true,
-	   	      "autoWidth": true,
 	   	      "responsive": true,
-				"data":rankingList,
-				"language": {
-	                "url": /*[[@{/DataTables-1.10.16/Japanese.json}]]*/ 'Japanese.json'
-	            },
+	   	      "ajax" : {
+		   	      	"url": url,
+		   	      	"type" : "post",
+		   	      	"data" : function( d ) {
+					      d.eid = /*[[${eid}]]*/0;
+					    },
+					"dataSrc": "rankingList"
+				},
 	            "columns": [
 	            	{
 	            		data:"ranking" ,
@@ -165,10 +73,72 @@ setInterval(()=>{
 	                { data: "affiliation" },
 	                { data: "score" }
 	            ]
-	   	    });
-   			rtable.draw();
+	   	      
+	   	      });
+	});
+  </script>
+</head>
 
-		})
-		}, 30000);
+<body class="g-sidenav-show   bg-gray-100">
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>
+  
+  <main class="main-content position-relative border-radius-lg ">
+    <div class="container-fluid py-1">
+      <div class="row">
+        <div class="col-12 mb-4">
+          <div class="card">
+           	<div class="card-header">
+           		<div class="row">
+					<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2 th:text="|${etitle} ランキング|"></h2></p>
+           		</div>
+           	</div>
+            <div class="card-body p-2">
+              <div class="row">
+				<div class="d-flex justify-content-end">
+					<h6 id="gettimeforranking" th:text="|${gettime} 現在|"></h6>
+				</div>				
+				<table id="rlistTable" class="display" style="width:100%">
+					<thead>
+						<tr>
+							<th>順位</th>
+							<th>表示名</th>
+							<th>所属</th>
+							<th>得点</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th>順位</th>
+							<th>表示名</th>
+							<th>所属</th>
+							<th>得点</th>
+						</tr>
+					</tfoot>
+				</table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+	  <!--   FOOTER   -->
+	  <div id="parent" th:replace="/common/footer"></div>  
+    </div>
+    </div>
+  </main>
+  <!--   Core JS Files   -->
+  <div id="parent" th:replace="/common/corejs"></div>  
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+<script th:inline="javascript">
+const gettimeforranking = document.getElementById("gettimeforranking");
+setInterval(()=>{
+	rtable.ajax.reload();
+	//更新処理
+	let result = rtable.ajax.json();
+	gettimeforranking.innerHTML = result.getTime+" 現在";
+},10000);
 </script>
 </html>

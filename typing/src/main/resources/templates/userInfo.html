@@ -1,0 +1,115 @@
+<!--
+=========================================================
+* Argon Dashboard 2 - v2.0.4
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/argon-dashboard
+* Copyright 2022 Creative Tim (https://www.creative-tim.com)
+* Licensed under MIT (https://www.creative-tim.com/license)
+* Coded by Creative Tim
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- ヘッダー -->
+  <div id="parent" th:replace="/common/head"></div>  
+</head>
+
+<body class="g-sidenav-show   bg-gray-100">
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>
+  <!-- サイドバー -->
+  <div id="parent" th:replace="/common/sidebar"></div>  
+  
+  <main class="main-content position-relative border-radius-lg ">
+    <!-- Navbar -->
+  	<div id="parent" th:replace="/common/nav"></div>  
+    <!-- End Navbar -->
+    <div class="container-fluid py-1">
+      <div class="row">
+        <div class="col-12 mb-4">
+          <div class="card">
+          	<div class="card-header">
+          		<div class="row">
+          			<div class="col">
+	  					<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2>ユーザー情報</h2></p>
+          			</div>
+          		</div>
+          	</div>
+            <div class="card-body p-3">
+              <div class="row">
+				<div class="nav-wrapper position-relative end-0">
+					<ul class="nav nav-pills nav-fill p-1" role="tablist">
+						<li class="nav-item">
+							<a class="nav-link mb-0 px-0 py-1 active" data-bs-toggle="tab" href="#registeruser" role="tab" aria-controls="profile" aria-selected="true">
+							基本情報
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#searchuser" role="tab" aria-controls="dashboard" aria-selected="false">
+							大会参加履歴
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#contact" role="tab" aria-controls="dashboard" aria-selected="false">
+							メンテナンス
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div class="tab-content" id="myTabContent">
+					<div class="tab-pane fade show active" id="registeruser" role="tabpanel" aria-labelledby="home-tab">
+		                <form class="mb-3" id="usercsvinput" th:action="@{/csventry}" method="POST" enctype="multipart/form-data">
+							<div class="form-group">
+								<label for="example-text-input" class="form-control-label">ユーザーCSVファイル</label>
+								<input class="form-control" type="file" value="" id="inputuserfile">
+							</div>
+							<div class="form-group">
+								<button type="button" id="usercsvinputButton" class="btn bg-gradient-primary">登録</button>
+							</div>
+		                </form>
+					</div>
+					<div class="tab-pane fade" id="searchuser" role="tabpanel" aria-labelledby="profile-tab">.b..</div>
+					<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">.c..</div>
+				</div>
+              </div>
+            </div>
+          </div>
+         </div>
+      </div>
+	  <!--   FOOTER   -->
+	  <div id="parent" th:replace="/common/footer"></div>  
+    </div>
+  </main>
+  <!--   Core JS Files   -->
+  <div id="parent" th:replace="/common/corejs"></div>  
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+<script>
+    const insertButton = document.getElementById('usercsvinputButton');
+	const inputuserfile = document.getElementById("inputuserfile");
+    insertButton.addEventListener('click',()=>{	
+		if( !confirm("処理を開始します。途中で中断はできません。\nよろしいですか？")){
+			return;
+		}
+        const url = /*[[@{/mastermainte/csventry}]]*/ "/mastermainte/csventry";
+		// 送信データの準備
+		const formData = new FormData();
+		formData.append("inputuserfile", inputuserfile.files[0]);  // ファイル内容を詰める
+        fetch(url,{method:"post",body: formData})
+        //レスポンスの受け取り
+        .then( response => response.json()).then(result => {
+ 			if( result.errorMsg != null){
+ 				alert(result.errorMsg);
+ 			}else if(result.now > 0){
+ 				alert("登録完了："+result.now+"件");
+ 			}
+ 		});
+    });
+</script>
+</html>

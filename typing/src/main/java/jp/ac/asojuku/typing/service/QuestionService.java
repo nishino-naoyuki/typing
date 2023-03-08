@@ -20,6 +20,7 @@ import jp.ac.asojuku.typing.entity.EventUserEntity;
 import jp.ac.asojuku.typing.entity.QestionTblEntity;
 import jp.ac.asojuku.typing.form.QuestionForm;
 import jp.ac.asojuku.typing.param.RoleId;
+import jp.ac.asojuku.typing.param.TypingConst;
 import jp.ac.asojuku.typing.repository.AnsTblRepository;
 import jp.ac.asojuku.typing.repository.EventQuestionRepository;
 import jp.ac.asojuku.typing.repository.EventUserRepository;
@@ -63,7 +64,7 @@ public class QuestionService extends ServiceBase{
 		
 		List<QestionTblEntity> entityList =  questionRepository.getQList(role.getId());
 		for(QestionTblEntity entity : entityList) {
-			list.add(getFrom(entity,uid));
+			list.add(getFrom(entity,uid,TypingConst.PRACTICE_EVENTID));
 		}
 		return list;
 	}
@@ -96,7 +97,7 @@ public class QuestionService extends ServiceBase{
 				.and(QuestionSpecifications.practiceEquals((role == RoleId.STUDENT ?1:null))) )
 				).orElse(null);
 		
-		return getDetailForm(qEntity,uid);
+		return getDetailForm(qEntity,uid,TypingConst.PRACTICE_EVENTID);
 	}
 	
 	
@@ -117,7 +118,7 @@ public class QuestionService extends ServiceBase{
 	
 	/* ------- private method ------------ */
 	
-	private QuestionOutlineDto getFrom(QestionTblEntity entity,Integer uid) {
+	private QuestionOutlineDto getFrom(QestionTblEntity entity,Integer uid,Integer eid) {
 		QuestionOutlineDto dto = new QuestionOutlineDto();
 		
 		dto.setQid(entity.getQid());
@@ -125,7 +126,7 @@ public class QuestionService extends ServiceBase{
 		dto.setPracticeFlg(entity.getPracticeflg());
 		dto.setTitle(entity.getTitle());
 		dto.setKindName( (entity.getPracticeflg()==1?"練習用":"大会用") );
-		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(entity.getQid(),uid);
+		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(eid,entity.getQid(),uid);
 		if( ansEntity != null ) {
 			dto.setSubmitTime(ansEntity.getAnsTimestamp());
 			dto.setSubmitTimeString(Exchange.toFormatString(ansEntity.getAnsTimestamp(), "yyyy/MM/dd HH:mm:ss"));
