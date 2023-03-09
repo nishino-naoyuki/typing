@@ -80,7 +80,7 @@
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
-<script　th:inline="javascript">
+<script>
     const insertButton = document.getElementById('createbutton');
  	const alertarea = document.getElementById('alertmsg');
  	
@@ -105,7 +105,7 @@
  		formData.append('question',questionObj.value );
  		formData.append('difficulty',difficultyObj.value );
  		 		
-        const url = /*[[@{/question/save}]]*/ "/question/save";
+        const url = /*[[@{/question/insert}]]*/ "/question/insert";
         fetch(url,{method:"post",body: formData})
         //レスポンスの受け取り
         .then( response => response.json()).then(result => {

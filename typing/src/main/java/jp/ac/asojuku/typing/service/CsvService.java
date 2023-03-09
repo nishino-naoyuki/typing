@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class CsvService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(CsvService.class);
 	private static final String RANKINGCSV = "ranking.csv";
 	private static final String NOTANSWERD = "-";
+	private static final Integer DELETE = 1;
 
 	@Autowired
 	ResourceLoader resourceLoader;
@@ -45,8 +47,9 @@ public class CsvService extends ServiceBase{
 	 * 大会結果を問題ごとで切り出す
 	 * @param eid
 	 * @return
+	 * @throws UnsupportedEncodingException 
 	 */
-	public byte[] getEventResult(Integer eid) {
+	public byte[] getEventResult(Integer eid) throws UnsupportedEncodingException {
 		//問題の一覧を取得する
 		List<EventQuestionEntity> eqList = eventQuestionRepository.findByEidOrderByNo(eid);
 		//イベントに参加しているユーザーを取得する
@@ -64,7 +67,8 @@ public class CsvService extends ServiceBase{
 			sb.append(element.toString()).append("\n");	//1行ごとに書き込む
 		}
 		
-		return sb.toString().getBytes();
+		
+		return sb.toString().getBytes(SystemConfig.getInstance().getCsvoutputencode());
 	}
 	/**
 	 * 指定されたイベントのランキングをCSVデータとしてバイナリを返す
@@ -166,30 +170,32 @@ public class CsvService extends ServiceBase{
 		
 		List<EventResultCSV> erCSVList = new ArrayList<>();
 		for( EventUserEntity euEntity : euList) {
-			EventResultCSV element = new EventResultCSV();
-			UserTblEntity userEntity = euEntity.getUserTbl();
-			
-			//１．大会名をセット
-			element.addData(euEntity.getEventTbl().getName());
-			//２．名前をセット
-			element.addData(userEntity.getName());
-			//３．表示名前をセット
-			element.addData(userEntity.getDispName());
-			//４．メールアドレスをセット
-			element.addData(userEntity.getMail());
-			//５．所属をセット
-			element.addData(userEntity.getAffiliation());
-			//大会の問題ごとにセットしていく
-			for( EventQuestionEntity eqEntity  : eqList) {
-				AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(eqEntity.getEid(), eqEntity.getQid(),userEntity.getUid() );
-				//６～．点数をセット
-				if( ansEntity != null ) {
-					element.addData(ansEntity.getScore().toString());
-				}else {
-					element.addData(NOTANSWERD);
+			if( euEntity.getDelFlg() != DELETE) {
+				EventResultCSV element = new EventResultCSV();
+				UserTblEntity userEntity = euEntity.getUserTbl();
+				
+				//１．大会名をセット
+				element.addData(euEntity.getEventTbl().getName());
+				//２．名前をセット
+				element.addData(userEntity.getName());
+				//３．表示名前をセット
+				element.addData(userEntity.getDispName());
+				//４．メールアドレスをセット
+				element.addData(userEntity.getMail());
+				//５．所属をセット
+				element.addData(userEntity.getAffiliation());
+				//大会の問題ごとにセットしていく
+				for( EventQuestionEntity eqEntity  : eqList) {
+					AnsTblEntity ansEntity = ansTblRepository.findByUidAndEqid(userEntity.getUid(), eqEntity.getEqid());
+					//６～．点数をセット
+					if( ansEntity != null ) {
+						element.addData(ansEntity.getScore().toString());
+					}else {
+						element.addData(NOTANSWERD);
+					}
 				}
+				erCSVList.add(element);
 			}
-			erCSVList.add(element);
 		}
 		
 		return erCSVList;

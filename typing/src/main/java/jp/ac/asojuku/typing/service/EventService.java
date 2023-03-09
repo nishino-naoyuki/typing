@@ -77,9 +77,13 @@ public class EventService extends ServiceBase{
 		
 		List<RankingDto> rankingList = new ArrayList<>();
 		int ranking = 1;
+		int count = 1;
+		int wkScore = Integer.MAX_VALUE;
 		for(RankingSummary summary : rankingSummaryList) {
 			RankingDto rDto = new RankingDto();
-
+			if( wkScore > summary.getScore()) {
+				ranking = count;
+			}
 			UserTblEntity userEntity = userRepository.getOne(summary.getUid());
 			rDto.setUid(summary.getUid());
 			rDto.setScore(summary.getScore());
@@ -90,7 +94,8 @@ public class EventService extends ServiceBase{
 			rDto.setAffiliation(userEntity.getAffiliation());
 			
 			rankingList.add(rDto);
-			ranking++;
+			count++;
+			wkScore = summary.getScore();
 		}
 		
 		return rankingList;
@@ -259,7 +264,7 @@ public class EventService extends ServiceBase{
 				qDto.setDifficulty(eqEntity.getQestionTbl().getDifficalty());
 				qDto.setPracticeFlg(eqEntity.getQestionTbl().getPracticeflg());
 				qDto.setTitle(eqEntity.getQestionTbl().getTitle());
-				AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(entity.getEid(),qid,uid);
+				AnsTblEntity ansEntity = ansTblRepository.findByUidAndEqid(uid, eqEntity.getEqid());
 				if( ansEntity != null ) {
 					qDto.setScore( String.valueOf(ansEntity.getScore()) );
 				}else {

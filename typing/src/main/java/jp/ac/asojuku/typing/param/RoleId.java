@@ -59,5 +59,15 @@ public enum RoleId {
 
 		return ret;
 	}
-	
+
+	public static String toString(Integer id){
+		RoleId role = null;
+		if( STUDENT.equals(id)){
+			role = STUDENT;
+		}else if( ADMIN.equals(id)){
+			role = ADMIN;
+		}
+
+		return role.getMsg();
+	}
 }

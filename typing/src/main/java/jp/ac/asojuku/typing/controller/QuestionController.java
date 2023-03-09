@@ -52,7 +52,20 @@ public class QuestionController {
 	
 	@Autowired
 	HttpSession session;
-	
+
+	@RequestMapping(value= {"/edit"}, method=RequestMethod.GET)
+    public ModelAndView edit(
+    		ModelAndView mv,
+    		@RequestParam(required = true) Integer qid
+    		) throws SystemErrorException {
+		
+		QuestionDetailDto qDetail = questionService.getDetail(qid);
+		
+		mv.addObject("qDetail", qDetail);
+        mv.setViewName("qedit");
+        
+		return mv;
+	}
 	/**
 	 * 問題作成画面を表示する
 	 * @param mv
@@ -79,7 +92,7 @@ public class QuestionController {
 	 * @throws SystemErrorException
 	 * @throws JsonProcessingException
 	 */
-	@RequestMapping(value= {"/insert"}, method=RequestMethod.POST)
+	@RequestMapping(value= {"/save"}, method=RequestMethod.POST)
 	@ResponseBody
     public Object insert(ModelAndView mv,
     		@Valid QuestionForm qForm,

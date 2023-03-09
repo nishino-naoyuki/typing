@@ -3,6 +3,7 @@ package jp.ac.asojuku.typing.controller;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,6 +49,14 @@ public class FileController {
 	@Autowired
 	CsvService csvService;
 	
+	/**
+	 * CSV登録処理
+	 * @param userInputCSVForm
+	 * @param err
+	 * @return
+	 * @throws SystemErrorException
+	 * @throws Exception
+	 */
 	@RequestMapping(value= {"/mastermainte/csventry"}, method=RequestMethod.POST)
     public Object csventry(
     		@Valid UserInputCSVForm userInputCSVForm,BindingResult err
@@ -128,7 +137,13 @@ public class FileController {
 			@ModelAttribute("eid")Integer eid
 			) throws SystemErrorException {
 
-	    byte[] csvBinary = csvService.getEventResult(eid);
+	    byte[] csvBinary;
+	    
+		try {
+			csvBinary = csvService.getEventResult(eid);
+		} catch (UnsupportedEncodingException e) {
+			throw new SystemErrorException(e);
+		}
 		
 		// レスポンスデータとして返却
 		HttpHeaders headers = new HttpHeaders();

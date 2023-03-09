@@ -13,4 +13,6 @@ public interface EventQuestionRepository
 	public void deleteByEid(Integer eid);
 	
 	public List<EventQuestionEntity> findByEidOrderByNo(Integer eid);
+	
+	public EventQuestionEntity findByQidAndEidIsNull(Integer qid);
 }

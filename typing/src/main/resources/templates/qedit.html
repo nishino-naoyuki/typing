@@ -42,25 +42,25 @@
 			      <strong id="errrmessage"></strong>
 			    </div>
 				<div class="form-group form-check form-switch">
-					<input class="form-check-input" type="checkbox" id="practiceFlg" checked>
+					<input class="form-check-input" type="checkbox" id="practiceFlg" checked th:checked="${qDetail.practiceFlg}">
 					<label class="form-check-label" for="flexSwitchCheckDefault">練習問題</label>
 				</div>
 				<div class="form-group">
 					<label for="example-text-input" class="form-control-label">タイトル</label>
-					<input class="form-control" type="text" value="" id="titlename">
+					<input class="form-control" type="text" value="" id="titlename" th:value="${qDetail.title}">
 				</div>
 				<div class="form-group">
 					<label for="exampleFormControlTextarea1">問題文</label>
-					<textarea class="form-control" id="question" rows="10"></textarea>
+					<textarea class="form-control" id="question" rows="10" th:text="${qDetail.sentence}"></textarea>
 				</div>
 				<div class="form-group">
 					<label for="exampleFormControlSelect2">難易度</label>
 					<select class="form-control" id="difficulty">
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
+						<option value="1" th:selected="${qDetail.difficulty} == 1">1</option>
+						<option value="2" th:selected="${qDetail.difficulty} == 2">2</option>
+						<option value="3" th:selected="${qDetail.difficulty} == 3">3</option>
+						<option value="4" th:selected="${qDetail.difficulty} == 4">4</option>
+						<option value="5" th:selected="${qDetail.difficulty} == 5">5</option>
 					</select>
 				</div>
 				<div class="form-group">
@@ -100,6 +100,7 @@
  		//alert(questionObj.value);
  		//alert(difficultyObj.value);
  		const formData = new FormData();
+ 		formData.append('qid',/*[[${qDetail.qid}]]*/0 );
  		formData.append('practiceFlg',(paracticeCheck.checked ? true:false) );
  		formData.append('title',titleObj.value );
  		formData.append('question',questionObj.value );

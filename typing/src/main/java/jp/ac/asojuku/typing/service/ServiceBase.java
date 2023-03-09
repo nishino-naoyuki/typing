@@ -12,9 +12,11 @@ import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
 import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.summary.RankingSummary;
+import jp.ac.asojuku.typing.entity.AnsHistoryTblEntity;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.QestionTblEntity;
+import jp.ac.asojuku.typing.repository.AnsHistoryTblRepository;
 import jp.ac.asojuku.typing.repository.AnsTblRepository;
 import jp.ac.asojuku.typing.repository.EventQuestionRepository;
 import jp.ac.asojuku.typing.repository.EventRepository;
@@ -38,8 +40,26 @@ public class ServiceBase {
 	protected EventRepository eventRepository;
 	@Autowired
 	protected UserRepository userRepository;
+	@Autowired
+	protected AnsHistoryTblRepository ansHistoryTblRepository;
 	
 	protected QuestionDetailDto getDetailForm(QestionTblEntity qEntity,Integer uid,Integer eid) {
+		if( qEntity == null ) {
+			return null;
+		}
+		QuestionDetailDto dto = getDetailForm(qEntity);
+		//解答をセット
+		AnsHistoryTblEntity ansEntity = ansHistoryTblRepository.getRecentlyOne(eid,qEntity.getQid(),uid);
+		if( ansEntity != null ) {
+			dto.setAnswer(ansEntity.getAnswer());
+		}else {
+			dto.setAnswer("");
+		}
+		
+		return dto;		
+	}
+
+	protected QuestionDetailDto getDetailForm(QestionTblEntity qEntity) {
 		if( qEntity == null ) {
 			return null;
 		}
@@ -49,13 +69,7 @@ public class ServiceBase {
 		dto.setSentence(qEntity.getSentence());
 		dto.setTitle(qEntity.getTitle());
 		dto.setDifficulty(qEntity.getDifficalty());
-		//解答をセット
-		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(eid,qEntity.getQid(),uid);
-		if( ansEntity != null ) {
-			dto.setAnswer(ansEntity.getAnswer());
-		}else {
-			dto.setAnswer("");
-		}
+		dto.setPracticeFlg(qEntity.getPracticeflg()==1?true:false);
 		//どの大会に使われているか？
 		List<EventQuestionEntity> eqList = eventQuestionRepository.findAll(
 				Specification
@@ -78,7 +92,6 @@ public class ServiceBase {
 		
 		return dto;		
 	}
-	
 
 	/**
 	 * 個人成績を取得する
@@ -92,18 +105,24 @@ public class ServiceBase {
 		//ランキングを取得する
 		List<RankingSummary> rankingSummaryList = ansTblRepository.findRankingSummary(eid);
 		int ranking = 1;
+		int count = 1;
+		int wkScore = Integer.MAX_VALUE;
 		for(RankingSummary summary : rankingSummaryList) {
+			if( wkScore > summary.getScore()) {
+				ranking = count;
+			}
 			if(summary.getUid() == uid) {
 				peiDto.setRank(ranking);
 				peiDto.setTotalScore(summary.getScore());
-				int submitCount = ansTblRepository.getAnsCountByEidUid(eid, uid);
-				peiDto.setSubmitCount(submitCount);
+				Integer submitCount = ansTblRepository.getAnsCountByEidUid(eid, uid);
+				peiDto.setSubmitCount((submitCount == null ? 0 : submitCount) );
 				peiDto.setGetTime(Exchange.toFormatString(new Date()));
 				peiDto.setEid(eid);
 				peiDto.setEventName(eventRepository.getOne(eid).getName()); 
 				break;
 			}
-			ranking++;
+			count++;
+			wkScore = summary.getScore();
 		}
 		return peiDto;
 	}

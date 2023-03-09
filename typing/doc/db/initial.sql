@@ -1,0 +1,2 @@
+INSERT INTO `user_tbl` (`uid`, `mail`, `password`, `name`, `disp_name`, `affiliation`, `role`, `del_flg`) VALUES
+(1, 'nishino@asojuku.ac.jp', 'ad19081ee19c812af599f5b183b90dab', '西野　直幸', '西野', '教員', 1, 0);

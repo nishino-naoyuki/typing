@@ -12,8 +12,11 @@ public class QuestionDetailDto {
 	private String title;
 	private String sentence;
 	private Integer difficulty;
-	private String answer;
 	private List<EventOutlineDto> eventList;
+	
+	//option  セットされない場合がある
+	private String answer;
+	private Boolean practiceFlg;
 	
 	public String getSentenceBR() {
 		return HtmlUtil.nl2be(sentence);

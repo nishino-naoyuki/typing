@@ -74,7 +74,7 @@
 		            		type:"uid",
 		                	render: function ( data, type, row ) {
 		                		const url = /*[[@{/user/detail}]]*/ "/user/detail";
-		                		return '<a href="'+url+'?id='+row.uid+'" target="userInfo">'+data+'</a>';
+		                		return '<a href="'+url+'?uid='+row.uid+'" target="userInfo">'+data+'</a>';
 		                	}
 		            	},
 		                { data: "affiliation" },
@@ -104,14 +104,7 @@
 					},
 		            "columns": [
 		            	{ data:"ranking"},
-		            	{
-		            		data:"dispName" ,
-		            		type:"uid",
-		                	render: function ( data, type, row ) {
-		                		const url = /*[[@{/user/detail}]]*/ "/user/detail";
-		                		return '<a href="'+url+'?id='+row.uid+'" target="userInfo">'+data+'</a>';
-		                	}
-		            	},
+		            	{ data:"dispName"},
 		                { data: "affiliation" },
 		                { data: "score" }
 		            ]

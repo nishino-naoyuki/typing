@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,37 @@ import jp.ac.asojuku.typing.dto.UserDetailInfoDto;
 import jp.ac.asojuku.typing.entity.EventUserEntity;
 import jp.ac.asojuku.typing.entity.UserTblEntity;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
+import jp.ac.asojuku.typing.form.UserCreateForm;
 import jp.ac.asojuku.typing.util.Digest;
+import jp.ac.asojuku.typing.util.Token;
 import jp.ac.asojuku.typing.param.RoleId;
 
 @Service
 public class UserService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(UserService.class);
 
+	/**
+	 * 更新する
+	 * @param uid
+	 * @param userForm
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void update(Integer uid,UserCreateForm userForm) {
+		
+		UserTblEntity userEntity = userRepository.getOne(uid);
+
+		userEntity.setMail(userForm.getMail());
+		userEntity.setName(userForm.getName());
+		userEntity.setDispName(userForm.getDispName());
+		userEntity.setAffiliation(userForm.getAffiliation());
+		//パスワード変更
+		if( StringUtils.isNoneEmpty( userForm.getPassword() ) ) {
+			userEntity.setPassword(
+					Digest.createPassword(userForm.getMail(), userForm.getPassword()) 
+					);
+		}
+		userRepository.save(userEntity);
+	}
 	/**
 	 * @param uid
 	 * @return
@@ -43,12 +68,14 @@ public class UserService extends ServiceBase{
 		}
 		//値をセット
 		UserDetailInfoDto dto = new UserDetailInfoDto();
+		dto.setToken(Token.getCsrfToken());
 		dto.setName(userEntity.getName());
 		dto.setMail(userEntity.getMail());
 		dto.setDispName(userEntity.getDispName());
 		dto.setAffiliation(userEntity.getAffiliation());
 		dto.setUid(userEntity.getUid());
 		dto.setPersonalEventInfoList(peiList);
+		dto.setRoleId(userEntity.getRole());
 		
 		return dto;
 	}
@@ -230,7 +257,9 @@ public class UserService extends ServiceBase{
 		userEntity.setMail(createUserDto.getMail());
 		userEntity.setName(createUserDto.getName());
 		userEntity.setDispName(createUserDto.getDispName());
-		userEntity.setRole(createUserDto.getRoleId());
+		if( createUserDto.getRoleId() != null) {
+			userEntity.setRole(createUserDto.getRoleId());
+		}
 		userEntity.setAffiliation(createUserDto.getAffiliation());
 		
 		return userEntity;

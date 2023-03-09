@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
+import jp.ac.asojuku.typing.entity.AnsHistoryTblEntity;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.EventUserEntity;
@@ -41,13 +42,24 @@ public class QuestionService extends ServiceBase{
 	@Transactional(rollbackFor = Exception.class)
 	public void insert(QuestionForm form) {
 		QestionTblEntity qEntity = questionRepository.save(getFrom(form));
+		
+		//練習問題としての登録があるか？
+		EventQuestionEntity pqEntity = eventQuestionRepository.findByQidAndEidIsNull(qEntity.getQid());;
 		if( form.getPracticeFlg() ) {
-			//練習問題の場合は、大会をNULLで登録しておく
-			EventQuestionEntity pqEntity = new EventQuestionEntity();
-			pqEntity.setQid(qEntity.getQid());
-			pqEntity.setEid(null);
-			pqEntity.setNo(0);
-			eventQuestionRepository.save(pqEntity);
+			//練習問題の場合は、イベントを仮登録する。既にある場合するひつようはない
+			if(pqEntity == null) {
+				pqEntity = new EventQuestionEntity();
+				pqEntity.setQid(qEntity.getQid());
+				pqEntity.setEid(null);
+				pqEntity.setNo(0);
+				eventQuestionRepository.save(pqEntity);
+			}
+		}else {
+			if( pqEntity != null ) {
+				//練習問題ではないのにNULLイベントの登録があるということは　練習問題→本番用の問題　に切り替えられたということなので
+				//リンクを削除しておく
+				eventQuestionRepository.delete(pqEntity);
+			}
 		}
 	}
 	
@@ -99,7 +111,21 @@ public class QuestionService extends ServiceBase{
 		
 		return getDetailForm(qEntity,uid,TypingConst.PRACTICE_EVENTID);
 	}
-	
+
+	/**
+	 * @param qid
+	 * @param role
+	 * @param uid
+	 * @return
+	 */
+	public QuestionDetailDto getDetail(Integer qid) {
+		QestionTblEntity qEntity = questionRepository.findOne(
+				Specification.
+				where( QuestionSpecifications.qidEquals(qid) )
+				).orElse(null);
+		
+		return getDetailForm(qEntity);
+	}
 	
 	/**
 	 * @param uid
@@ -126,7 +152,7 @@ public class QuestionService extends ServiceBase{
 		dto.setPracticeFlg(entity.getPracticeflg());
 		dto.setTitle(entity.getTitle());
 		dto.setKindName( (entity.getPracticeflg()==1?"練習用":"大会用") );
-		AnsTblEntity ansEntity = ansTblRepository.getRecentlyOne(eid,entity.getQid(),uid);
+		AnsHistoryTblEntity ansEntity = ansHistoryTblRepository.getRecentlyOne(eid,entity.getQid(),uid);
 		if( ansEntity != null ) {
 			dto.setSubmitTime(ansEntity.getAnsTimestamp());
 			dto.setSubmitTimeString(Exchange.toFormatString(ansEntity.getAnsTimestamp(), "yyyy/MM/dd HH:mm:ss"));
@@ -154,7 +180,13 @@ public class QuestionService extends ServiceBase{
 	 * @return
 	 */
 	private QestionTblEntity getFrom(QuestionForm form) {
-		QestionTblEntity entity = new QestionTblEntity();
+		Integer qid = form.getQid();
+		QestionTblEntity entity = null;
+		if( qid != null ) {
+			entity = questionRepository.getOne(qid);
+		}else {
+			entity = new QestionTblEntity();
+		}
 		
 		entity.setTitle(form.getTitle());
 		entity.setSentence(form.getQuestion());

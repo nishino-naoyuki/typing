@@ -14,23 +14,19 @@ import jp.ac.asojuku.typing.entity.AnsTblEntity;
 public interface AnsTblRepository 
 	extends JpaSpecificationExecutor<AnsTblEntity>, JpaRepository<AnsTblEntity, Integer>{
 
-	@Query("select count(*) from AnsTblEntity a "
+	public AnsTblEntity findByUidAndEqid(@Param("uid")Integer uid,@Param("eqid")Integer eqid);
+	
+	@Query("select sum(a.submitCount) from AnsTblEntity a "
 			+ "left join a.eventQuestion eq "
 			+ "where eq.eid = :eid and a.uid=:uid")
 	public Integer getAnsCountByEidUid(@Param("eid")Integer eid,@Param("uid")Integer uid);
 	
-	@Query(value="select * from ANS_TBL a "
-			+ "left join EVENT_QUESTION eq ON a.eqid=eq.eqid "
-			+ "where eq.qid = :qid and a.uid = :uid and ((eq.eid is null AND :eid = 0 ) OR eq.eid = :eid) "
-			+ "order by a.ans_timestamp DESC LIMIT 1",nativeQuery = true)
-	public AnsTblEntity getRecentlyOne(@Param("eid")Integer eid,@Param("qid")Integer qid,@Param("uid")Integer uid);
-
-	@Query(value="select sum(COALESCE(a.score,0)) as tscore,eu.uid "
+	@Query(value="select sum(COALESCE(a.score,0)) as tscore,eu.uid,eu.eid "
 			+ "from EVENT_USER eu "
-			+ "LEFT JOIN EVENT_QUESTION eq ON eu.euid=eq.eqid "
-			+ "LEFT JOIN ANS_TBL a ON eq.eqid=a.eqid "
+			+ "LEFT JOIN EVENT_QUESTION eq ON eu.eid=eq.eid "
+			+ "LEFT JOIN ANS_TBL a ON (eq.eqid=a.eqid and eu.uid=a.uid) "
 			+ "LEFT JOIN USER_TBL u ON eu.uid = u.uid "
-			+ "where u.role = 0 AND eu.eid=:eid group by eu.uid order by sum(a.score) DESC"
+			+ "where u.role = 0 AND eu.del_flg=0 AND eu.eid=:eid group by eu.eid,eu.uid order by sum(a.score) DESC"
 			,nativeQuery = true)
 	public List<Object[]> getRanking(@Param("eid")Integer eid);
 	default List<RankingSummary> findRankingSummary(Integer eid) {

@@ -37,7 +37,7 @@
           			<div class="col">
 		        		<div class="d-flex justify-content-end mb-3">
 		        			<div class="p-2" th:text="|難易度：${detailDto.difficulty}|"></div>
-		            		<button type="button" class="btn bg-gradient-success" id="editbtn"　th:if="${session['loginInfo'].isAdmin()}">問題編集</button>
+		            		<a th:href="|@{/question/edit}?qid=${detailDto.qid}|" target="ranking" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success" id="qeditbtn" >問題編集</button></a>
 		        		</div>
           			</div>
           		</div>

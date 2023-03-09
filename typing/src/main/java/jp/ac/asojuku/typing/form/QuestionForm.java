@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class QuestionForm {
 	
+	private Integer qid;	//更新の時に入る
+	
 	private Boolean practiceFlg;
 	
 	@NotEmpty(message = "{errmsg0101}")

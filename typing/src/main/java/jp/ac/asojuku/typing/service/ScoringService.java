@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jp.ac.asojuku.typing.dto.ScoringResultDto;
+import jp.ac.asojuku.typing.entity.AnsHistoryTblEntity;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.EventTblEntity;
@@ -75,9 +76,7 @@ public class ScoringService extends ServiceBase{
 					).orElse(null);
 			
 			if( eqEntity != null ) {
-				AnsTblEntity ansEntity = getFrom(scoringForm,result,eqEntity.getEqid(),uid);
-				
-				ansTblRepository.save(ansEntity);
+				saveAnswer(scoringForm,result,eqEntity.getEqid(),uid);
 			}
 			
 		}catch(Exception e) {
@@ -116,32 +115,47 @@ public class ScoringService extends ServiceBase{
 	}
 	
 	/**
-	 * Entityを作成する
+	 * 解答情報を登録する
+	 * 
 	 * @param scoringForm
 	 * @param result
 	 * @param eqId
 	 * @param uid
-	 * @return
-	 * @throws ParseException
 	 * @throws JsonProcessingException
+	 * @throws ParseException
 	 */
-	private AnsTblEntity getFrom(ScoringForm scoringForm, ScoringResultDto result, Integer eqId, Integer uid)
-			throws ParseException, JsonProcessingException {
-		AnsTblEntity ansEntity = new AnsTblEntity();
-
-		ansEntity.setCorrectFlg((result.isUnjustFlag() ? 1 : 0));
-		ansEntity.setUid(uid);
-		ansEntity.setEqid(eqId);
-		ansEntity.setScore(result.getTotalScore());
-		ansEntity.setTime(scoringForm.getTime());
-		ansEntity.setAnswer(scoringForm.getAnswer());
-		ansEntity.setAnsTimestamp(
+	private void saveAnswer(ScoringForm scoringForm, ScoringResultDto result, Integer eqId, Integer uid) throws JsonProcessingException, ParseException {
+		int submitCount = 1;
+		//既に回答があるか？
+		AnsTblEntity ansTblEntity = ansTblRepository.findByUidAndEqid(uid,eqId);
+		if( ansTblEntity != null ) {
+			submitCount = ansTblEntity.getSubmitCount() + 1;
+		}else {
+			ansTblEntity = new AnsTblEntity();
+			ansTblEntity.setEqid(eqId);
+			ansTblEntity.setUid(uid);
+		}
+		ansTblEntity.setScore(result.getTotalScore());
+		ansTblEntity.setSubmitCount(submitCount);
+		
+		ansTblEntity = ansTblRepository.save(ansTblEntity);
+		
+		//履歴データを追加
+		AnsHistoryTblEntity ansHistory = new AnsHistoryTblEntity();
+		
+		ansHistory.setAnsid(ansTblEntity.getAnsid());
+		ansHistory.setTime(scoringForm.getTime());
+		ansHistory.setAnswer(scoringForm.getAnswer());
+		ansHistory.setAnsTimestamp(
 				Exchange.toDate(scoringForm.getSubmitYear(), scoringForm.getSubmitMounth(), scoringForm.getSubmitday(),
 						scoringForm.getSubmitHour(), scoringForm.getSubmitMinutes(), scoringForm.getSubmitSecond()));
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonString = mapper.writeValueAsString(result);
-		ansEntity.setLog(jsonString);
-
-		return ansEntity;
+		ansHistory.setSocreJson(jsonString);
+		ansHistory.setCorrectFlg((result.isUnjustFlag() ? 1 : 0));
+		ansHistory.setScore(result.getTotalScore());
+		ansHistory.setSubmitNo(submitCount);
+		
+		ansHistoryTblRepository.save(ansHistory);
 	}
 }
