@@ -24,6 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jp.ac.asojuku.typing.dto.EventInfoDetailDto;
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.LoginInfoDto;
@@ -53,6 +54,9 @@ public class EventController {
 	EventService eventService;
 	@Autowired
 	QuestionService questionService;
+	
+	
+	
 	/**
 	 * イベントリストの表示
 	 * @param mv
@@ -96,6 +100,23 @@ public class EventController {
 		return mv;
 	}
 
+	/**
+	 * 変更画面
+	 * @param mv
+	 * @return
+	 */
+	@RequestMapping(value = { "/edit" }, method = RequestMethod.GET)
+	public ModelAndView edit(ModelAndView mv,@ModelAttribute("eid")Integer eid) {
+		
+		List<QuestionOutlineDto> qList = questionService.listForEvent();
+		EventInfoDetailDto eventDetail =  eventService.getDetail(eid);
+
+		mv.addObject("qList", qList);
+		mv.addObject("eventDetail", eventDetail);
+		
+		mv.setViewName("eedit");
+		return mv;
+	}
 	
 	/**
 	 * イベント作成処理
@@ -106,18 +127,24 @@ public class EventController {
 	 * @throws SystemErrorException
 	 * @throws JsonProcessingException
 	 */
-	@RequestMapping(value = { "/create" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/save" }, method = RequestMethod.POST)
 	@ResponseBody
 	public Object inert(
 			@Valid EventCreateForm eventCreateForm,
 			BindingResult bindingResult) throws SystemErrorException, JsonProcessingException {
 
+		
+		//IDリストの重複チェック
+		if( isDuplicateQid(eventCreateForm.getQidList()) ) {
+			FieldError fieldError = new FieldError(bindingResult.getObjectName(), "idList", "登録する問題が重複しています");
+			bindingResult.addError(fieldError);
+		}
 		//エラーがあったか？
 		if( bindingResult.hasErrors() ) {
 			return getJson(bindingResult);
 		}
 		
-		eventService.insert(eventCreateForm);
+		eventService.save(eventCreateForm);
 		
 		return getJson(bindingResult);
 	}
@@ -160,16 +187,21 @@ public class EventController {
 	 * @param eid
 	 * @return
 	 * @throws SystemErrorException
+	 * @throws PermitionException 
 	 */
 	@RequestMapping(value = { "/detail" }, method = RequestMethod.GET)
 	public ModelAndView detail(
-			ModelAndView mv,@ModelAttribute("eid")Integer eid) throws SystemErrorException {
+			ModelAndView mv,@ModelAttribute("eid")Integer eid) throws SystemErrorException, PermitionException {
 		
 		// ログイン情報を取得する
 		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
 		
 		//詳細情報を取得する
 		EventInfoDto eventDetail = eventService.getDetail(eid,loginInfo.getUid(), loginInfo.getRole());
+		if( eventDetail == null ) {
+			logger.warn("不正にイベントを表示しようとしました。eid="+eid+" uid="+loginInfo.getUid());
+			throw new PermitionException("このイベントは表示できません");
+		}
 		List<RankingDto> rankingList =  eventService.getRankingAll(eid);
 		
 		if( loginInfo.getRole() == RoleId.STUDENT ) {
@@ -306,6 +338,19 @@ public class EventController {
 		return mv;
 	}
 	/* ----private---- */
+	private boolean isDuplicateQid(Integer[] qidList) {
+		boolean isDuplicate = false;
+		for(int i=0; i<qidList.length;i++) {
+			for(int j=i+1; j<qidList.length;j++) {
+				if( qidList[i] == qidList[j] ) {
+					isDuplicate = true;
+					break;
+				}
+			}
+		}
+		
+		return isDuplicate;
+	}
 	/**
 	 * トークンとイベントIDのペアをセッションに保存する
 	 * ほんとは期限付きでDBに保存するのがよさげだけどめんどくさいのでセッションにする

@@ -9,6 +9,8 @@ import lombok.Data;
 
 @Data
 public class EventCreateForm {
+	
+	private Integer eid;
 
 	@NotEmpty(message = "{errmsg0201}")
 	@Size(max = 200, message="{errmsg0207}")

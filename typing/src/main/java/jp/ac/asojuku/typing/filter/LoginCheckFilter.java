@@ -53,7 +53,7 @@ public class LoginCheckFilter implements Filter{
 		if( loginInfo == null ) {
 			//ログイン画面へ転送
 			logger.info("Filter!!! servletPath="+servletPath);
-			((HttpServletResponse)response).sendRedirect( "/signin");
+			((HttpServletResponse)response).sendRedirect( "/typing");
 			return;
 		}
 		

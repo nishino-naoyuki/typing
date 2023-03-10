@@ -39,10 +39,10 @@
       	<div class="card-header">
       		<div class="row">
        		<div class="col-8">
-       			<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2>イベント作成</h2></p>
+       			<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2>イベント編集</h2></p>
        		</div>
        		<div class="col-4 justify-content-end">
-       			<button type="button" class="btn bg-gradient-primary" id="createEventBtn" >イベント作成</button>
+       			<button type="button" class="btn bg-gradient-primary" id="createEventBtn" >イベント更新</button>
        		</div>
       		</div>
       	</div>
@@ -75,29 +75,29 @@
 				<div class="tab-pane fade show active" id="registeruser" role="tabpanel" aria-labelledby="home-tab">
 					<div class="form-group col-6">
 						<label for="example-text-input" class="form-control-label">イベント名</label>
-						<input class="form-control" type="text" value="" id="eventname">
+						<input class="form-control" type="text" id="eventname" th:value="${eventDetail.eventname}">
 					</div>
 					<div class="form-group col-6">
 						<label for="example-text-input" class="form-control-label">情報公開開始日時</label>
 						<div class="d-flex">
-							<input type="datetime-local" class="form-control" name="publicstartdatetime" id="publicstartdatetime">
+							<input type="datetime-local" class="form-control" name="publicstartdatetime" id="publicstartdatetime" th:value="${eventDetail.publicstartdatetime}">
 						</div>
 						<label for="example-text-input" class="form-control-label">イベント開始日時</label>
 						<div class="d-flex">
-							<input type="datetime-local" class="form-control" name="startdatetime" id="startdatetime">
+							<input type="datetime-local" class="form-control" name="startdatetime" id="startdatetime" th:value="${eventDetail.startdatetime}">
 						</div>
 						<label for="example-text-input" class="form-control-label">イベント終了日時</label>
 						<div class="d-flex">
-							<input type="datetime-local" class="form-control" name="enddatetime" id="enddatetime">
+							<input type="datetime-local" class="form-control" name="enddatetime" id="enddatetime" th:value="${eventDetail.enddatetime}">
 						</div>
 						<label for="example-text-input" class="form-control-label">情報公開終了日時</label>
 						<div class="d-flex">
-							<input type="datetime-local" class="form-control" name="publicenddatetime" id="publicenddatetime" value="9999-12-31T23:59:00">
+							<input type="datetime-local" class="form-control" name="publicenddatetime" id="publicenddatetime" th:value="${eventDetail.publicenddatetime}">
 						</div>
 					</div>
 					<div class="form-group col-6">
 						<label for="example-text-input" class="form-control-label">主催者名</label>
-						<input class="form-control" type="text" value="" id="ownername">
+						<input class="form-control" type="text" id="ownername" th:value="${eventDetail.ownername}">
 					</div>
 				</div>
 				<div class="tab-pane fade" id="searchuser" role="tabpanel" aria-labelledby="profile-tab">
@@ -132,6 +132,7 @@
 				<div class="form-group">
 					<label for="exampleFormControlTextarea1">出題問題（D＆Dで入れ替え、欄外ドロップで削除）</label>
 					<ol class="drag-list" id="questionlist">
+						<li draggable="true" th:each="element,status:${eventDetail.qList}" th:id="${element.qid}" th:text="${element.title}"></li>
 					</ol>
 				</div>
          	</div><!-- col -->
@@ -141,18 +142,18 @@
 			<div class="row mt-5 align-items-center">
 				<div class="form-group col-3">
 					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" id="rankingdisplay" value="1" checked="">
+						<input class="form-check-input" type="checkbox" id="rankingdisplay" th:checked="${eventDetail.rankingdisplay}">
 						<label class="form-check-label" for="flexSwitchCheckDefault" >ランキングを参加者に見せる</label>
 					</div>
 				</div>
 				<div class="form-group col-3">
 					<label for="example-text-input" class="form-control-label">ランキングを見せなくする時間</label>
-					<input class="form-control" type="text" value="" id="hiderankingtime">分前
+					<input class="form-control" type="text" id="hiderankingtime" th:value="${eventDetail.hiderankingtime}">分前
 				</div>
 			</div>
 			<div class="form-group col-6">
 				<label for="example-text-input" class="form-control-label">参加者フィルター(正規表現)</label>
-				<input class="form-control" type="text" value="" id="filter">
+				<input class="form-control" type="text" id="filter" th:value="${eventDetail.filter}">
 			</div>
 		</div>
 	</div>
@@ -263,7 +264,10 @@
   			qidList.push( elm.id );
   		});
   		
+
+  		
  		const formData = new FormData();
+ 		formData.append('eid',/*[[${eventDetail.eid}]]*/0 );
  		formData.append('eventname',eventname.value );
  		formData.append('publicstartdatetime',publicstartdatetime.value );
  		formData.append('startdatetime',startdatetime.value );

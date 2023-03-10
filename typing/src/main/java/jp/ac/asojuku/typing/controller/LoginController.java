@@ -54,7 +54,19 @@ public class LoginController {
         
 		return mv;
 	}
-	
+
+	@RequestMapping(value= {"/signout"}, method=RequestMethod.GET)
+    public ModelAndView signout(
+    		ModelAndView mv
+    		) throws SystemErrorException {
+
+		// ログイン情報を削除する
+		session.removeAttribute(SessionConst.LOGININFO);
+		
+		mv.setViewName("redirect:signin");
+        
+		return mv;
+	}
 
 	/**
 	 * @param redirectAttributes

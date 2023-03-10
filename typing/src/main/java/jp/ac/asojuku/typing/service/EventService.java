@@ -9,9 +9,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jp.ac.asojuku.typing.dto.EventInfoDetailDto;
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
@@ -29,6 +31,7 @@ import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.EventCreateForm;
 import jp.ac.asojuku.typing.param.EventState;
 import jp.ac.asojuku.typing.param.RoleId;
+import jp.ac.asojuku.typing.repository.specifications.EventQuestionSpecifications;
 import jp.ac.asojuku.typing.util.Exchange;
 import jp.ac.asojuku.typing.util.Token;
 
@@ -101,6 +104,47 @@ public class EventService extends ServiceBase{
 		return rankingList;
 	}
 	/**
+	 * 編集用のイベント情報詳細を取得する
+	 * @param eid
+	 * @return
+	 */
+	public EventInfoDetailDto getDetail(Integer eid) {
+		EventTblEntity entity = eventRepository.getOne(eid);
+		
+		EventInfoDetailDto dto = new EventInfoDetailDto();
+
+		dto.setEid(entity.getEid());
+		dto.setEventname(entity.getName());
+		dto.setPublicstartdatetime(entity.getPublicDate());
+		dto.setPublicenddatetime(entity.getPublicEndDate());
+		dto.setStartdatetime(entity.getStartDate());
+		dto.setEnddatetime(entity.getFinishDate());
+		dto.setOwnername(entity.getOwerName());
+		dto.setRankingdisplay( entity.getRankingdisplay()==1?true:false );
+		dto.setHiderankingtime( entity.getHiderankingtime() );
+		dto.setFilter( entity.getFilter() );
+		
+		//問題リストを取得
+		List<EventQuestionEntity> eqEntityList =  eventQuestionRepository.findByEidOrderByNo(eid);
+		List<QuestionOutlineDto> qList = new ArrayList<>();
+		for( EventQuestionEntity eqEntity : eqEntityList) {
+			QuestionOutlineDto qDto = new QuestionOutlineDto();
+			//全てはセットしない
+			Integer qid = eqEntity.getQestionTbl().getQid();
+			qDto.setQid(qid);
+			qDto.setEqid(eqEntity.getEqid());
+			qDto.setNo(eqEntity.getNo());
+			qDto.setDifficulty(eqEntity.getQestionTbl().getDifficalty());
+			qDto.setPracticeFlg(eqEntity.getQestionTbl().getPracticeflg());
+			qDto.setTitle(eqEntity.getQestionTbl().getTitle());
+			
+			qList.add(qDto);
+		}
+		dto.setQList(qList);
+		
+		return dto;
+	}
+	/**
 	 * イベントの詳細情報を取得する
 	 * @param eid
 	 * @param roleId
@@ -109,6 +153,15 @@ public class EventService extends ServiceBase{
 	public EventInfoDto getDetail(Integer eid,Integer uid,RoleId roleId) {
 		
 		EventTblEntity entity = eventRepository.getOne(eid);
+		
+		if( roleId == RoleId.STUDENT) {
+			//学生の場合は表示可能かどうかを家訓する
+			UserTblEntity userEntity = userRepository.getOne(uid);
+			if( !userEntity.getMail().matches( entity.getFilter() )) {
+				//表示権限がない場合
+				return null;
+			}
+		}
 		
 		List<EventQuestionEntity> eqEntityList =  eventQuestionRepository.findByEidOrderByNo(eid);
 		
@@ -157,12 +210,12 @@ public class EventService extends ServiceBase{
 	}
 
 	/**
-	 * 挿入
+	 * 挿入・更新
 	 * @param eventCreateForm
 	 * @throws SystemErrorException
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void insert(EventCreateForm eventCreateForm) throws SystemErrorException {
+	public void save(EventCreateForm eventCreateForm) throws SystemErrorException {
 		EventTblEntity entity = null;
 		
 		try {
@@ -302,28 +355,72 @@ public class EventService extends ServiceBase{
 	 * @param eventCreateForm
 	 */
 	private void insertQuestions(Integer eid,EventCreateForm eventCreateForm) {
-		//いったん削除
-		eventQuestionRepository.deleteByEid(eid);
 
-		//追加する
+		//現状を取得する
+		List<EventQuestionEntity> eqList = eventQuestionRepository.findByEidOrderByNo(eid);
+
+		//追加・更新
+		insertOrUpdateEventQuestion(eid,eventCreateForm,eqList);
+		
+		//現状のリストにあって、新リストに無いものは削除する
+		deteleEventQuestion(eventCreateForm,eqList);
+		
+	}
+	
+	/**
+	*既に解答済みのものを考慮して、全削除→全追加はしない（外部キーの制エラーもある）
+	*現状のものと突き合わせて、既にあれば更新、無ければ追加、消えていれば削除を行う
+	 * @param eventCreateForm
+	 * @param eqList
+	 */
+	private void insertOrUpdateEventQuestion(
+			Integer eid,EventCreateForm eventCreateForm,List<EventQuestionEntity> eqList) {
+
+		//既に解答済みのものを考慮して、全削除→全追加はしない（外部キーの制エラーもある）
+		//現状のものと突き合わせて、既にあれば更新、無ければ追加、消えていれば削除を行う
 		int no = 1;
-		List<EventQuestionEntity> entityList = new ArrayList<>();
 		for(Integer qid: eventCreateForm.getQidList() ) {
+			//現状存在するかを確認
 			EventQuestionEntity eqEntity = new EventQuestionEntity();
-			
+			for(EventQuestionEntity eqElement : eqList) {
+				if( eqElement.getQid() == qid ) {
+					//存在する場合は更新するためにキーをセットしておく
+					eqEntity.setEqid(eqElement.getEqid());
+					break;
+				}
+			}
 			eqEntity.setEid(eid);
 			eqEntity.setNo(no);
 			eqEntity.setQid(qid);
-			
-			entityList.add(eqEntity);
+			eventQuestionRepository.save(eqEntity);
 			no++;
-		}
-		
-		if( entityList.size() > 0 ) {
-			eventQuestionRepository.saveAll(entityList);
 		}
 	}
 	
+	/**
+	 * 現状のリストにあって、新リストに無いものは削除する
+	 * @param eventCreateForm
+	 * @param eqList
+	 */
+	private void deteleEventQuestion(EventCreateForm eventCreateForm,List<EventQuestionEntity> eqList) {
+
+		for(EventQuestionEntity eqElement : eqList ) {
+			boolean bFindFlg = false;
+			//新リストにあるか？
+			for(Integer qid: eventCreateForm.getQidList()){
+				if( qid == eqElement.getQid()) {
+					bFindFlg = true;
+					break;
+				}
+			}
+			if( !bFindFlg ) {
+				//解答情報を削除する
+				ansTblRepository.delteByEqId(eqElement.getEqid());
+				//リストから削除する
+				eventQuestionRepository.deleteById(eqElement.getEqid());
+			}
+		}
+	}
 	/**
 	 * Form→Entityの変換
 	 * @param eventCreateForm
@@ -331,13 +428,19 @@ public class EventService extends ServiceBase{
 	 * @throws ParseException
 	 */
 	private EventTblEntity getFrom(EventCreateForm eventCreateForm) throws ParseException {
-		EventTblEntity entity = new EventTblEntity();
+		Integer eid = eventCreateForm.getEid();
+		EventTblEntity entity = null;
+		if( eid != null ) {
+			entity = eventRepository.getOne(eid);
+		}else {
+			entity = new EventTblEntity();
+		}
 	
 		entity.setName( eventCreateForm.getEventname() );
 		entity.setFilter( ( StringUtils.isEmpty( eventCreateForm.getFilter() ) ? ".*": eventCreateForm.getFilter()) );
 		entity.setOwerName( eventCreateForm.getOwnername() );
 		entity.setRankingdisplay( eventCreateForm.getRankingdisplay() );
-		entity.setHiderankingtime( eventCreateForm.getHiderankingtime() );
+		entity.setHiderankingtime( eventCreateForm.getHiderankingtime()==null ? 0: eventCreateForm.getHiderankingtime()  );
 		entity.setPublicDate( Exchange.toDate(eventCreateForm.getPublicstartdatetime(),DATE_FMT) );
 		entity.setStartDate( Exchange.toDate(eventCreateForm.getStartdatetime(),DATE_FMT) );
 		entity.setFinishDate( Exchange.toDate(eventCreateForm.getEnddatetime(),DATE_FMT) );

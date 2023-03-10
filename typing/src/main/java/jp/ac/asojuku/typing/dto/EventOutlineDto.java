@@ -30,6 +30,9 @@ public class EventOutlineDto {
 	public String getStateString() {
 		return eventState.getMsg();
 	}
+	public Integer getStateId() {
+		return eventState.getId();
+	}
 	
 	/**
 	 * 登録ボタンを表示するかどうかの判断

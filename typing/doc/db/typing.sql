@@ -1,223 +1,223 @@
-SET SESSION FOREIGN_KEY_CHECKS=0;
+set session foreign_key_checks=0;
 
-/* Drop Tables */
+/* drop tables */
 
-DROP TABLE IF EXISTS ANS_HISTORY_TBL;
-DROP TABLE IF EXISTS ANS_TBL;
-DROP TABLE IF EXISTS EVENT_QUESTION;
-DROP TABLE IF EXISTS EVENT_USER;
-DROP TABLE IF EXISTS EVENT_TBL;
-DROP TABLE IF EXISTS QUESTION_TBL;
-DROP TABLE IF EXISTS USER_TBL;
-
-
+drop table if exists ans_history_tbl;
+drop table if exists ans_tbl;
+drop table if exists event_question;
+drop table if exists event_user;
+drop table if exists event_tbl;
+drop table if exists question_tbl;
+drop table if exists user_tbl;
 
 
-/* Create Tables */
 
-CREATE TABLE ANS_HISTORY_TBL
+
+/* create tables */
+
+create table ans_history_tbl
 (
-	anshid int NOT NULL AUTO_INCREMENT,
-	ansid int NOT NULL,
+	anshid int not null auto_increment,
+	ansid int not null,
 	-- 何回目の提出か
-	-- ANS＿TBLのsubmit_countと関係あり
-	submit_no int NOT NULL COMMENT '何回目の提出か
-ANS＿TBLのsubmit_countと関係あり',
+	-- ans＿tblのsubmit_countと関係あり
+	submit_no int not null comment '何回目の提出か
+ans＿tblのsubmit_countと関係あり',
 	-- 回答内容
-	answer varchar(16383) NOT NULL COMMENT '回答内容',
+	answer varchar(10000) not null comment '回答内容',
 	-- 解答時間
-	time int NOT NULL COMMENT '解答時間',
+	time int not null comment '解答時間',
 	-- 提出時間
-	ans_timestamp datetime NOT NULL COMMENT '提出時間',
+	ans_timestamp datetime not null comment '提出時間',
 	-- 正解フラグ
 	-- ０の場合は不正がった
-	correct_flg int NOT NULL COMMENT '正解フラグ
+	correct_flg int not null comment '正解フラグ
 ０の場合は不正がった',
-	-- 採点結果のJSONデータ
-	socre_json varchar(4000) NOT NULL COMMENT '採点結果のJSONデータ',
-	score int NOT NULL,
-	PRIMARY KEY (anshid)
+	-- 採点結果のjsonデータ
+	socre_json varchar(4000) not null comment '採点結果のjsonデータ',
+	score int not null,
+	primary key (anshid)
 );
 
 
-CREATE TABLE ANS_TBL
+create table ans_tbl
 (
-	ansid int NOT NULL AUTO_INCREMENT,
-	uid int NOT NULL,
-	eqid int NOT NULL,
+	ansid int not null auto_increment,
+	uid int not null,
+	eqid int not null,
 	-- 得点
 	-- 最後の１回分のみ
-	score int NOT NULL COMMENT '得点
+	score int not null comment '得点
 最後の１回分のみ',
 	-- 提出回数
-	submit_count int NOT NULL COMMENT '提出回数',
-	PRIMARY KEY (ansid),
-	CONSTRAINT UQ_UEQ UNIQUE (uid, eqid)
+	submit_count int not null comment '提出回数',
+	primary key (ansid),
+	constraint uq_ueq unique (uid, eqid)
 );
 
 
-CREATE TABLE EVENT_QUESTION
+create table event_question
 (
-	eqid int NOT NULL AUTO_INCREMENT,
+	eqid int not null auto_increment,
 	-- イベント内での問題番号
-	no int NOT NULL COMMENT 'イベント内での問題番号',
-	-- 練習問題の場合はNULLで登録
-	eid int COMMENT '練習問題の場合はNULLで登録',
-	qid int NOT NULL,
-	PRIMARY KEY (eqid),
-	CONSTRAINT eidqid UNIQUE (eid, qid)
+	no int not null comment 'イベント内での問題番号',
+	-- 練習問題の場合はnullで登録
+	eid int comment '練習問題の場合はnullで登録',
+	qid int not null,
+	primary key (eqid),
+	constraint eidqid unique (eid, qid)
 );
 
 
-CREATE TABLE EVENT_TBL
+create table event_tbl
 (
-	eid int NOT NULL AUTO_INCREMENT,
+	eid int not null auto_increment,
 	-- イベント名
-	name varchar(256) NOT NULL COMMENT 'イベント名',
+	name varchar(256) not null comment 'イベント名',
 	-- 公開日時
-	public_date datetime NOT NULL COMMENT '公開日時',
+	public_date datetime not null comment '公開日時',
 	-- イベントの開始日
-	start_date datetime NOT NULL COMMENT 'イベントの開始日',
+	start_date datetime not null comment 'イベントの開始日',
 	-- 終了日時
-	finish_date datetime NOT NULL COMMENT '終了日時',
+	finish_date datetime not null comment '終了日時',
 	-- 公開終了日時
-	public_end_date datetime NOT NULL COMMENT '公開終了日時',
+	public_end_date datetime not null comment '公開終了日時',
 	-- 主催者名
-	ower_name varchar(256) NOT NULL COMMENT '主催者名',
+	ower_name varchar(256) not null comment '主催者名',
 	-- ランキング表示フラグ
 	-- 0:参加者に見せない
 	-- 1:参加者にも見せる
-	rankingdisplay int NOT NULL COMMENT 'ランキング表示フラグ
+	rankingdisplay int not null comment 'ランキング表示フラグ
 0:参加者に見せない
 1:参加者にも見せる',
 	-- ランキングを隠すタイミング
-	hiderankingtime int NOT NULL COMMENT 'ランキングを隠すタイミング',
+	hiderankingtime int not null comment 'ランキングを隠すタイミング',
 	-- 公開相手を限定したいときに使用する
 	-- 公開したいメールアドレスのフィルターを正規表現で記載する
-	filter varchar(256) COMMENT '公開相手を限定したいときに使用する
+	filter varchar(256) comment '公開相手を限定したいときに使用する
 公開したいメールアドレスのフィルターを正規表現で記載する',
-	PRIMARY KEY (eid)
+	primary key (eid)
 );
 
 
-CREATE TABLE EVENT_USER
+create table event_user
 (
-	euid int NOT NULL AUTO_INCREMENT,
-	uid int NOT NULL,
-	eid int NOT NULL,
+	euid int not null auto_increment,
+	uid int not null,
+	eid int not null,
 	-- 削除フラグ
-	del_flg int NOT NULL COMMENT '削除フラグ',
-	PRIMARY KEY (euid)
+	del_flg int not null comment '削除フラグ',
+	primary key (euid)
 );
 
 
-CREATE TABLE QUESTION_TBL
+create table question_tbl
 (
-	qid int NOT NULL AUTO_INCREMENT,
+	qid int not null auto_increment,
 	-- タイトル
-	title varchar(256) NOT NULL COMMENT 'タイトル',
+	title varchar(256) not null comment 'タイトル',
 	-- 問題の文章
-	sentence varchar(16383) NOT NULL COMMENT '問題の文章',
+	sentence varchar(10000) not null comment '問題の文章',
 	-- 0:本番用問題
 	-- 1:練習用問題
-	practiceflg int NOT NULL COMMENT '0:本番用問題
+	practiceflg int not null comment '0:本番用問題
 1:練習用問題',
 	-- 難易度
-	difficalty int NOT NULL COMMENT '難易度',
+	difficalty int not null comment '難易度',
 	-- 問題文の文字数
-	count int NOT NULL COMMENT '問題文の文字数',
+	count int not null comment '問題文の文字数',
 	-- 問題の作成日
-	create_date datetime NOT NULL COMMENT '問題の作成日',
+	create_date datetime not null comment '問題の作成日',
 	-- 更新日
-	update_date datetime NOT NULL COMMENT '更新日',
-	PRIMARY KEY (qid)
+	update_date datetime not null comment '更新日',
+	primary key (qid)
 );
 
 
-CREATE TABLE USER_TBL
+create table user_tbl
 (
-	uid int NOT NULL AUTO_INCREMENT,
+	uid int not null auto_increment,
 	-- メールアドレス
 	-- ログインアカウント
-	mail varchar(256) NOT NULL COMMENT 'メールアドレス
+	mail varchar(256) not null comment 'メールアドレス
 ログインアカウント',
-	password varchar(256) NOT NULL,
+	password varchar(256) not null,
 	-- 名前
-	name varchar(256) NOT NULL COMMENT '名前',
+	name varchar(256) not null comment '名前',
 	-- 表示名
-	disp_name varchar(256) NOT NULL COMMENT '表示名',
+	disp_name varchar(256) not null comment '表示名',
 	-- 所属
 	-- 学校名やクラス名など
-	affiliation varchar(256) COMMENT '所属
+	affiliation varchar(256) comment '所属
 学校名やクラス名など',
 	-- 役割
 	-- 0:学生
 	-- 1:管理者
-	role int NOT NULL COMMENT '役割
+	role int not null comment '役割
 0:学生
 1:管理者',
 	-- 削除フラグ
-	del_flg int NOT NULL COMMENT '削除フラグ',
-	PRIMARY KEY (uid)
+	del_flg int not null comment '削除フラグ',
+	primary key (uid)
 );
 
 
 
-/* Create Foreign Keys */
+/* create foreign keys */
 
-ALTER TABLE ANS_HISTORY_TBL
-	ADD FOREIGN KEY (ansid)
-	REFERENCES ANS_TBL (ansid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+alter table ans_history_tbl
+	add foreign key (ansid)
+	references ans_tbl (ansid)
+	on update restrict
+	on delete restrict
 ;
 
 
-ALTER TABLE ANS_TBL
-	ADD FOREIGN KEY (eqid)
-	REFERENCES EVENT_QUESTION (eqid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+alter table ans_tbl
+	add foreign key (eqid)
+	references event_question (eqid)
+	on update restrict
+	on delete restrict
 ;
 
 
-ALTER TABLE EVENT_QUESTION
-	ADD FOREIGN KEY (eid)
-	REFERENCES EVENT_TBL (eid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+alter table event_question
+	add foreign key (eid)
+	references event_tbl (eid)
+	on update restrict
+	on delete restrict
 ;
 
 
-ALTER TABLE EVENT_USER
-	ADD FOREIGN KEY (eid)
-	REFERENCES EVENT_TBL (eid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+alter table event_user
+	add foreign key (eid)
+	references event_tbl (eid)
+	on update restrict
+	on delete restrict
 ;
 
 
-ALTER TABLE EVENT_QUESTION
-	ADD FOREIGN KEY (qid)
-	REFERENCES QUESTION_TBL (qid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+alter table event_question
+	add foreign key (qid)
+	references question_tbl (qid)
+	on update restrict
+	on delete restrict
 ;
 
 
-ALTER TABLE ANS_TBL
-	ADD FOREIGN KEY (uid)
-	REFERENCES USER_TBL (uid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+alter table ans_tbl
+	add foreign key (uid)
+	references user_tbl (uid)
+	on update restrict
+	on delete restrict
 ;
 
 
-ALTER TABLE EVENT_USER
-	ADD FOREIGN KEY (uid)
-	REFERENCES USER_TBL (uid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+alter table event_user
+	add foreign key (uid)
+	references user_tbl (uid)
+	on update restrict
+	on delete restrict
 ;
 
 

@@ -126,7 +126,7 @@
           		<div class="row">
           			<div class="col">
 		        		<div class="d-flex justify-content-end">
-		            		<button type="button" class="btn bg-gradient-success" id="editbtn" th:if="${session['loginInfo'].isAdmin()}">イベント編集</button>
+							<a th:href="|@{/event/edit}?eid=${eventDetail.eid}|" target="eventedit" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success" id="editbtn" >イベント編集</button></a>
 		        		</div>
           			</div>
           		</div>
@@ -291,7 +291,7 @@
 											<tbody>
 												<tr th:each="element,status:${rankingList}">
 													<td th:text="${element.ranking}"></td>
-													<td><a th:href="|@{/user/detail}?id=${element.uid}|" target="userdetail" rel="noopener noreferrer" th:text="${element.dispName}"　></a></td>
+													<td><a th:href="|@{/user/detail}?uid=${element.uid}|" target="userdetail" rel="noopener noreferrer" th:text="${element.dispName}"　></a></td>
 													<td th:if="${session['loginInfo'].isAdmin()}"　th:text="${element.mail}"></td>
 													<td th:if="${session['loginInfo'].isAdmin()}"　th:text="${element.name}"></td>
 													<td th:text="${element.affiliation}"></td>
