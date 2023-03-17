@@ -18,7 +18,7 @@
 <head>
   <!-- ヘッダー -->
   <div id="parent" th:replace="/common/head"></div>
-  <link th:href="@{/assets/css/question-detail.css}" rel="stylesheet" />
+  <link th:href="@{/assets/css/question-detail.css?v=1.0.4}" rel="stylesheet" />
 </head>
 
 <body class="g-sidenav-show   bg-gray-100">
@@ -67,13 +67,12 @@
 		            			</div>
 		            		</div>
 		            		<div class="row">
-			            		<div id="question" class="col-6 justify-content-start mb-3" th:utext="${detailDto.getSentenceBR()}">
+								<div class="qdisparea form-group col-6 justify-content-start mb-3">
+			            			<div id="question" class="qdisp" th:utext="${detailDto.getSentenceBR()}"></div>
 								</div>
-								<form id="sendform" class="col-6" autocomplete="off">
-									<div class="form-group" id="sendform">
-										<textarea class="form-control" id="answerarea" onkeyup="ShowLength(value);" rows="30" oncopy="return false" onpaste="return false" oncontextmenu="return false" disabled placeholder="開始ボタンをクリックすると入力できるようになります"></textarea>
-									</div>
-								</form>
+								<div id="sendform" class="qdisparea form-group col-6">
+									<div contenteditable=false class="form-control qdisp" id="answerarea" onkeyup="ShowLength();" rows="30" oncopy="return false" onpaste="return false" oncontextmenu="return false" placeholder="開始ボタンをクリックすると入力できるようになります" autocomplete="off"></div>			
+								</div>
 		            		</div>
 		            	</div>
 		            </div>
@@ -113,22 +112,10 @@
   <div id="parent" th:replace="/common/corejs"></div>  
   <script th:inline="javascript">
   	//初期処理
-  	const retDialogTrigger = document.getElementById("retDialogTrigger");
-  	
-  	retDialogTrigger.style.display ="none";
-  	
-  	const dispchangebtn = document.getElementById("dispchangebtn");
-  	dispchangebtn.addEventListener('click',()=>{
-  		let qestionobj = document.getElementById("question");
-  		let formgrp = document.getElementById("sendform");
-  		qestionobj.classList.toggle('col-6', !qestionobj.classList.contains('col-6'));
-  		formgrp.classList.toggle('col-6', !formgrp.classList.contains('col-6'));
-  	});
   	let timer;
   	const question = document.getElementById("question");
   	const pasttime = document.getElementById("pasttime");
   	const answer = document.getElementById('answerarea');
-  	const textarea = document.getElementById("answerarea");
   	const startbtn = document.getElementById("startbtn");
   	const stopbtn = document.getElementById("stopbtn");
   	let elapsedTime = 0;
@@ -137,6 +124,24 @@
   	let second = 0;
   	let nowTime;
   	
+  	const retDialogTrigger = document.getElementById("retDialogTrigger");
+  	retDialogTrigger.style.display ="none";
+  	
+  	const dispchangebtn = document.getElementById("dispchangebtn");
+  	dispchangebtn.addEventListener('click',()=>{
+  		let qdispareas = document.getElementsByClassName("qdisparea");
+  		for(let i=0;i<qdispareas.length;i++){
+  			qdispareas[i].classList.toggle('col-6', !qdispareas[i].classList.contains('col-6'));
+  		}
+	   //高さを問題文と合わせる
+	   answer.style.height = question.clientHeight + 'px';
+  	});
+  	
+  	window.addEventListener("load", function() {
+	   //高さを問題文と合わせる
+	   answer.style.height = question.clientHeight + 'px';
+	});
+	
   	const count = ()=>{
   		nowTime = new Date();
 
@@ -151,8 +156,8 @@
   		clearInterval(timer);
   		startTime = new Date();
   		timer = setInterval(count, 100);
-  		textarea.value = "";
-  		textarea.disabled = false;
+  		answer.innerText = "";
+  		answer.setAttribute("contenteditable",true);
   		stopbtn.disabled = false;
   		startbtn.disabled = true;
   		keycount=0;
@@ -162,7 +167,7 @@
   	
   	stopbtn.addEventListener('click',()=>{
   		clearInterval(timer);
-  		textarea.disabled = true;
+  		answer.setAttribute("contenteditable",false);
   		stopbtn.disabled = true;
   		startbtn.disabled = false;
   		//alert("本来はここでサーバー側で入力チェックが行われ、誤りがあるとメッセージとともにタイマーが再開される");
@@ -170,7 +175,7 @@
  		const formData = new FormData();
  		formData.append('qid',/*[[${detailDto.qid}]]*/ );
  		formData.append('eid',/*[[${eid}]]*/ );
- 		formData.append('answer',answer.value );
+ 		formData.append('answer',answer.innerText );
  		formData.append('keycount',keycount );
  		formData.append('submitYear',nowTime.getFullYear() );
  		formData.append('submitMounth',nowTime.getMonth()+1 );
@@ -209,14 +214,14 @@
  		});;
   	});
   	
-  	const ShowLength = ( str )=>{
+  	const ShowLength = ()=>{
   		keycount++;
-	   document.getElementById("inputlength").innerHTML = "文字数:"+str.length + "文字";
+	   document.getElementById("inputlength").innerHTML = "文字数:"+answer.innerText.length + "文字";
 
 	   let srcString = /*[[${detailDto.sentence}]]*/ "";
 
 	   let srcStringArry = srcString.replace("<BR>","\n").split("");
-	   let ansStringArry = answer.value.split("");
+	   let ansStringArry = answer.innerText.split("");
 	   sameCount = 0;
 	   for(i=0; i < ansStringArry.length; i++){
 	   		console.log(i + "[" + srcStringArry[i] + "] [" + ansStringArry[i] +"]");

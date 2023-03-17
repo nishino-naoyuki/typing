@@ -1,8 +1,13 @@
 .samestr{
 	color: red;
-	font-weight: 600;
 }
 
 .underline{
 	text-decoration: #05c662 underline 1px;
+}
+
+.qdisp{
+	font-family: monospace, monospace;
+	font-size: medium;
+	padding: 0.5rem;
 }
