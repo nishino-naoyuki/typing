@@ -220,17 +220,22 @@
 
 	   let srcString = /*[[${detailDto.sentence}]]*/ "";
 
-	   let srcStringArry = srcString.replace("<BR>","\n").split("");
-	   let ansStringArry = answer.innerText.split("");
+	   let srcStringArry = srcString.replace(/\r\n|\n|\r/g,"\n").split("");
+	   let ansStringArry = answer.innerText.replace(/\r\n|\n|\r/g,"\n").split("");
 	   sameCount = 0;
 	   for(i=0; i < ansStringArry.length; i++){
-	   		console.log(i + "[" + srcStringArry[i] + "] [" + ansStringArry[i] +"]");
+	   		//console.log(i + "[" + srcStringArry[i] + "] [" + ansStringArry[i] +"]");
 	   		if( srcStringArry[i] != ansStringArry[i] ){
 	   			break;
 	   		}
-	   		sameCount++;
+	   		if( srcStringArry[i]=="\n"){
+	   			sameCount+=2;
+	   		}else{
+	   			sameCount++;
+	   		}
 	   }
-	   console.log(sameCount);
+	   //console.log(sameCount);
+	   //console.log(srcString.substring(0,sameCount));
 	   srcString = "<span class='samestr'>"+ srcString.substring(0,sameCount)+"</span>" + srcString.substring(sameCount,srcString.length);
 	   question.innerHTML = srcString.replace("\n","<BR>");
 
