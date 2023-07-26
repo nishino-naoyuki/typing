@@ -15,4 +15,5 @@ public class CreateUserDto {
 	private String dispName;
 	private String password;
 	private String affiliation;
+	
 }

@@ -174,29 +174,16 @@
 </body>
 
   <script th:inline="javascript">
-  const createEventBtn = document.getElementById('createEventBtn');
-  const addquestion = document.getElementById('addquestion');
+	const createEventBtn = document.getElementById('createEventBtn');
+	const addquestion = document.getElementById('addquestion');
 	const alertarea = document.getElementById('alertmsg');
+	const draglist = document.getElementById('questionlist');
 	
 	alertarea.style.display = "none";
-  addquestion.addEventListener('click',()=>{
-  	let elements = document.getElementsByClassName("qidcheckbox");
-  	let addScript = "";
-  	if( elements.length == 0){
-  		alert("追加する問題を選択してください");
-  		return;
-  	}
-  	for(let i=0; i < elements.length;i++){
-  		if( elements[i].checked ){
-  			addScript += "<li id='"+elements[i].value+"' draggable='true'>"+elements[i].dataset.title+"</li>";
-  			//alert(addScript);
-  			elements[i].checked = false;
-  		}
-  	}
-  	const draglist = document.getElementById('questionlist');
-  	draglist.innerHTML += addScript;
-  	
-	  document.querySelectorAll('.drag-list li').forEach (elm => {
+	
+	
+	const initialDragEvent = function(){
+		document.querySelectorAll('.drag-list li').forEach (elm => {
 			elm.ondragstart = function () {
 				event.dataTransfer.setData('text/plain', event.target.id);
 			};
@@ -237,16 +224,38 @@
 			elm.ondragend = function () {
 				let rect = draglist.getBoundingClientRect();
 				if( event.clientX < rect.left || event.clientX > rect.right ){
-					//console.log("OUT!");
+					console.log("OUT!");
 					this.remove();
 				}else if(event.clientY < rect.top || event.clientY > rect.bottom){
-					//console.log("OUT!!!");
+					console.log("OUT!!!");
 					this.remove();
 				}
-				//console.log("ondragend!! event.clientY="+event.clientY+" event.clientX="+event.clientX);
+				console.log("ondragend!! event.clientY="+event.clientY+" event.clientX="+event.clientX);
 			};
 		});
-  });
+	}
+	
+	initialDragEvent();
+	
+	addquestion.addEventListener('click',()=>{
+	  	let elements = document.getElementsByClassName("qidcheckbox");
+	  	let addScript = "";
+	  	if( elements.length == 0){
+	  		alert("追加する問題を選択してください");
+	  		return;
+	  	}
+	  	for(let i=0; i < elements.length;i++){
+	  		if( elements[i].checked ){
+	  			addScript += "<li id='"+elements[i].value+"' draggable='true'>"+elements[i].dataset.title+"</li>";
+	  			//alert(addScript);
+	  			elements[i].checked = false;
+	  		}
+	  	}
+	  	
+	  	draglist.innerHTML += addScript;
+	  	
+		initialDragEvent();
+	});
   
   createEventBtn.addEventListener('click',()=>{
   

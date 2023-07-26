@@ -1,0 +1,1 @@
+$ mysqldump -u root typing question_tbl > /home/abcc/typging/dump.sql

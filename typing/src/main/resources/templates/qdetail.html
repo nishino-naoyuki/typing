@@ -158,11 +158,12 @@
   		timer = setInterval(count, 100);
   		answer.innerText = "";
   		answer.setAttribute("contenteditable",true);
-  		stopbtn.disabled = false;
+  		//stopbtn.disabled = false;
   		startbtn.disabled = true;
   		keycount=0;
-  		let srcString = /*[[${detailDto.sentence}]]*/ "";
-  		question.innerHTML = srcString.replace("\n","<BR>");
+  		let srcString = /*[[${detailDto.getSentenceBR()}]]*/ "";
+  		//alert(srcString);
+  		question.innerHTML = srcString;
   	});
   	
   	stopbtn.addEventListener('click',()=>{
@@ -218,27 +219,37 @@
   		keycount++;
 	   document.getElementById("inputlength").innerHTML = "文字数:"+answer.innerText.length + "文字";
 
+		//入力文字と一致しているかをチェック。チェック対象文字はあえてエスケープ処理していないものをつかう
 	   let srcString = /*[[${detailDto.sentence}]]*/ "";
 
-	   let srcStringArry = srcString.replace(/\r\n|\n|\r/g,"\n").split("");
+	   srcString = srcString.replace(/\r\n|\n|\r/g,"\n");
+	   let srcStringArry = srcString.split("");
 	   let ansStringArry = answer.innerText.replace(/\r\n|\n|\r/g,"\n").split("");
 	   sameCount = 0;
 	   for(i=0; i < ansStringArry.length; i++){
-	   		//console.log(i + "[" + srcStringArry[i] + "] [" + ansStringArry[i] +"]");
+	   		console.log(i + "[" + srcStringArry[i] + "] [" + ansStringArry[i] +"]");
 	   		if( srcStringArry[i] != ansStringArry[i] ){
 	   			break;
 	   		}
-	   		if( srcStringArry[i]=="\n"){
-	   			sameCount+=2;
-	   		}else{
-	   			sameCount++;
-	   		}
+	   		sameCount++;
+	   		//if( srcStringArry[i]=="\n"){
+	   		//	sameCount+=2;
+	   		//}else{
+	   		//	sameCount++;
+	   		//}
 	   }
 	   //console.log(sameCount);
 	   //console.log(srcString.substring(0,sameCount));
 	   srcString = "<span class='samestr'>"+ srcString.substring(0,sameCount)+"</span>" + srcString.substring(sameCount,srcString.length);
-	   question.innerHTML = srcString.replace("\n","<BR>");
+	   
+	   question.innerHTML = srcString.replace(/\n/g,"<BR>");
 
+		//入力文字がすべて一致したら「提出」ボタンをクリックできるようにする
+		if( sameCount == srcStringArry.length ){
+			stopbtn.disabled = false;
+		}else{
+			stopbtn.disabled = true;
+		}
 	}
   </script>
   <!-- Github buttons -->

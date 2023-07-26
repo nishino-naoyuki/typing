@@ -11,7 +11,7 @@
 	</page_setting>
 	<category_index>0</category_index>
 	<zoom>1.0</zoom>
-	<x>7</x>
+	<x>0</x>
 	<y>0</y>
 	<default_color>
 		<r>128</r>
@@ -138,7 +138,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2023-02-17 14:30:49</creation_date>
-			<updated_date>2023-03-10 16:51:08</updated_date>
+			<updated_date>2023-07-26 14:05:03</updated_date>
 			<model_property>
 				<name>プロジェクト名</name>
 				<value></value>
@@ -851,7 +851,7 @@
 			<connections>
 				<relation>
 					<id>0</id>
-					<source>1</source>
+					<source>3</source>
 					<target>0</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -873,7 +873,7 @@
 				</relation>
 				<relation>
 					<id>1</id>
-					<source>3</source>
+					<source>1</source>
 					<target>0</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -937,7 +937,7 @@
 				<normal_column>
 					<id>1</id>
 					<referenced_column>4</referenced_column>
-					<relation>0</relation>
+					<relation>1</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name></logical_name>
@@ -971,7 +971,7 @@
 				<normal_column>
 					<id>2</id>
 					<referenced_column>16</referenced_column>
-					<relation>1</relation>
+					<relation>0</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name></logical_name>
@@ -1003,7 +1003,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>8</word_id>
+					<word_id>9</word_id>
 					<id>3</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1302,7 +1302,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>9</word_id>
+					<word_id>8</word_id>
 					<id>11</id>
 					<description></description>
 					<unique_key_name></unique_key_name>

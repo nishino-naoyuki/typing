@@ -202,7 +202,8 @@ public class EventService extends ServiceBase{
 		List<EventOutlineDto> dtoList = new ArrayList<> ();
 		//フィルタリング
 		for( EventTblEntity entity : eventEntityList) {
-			if( roleId == RoleId.ADMIN || mail.matches(entity.getFilter())) {
+			String filter = entity.getFilter();
+			if( roleId == RoleId.ADMIN || mail.matches(filter)) {
 				dtoList.add(getFrom(uid,entity,now,roleId));
 			}
 		}
