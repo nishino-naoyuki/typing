@@ -170,6 +170,7 @@
 		
 			const formData = new FormData();
 			formData.append('token',event.target.dataset.token );
+			let eventObj = event.target;
 			 		
 	       const url = /*[[@{/event/entry}]]*/ "/event/entry";
 	       fetch(url,{method:"post",body: formData})
@@ -178,7 +179,10 @@
 				const errmsg = document.getElementById("errtitle");
 				if( result.result == "OK"){
 					retOKDialogTrigger.click();
-					event.target.disabled = true;
+					eventObj.disabled = true;
+					eventObj.classList.remove("bg-gradient-primary");
+					eventObj.classList.add("bg-gradient-warning");
+					eventObj.textContent = "登録済み";
 				}else if( result.result == "EXIST"){
 					errmsg.innerHTML = "既に登録済みです。";
 				}else{

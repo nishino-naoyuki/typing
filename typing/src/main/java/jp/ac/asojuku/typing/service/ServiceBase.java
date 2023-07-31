@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
 import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
 import jp.ac.asojuku.typing.dto.QuestionDetailDto;
+import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.dto.summary.RankingSummary;
 import jp.ac.asojuku.typing.entity.AnsHistoryTblEntity;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
@@ -124,6 +125,45 @@ public class ServiceBase {
 			count++;
 			wkScore = summary.getScore();
 		}
+		/////////////////////////////
+		//個別の問題一覧を取得
+		List<QuestionOutlineDto> qList = new ArrayList<>();
+		List<EventQuestionEntity> eqEntityList =  eventQuestionRepository.findByEidOrderByNo(eid);
+		for( EventQuestionEntity eqEntity : eqEntityList) {
+			QuestionOutlineDto qDto = getQuestionOutlineDtoForUser(eqEntity,uid);				
+			qList.add(qDto);
+		}
+		peiDto.setQList(qList);
+		
+		
 		return peiDto;
+	}
+	/** protected **/
+
+	/**
+	 * ユーザー個別のスコア月問第一案を取得する
+	 * @param eqEntity
+	 * @param uid
+	 * @return
+	 */
+	protected QuestionOutlineDto getQuestionOutlineDtoForUser(EventQuestionEntity eqEntity,Integer uid) {
+
+		QuestionOutlineDto qDto = new QuestionOutlineDto();
+		//全てはセットしない
+		Integer qid = eqEntity.getQestionTbl().getQid();
+		qDto.setQid(qid);
+		qDto.setEqid(eqEntity.getEqid());
+		qDto.setNo(eqEntity.getNo());
+		qDto.setDifficulty(eqEntity.getQestionTbl().getDifficalty());
+		qDto.setPracticeFlg(eqEntity.getQestionTbl().getPracticeflg());
+		qDto.setTitle(eqEntity.getQestionTbl().getTitle());
+		AnsTblEntity ansEntity = ansTblRepository.findByUidAndEqid(uid, eqEntity.getEqid());
+		if( ansEntity != null ) {
+			qDto.setScore( String.valueOf(ansEntity.getScore()) );
+		}else {
+			qDto.setScore("未解答");
+		}
+		
+		return qDto;
 	}
 }

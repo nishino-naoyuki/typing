@@ -68,7 +68,7 @@
 		            		</div>
 		            		<div class="row">
 								<div class="qdisparea form-group col-6 justify-content-start mb-3">
-			            			<div id="question" class="qdisp" th:utext="${detailDto.getSentenceBR()}"></div>
+			            			<div id="question" class="qdisp"></div>
 								</div>
 								<div id="sendform" class="qdisparea form-group col-6">
 									<div contenteditable=false class="form-control qdisp" id="answerarea" onkeyup="ShowLength();" rows="30" oncopy="return false" onpaste="return false" oncontextmenu="return false" placeholder="開始ボタンをクリックすると入力できるようになります" autocomplete="off"></div>			
@@ -102,7 +102,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">Close</button>
+            <button id="modalclose" type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -118,6 +118,7 @@
   	const answer = document.getElementById('answerarea');
   	const startbtn = document.getElementById("startbtn");
   	const stopbtn = document.getElementById("stopbtn");
+  	const modalclose = document.getElementById("modalclose");
   	let elapsedTime = 0;
   	let offsetTime = 0;
   	let keycount = 0;
@@ -142,6 +143,11 @@
 	   answer.style.height = question.clientHeight + 'px';
 	});
 	
+	
+  	modalclose.addEventListener("click", ()=> {
+  		window.close();
+  	});
+  	
   	const count = ()=>{
   		nowTime = new Date();
 
@@ -163,7 +169,8 @@
   		keycount=0;
   		let srcString = /*[[${detailDto.getSentenceBR()}]]*/ "";
   		//alert(srcString);
-  		question.innerHTML = srcString;
+  		question.innerHTML = srcString;//高さを問題文と合わせる
+	   	answer.style.height = question.clientHeight + 'px';
   	});
   	
   	stopbtn.addEventListener('click',()=>{
@@ -187,6 +194,7 @@
  		formData.append('time',elapsedTime );
  		 		
         const url = /*[[@{/question/scoring}]]*/ "/question/scoring";
+ 		let eid = /*[[${eid}]]*/0;
   		fetch(url,{method:"post",body: formData})
         //レスポンスの受け取り
         .then( response => response.json()).then(result => {
@@ -200,10 +208,16 @@
  				alertarea.style.display = "block";
  			}else{
  				if( result.unjustFlag != true){
-	 				const totalscore = document.getElementById("totalscore");
-	 				totalscore.innerHTML = "得点 "+result.totalScore + "点";
-	 				const scoredetail = document.getElementById("scoredetail");
-	 				scoredetail.innerHTML = "<p>内訳</p>正確性："+result.accuracyScore + "点<br>" + "スピード："+result.sppedScore + "点";
+ 					if( eid == 0 ){
+ 						//練習問題の場合はスコアを出す
+ 						const totalscore = document.getElementById("totalscore");
+	 					totalscore.innerHTML = "得点 "+result.totalScore + "点";
+	 					const scoredetail = document.getElementById("scoredetail");
+	 					scoredetail.innerHTML = "<p>内訳</p>正確性："+result.accuracyScore + "点<br>" + "スピード："+result.sppedScore + "点";
+ 					}else{
+ 						//本番問題の場合はスコアは出さない
+ 						totalscore.innerHTML = "提出完了";
+ 					}
 	 			}else{
 	 				const totalscore = document.getElementById("totalscore");
 	 				totalscore.innerHTML = "不正が疑われるため０点となりました";
@@ -217,7 +231,7 @@
   	
   	const ShowLength = ()=>{
   		keycount++;
-	   document.getElementById("inputlength").innerHTML = "文字数:"+answer.innerText.length + "文字";
+	   document.getElementById("inputlength").innerHTML = "文字数:"+answer.innerText.replace(/\r\n|\n|\r/g,"").length + "文字";
 
 		//入力文字と一致しているかをチェック。チェック対象文字はあえてエスケープ処理していないものをつかう
 	   let srcString = /*[[${detailDto.sentence}]]*/ "";

@@ -309,22 +309,7 @@ public class EventService extends ServiceBase{
 		   ) {
 			dto.setDisplayQuestion(true);
 			for( EventQuestionEntity eqEntity : eqEntityList) {
-				QuestionOutlineDto qDto = new QuestionOutlineDto();
-				//全てはセットしない
-				Integer qid = eqEntity.getQestionTbl().getQid();
-				qDto.setQid(qid);
-				qDto.setEqid(eqEntity.getEqid());
-				qDto.setNo(eqEntity.getNo());
-				qDto.setDifficulty(eqEntity.getQestionTbl().getDifficalty());
-				qDto.setPracticeFlg(eqEntity.getQestionTbl().getPracticeflg());
-				qDto.setTitle(eqEntity.getQestionTbl().getTitle());
-				AnsTblEntity ansEntity = ansTblRepository.findByUidAndEqid(uid, eqEntity.getEqid());
-				if( ansEntity != null ) {
-					qDto.setScore( String.valueOf(ansEntity.getScore()) );
-				}else {
-					qDto.setScore("未解答");
-				}
-				
+				QuestionOutlineDto qDto = getQuestionOutlineDtoForUser(eqEntity,uid);				
 				qList.add(qDto);
 			}
 		}else {
@@ -350,6 +335,7 @@ public class EventService extends ServiceBase{
 		
 		return dto;
 	}
+	
 	/**
 	 * イベントに問題を追加する
 	 * @param eid

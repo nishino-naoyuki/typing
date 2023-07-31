@@ -30,10 +30,11 @@ public class TypingScoring implements Scoring {
 
 		ScoringResultDto resultDto = new ScoringResultDto();
 		//〇入力文字正答率（１００点満点）
-		int score = getSimilarScoreByLevenshteinDistance(
-				typingAnsSheet.getModelAns(), 
-				typingAnsSheet.getInputAns()
-				);
+		/* クライアント側ですべて正しく入力しないと提出できないようにしたので固定で100点とする
+		 * int score = getSimilarScoreByLevenshteinDistance(
+		 * typingAnsSheet.getModelAns(), typingAnsSheet.getInputAns() );
+		 */
+		int score = 100;
 		resultDto.setAccuracyScore(score);
 		
 		//〇入力スピード
@@ -65,7 +66,6 @@ public class TypingScoring implements Scoring {
      * @return 
      */
     private int getSimilarScoreByLevenshteinDistance(String s1, String s2){
-
         // 入力チェックは割愛
         LevensteinDistance dis =  new LevensteinDistance();
         return (int) (dis.getDistance(s1, s2) * 100);
