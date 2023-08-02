@@ -30,6 +30,7 @@ import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.QuestionForm;
 import jp.ac.asojuku.typing.form.ScoringForm;
+import jp.ac.asojuku.typing.form.TypingStartForm;
 import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.param.SessionConst;
 import jp.ac.asojuku.typing.param.TypingConst;
@@ -189,6 +190,21 @@ public class QuestionController {
 		ScoringResultDto sResult = scoringService.typingScoring(loginInfo.getUid(), scoringForm);
 		
 		return getScoringJson(sResult,scoringForm);
+	}
+
+	/**
+	 * タイピング開始処理
+	 * 
+	 * @param typingStartForm
+	 * @return
+	 */
+	@RequestMapping(value= {"/start"}, method=RequestMethod.POST)
+	@ResponseBody
+	public Object typingStart(
+			TypingStartForm typingStartForm) {
+		
+		questionService.updateStartTypingInfo(typingStartForm);
+		return "{\"result\":\"OK\"}";
 	}
 	
 	/* ---private method--- */

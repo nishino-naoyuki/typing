@@ -21,4 +21,18 @@ public class QuestionDetailDto {
 	public String getSentenceBR() {
 		return HtmlUtil.nl2be(sentence);
 	}
+	
+	//2023.8.1追加 開始ボタンが押されたときの処理
+	private boolean isStarted;
+	private String token;
+	private Integer startYear;
+	private Integer startMonth;
+	private Integer startDay;
+	private Integer startHour;
+	private Integer startMinutes;
+	private Integer startSecond;
+	
+	public Integer getStartMonth0Orgin() {
+		return (startMonth == null ? null : startMonth-1);
+	}
 }

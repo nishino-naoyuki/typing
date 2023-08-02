@@ -22,4 +22,5 @@ public interface EventQuestionRepository
 	public List<EventQuestionEntity> findByEidOrderByNo(Integer eid);
 	
 	public EventQuestionEntity findByQidAndEidIsNull(Integer qid);
+	public EventQuestionEntity findByQidAndEid(Integer qid,int eid);
 }

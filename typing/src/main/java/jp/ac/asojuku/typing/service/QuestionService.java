@@ -1,5 +1,6 @@
 package jp.ac.asojuku.typing.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,10 +17,12 @@ import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.entity.AnsHistoryTblEntity;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
+import jp.ac.asojuku.typing.entity.AnsTempTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.EventUserEntity;
 import jp.ac.asojuku.typing.entity.QestionTblEntity;
 import jp.ac.asojuku.typing.form.QuestionForm;
+import jp.ac.asojuku.typing.form.TypingStartForm;
 import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.param.TypingConst;
 import jp.ac.asojuku.typing.repository.AnsTblRepository;
@@ -60,6 +63,29 @@ public class QuestionService extends ServiceBase{
 				//リンクを削除しておく
 				eventQuestionRepository.delete(pqEntity);
 			}
+		}
+	}
+	
+	/**
+	 * 開始時間を一時テーブルに格納する
+	 * 
+	 * @param typingStartForm
+	 */
+	public void updateStartTypingInfo(TypingStartForm typingStartForm) {
+		
+		AnsTempTblEntity entity = ansTempTblRepository.getOne( typingStartForm.getToken() );
+		if( entity != null ) {
+			LocalDateTime ldt = LocalDateTime.of(
+						typingStartForm.getStartYear(),
+						typingStartForm.getStartMonth(),
+						typingStartForm.getStartDay(),
+						typingStartForm.getStartHour(),
+						typingStartForm.getStartMinutes(),
+						typingStartForm.getStartSecond()
+					);
+			entity.setStartTime( Exchange.toDate(ldt) );
+			
+			ansTempTblRepository.save(entity);
 		}
 	}
 	

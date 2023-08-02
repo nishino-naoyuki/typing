@@ -25,6 +25,9 @@ public class Exchange {
 	 * @return
 	 */
 	public static Date toDate(LocalDateTime localDateTime) {
+		if( localDateTime == null ) {
+			return null;
+		}
 		ZoneId zone = ZoneId.systemDefault();
         ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, zone);
         Instant instant = zonedDateTime.toInstant();
@@ -37,7 +40,15 @@ public class Exchange {
 		SimpleDateFormat sdf = new SimpleDateFormat(fmt);
 		return sdf.parse(dateString);
 	}
-	
+
+	/**
+	 * LocalDateTimeに変換する
+	 * @param localDate
+	 * @return
+	 */
+	public static LocalDateTime toLocalDateTime(final Date date) {
+		return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+	}
 	/**
 	 * LocalDateTimeをTimestampに変換する
 	 * @param localDateTime

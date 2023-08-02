@@ -1,5 +1,7 @@
 package jp.ac.asojuku.typing.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,10 +17,13 @@ import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.dto.summary.RankingSummary;
 import jp.ac.asojuku.typing.entity.AnsHistoryTblEntity;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
+import jp.ac.asojuku.typing.entity.AnsTempTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.QestionTblEntity;
+import jp.ac.asojuku.typing.param.TypingConst;
 import jp.ac.asojuku.typing.repository.AnsHistoryTblRepository;
 import jp.ac.asojuku.typing.repository.AnsTblRepository;
+import jp.ac.asojuku.typing.repository.AnsTempTblRepository;
 import jp.ac.asojuku.typing.repository.EventQuestionRepository;
 import jp.ac.asojuku.typing.repository.EventRepository;
 import jp.ac.asojuku.typing.repository.EventUserRepository;
@@ -26,6 +31,7 @@ import jp.ac.asojuku.typing.repository.QuestionRepository;
 import jp.ac.asojuku.typing.repository.UserRepository;
 import jp.ac.asojuku.typing.repository.specifications.EventQuestionSpecifications;
 import jp.ac.asojuku.typing.util.Exchange;
+import jp.ac.asojuku.typing.util.Token;
 
 public class ServiceBase {
 
@@ -43,12 +49,46 @@ public class ServiceBase {
 	protected UserRepository userRepository;
 	@Autowired
 	protected AnsHistoryTblRepository ansHistoryTblRepository;
+	@Autowired
+	protected AnsTempTblRepository ansTempTblRepository;
 	
 	protected QuestionDetailDto getDetailForm(QestionTblEntity qEntity,Integer uid,Integer eid) {
 		if( qEntity == null ) {
 			return null;
 		}
+		//問題詳細を取得
 		QuestionDetailDto dto = getDetailForm(qEntity);
+		//一時テーブルデータを取得
+		//一時テーブルにデータがあるかを取得する
+		EventQuestionEntity pqEntity = null;
+		if( eid == TypingConst.PRACTICE_EVENTID ) {
+			pqEntity = eventQuestionRepository.findByQidAndEidIsNull(qEntity.getQid());
+		}else {
+			pqEntity = eventQuestionRepository.findByQidAndEid(qEntity.getQid(),eid);
+		}
+		AnsTempTblEntity ansTempTblEntity = ansTempTblRepository.findByUidAndEqid(uid,pqEntity.getEqid());
+		if( ansTempTblEntity == null || ansTempTblEntity.getStartTime() == null) {
+			dto.setStarted(false);
+			String token;
+			if( ansTempTblEntity == null ) {
+				token = Token.getCsrfToken();
+				insertOrUpdateAnsTempTblEntity(token,uid,pqEntity.getEqid(),null);
+			}else {
+				token = ansTempTblEntity.getToken();
+			}
+			dto.setToken(token);
+		}else {
+			dto.setStarted(true);
+			dto.setToken(ansTempTblEntity.getToken());
+			LocalDateTime ldt = Exchange.toLocalDateTime(ansTempTblEntity.getStartTime());
+			dto.setStartYear(ldt.getYear());
+			dto.setStartMonth(ldt.getMonthValue());
+			dto.setStartDay(ldt.getDayOfMonth());
+			dto.setStartHour(ldt.getHour());
+			dto.setStartMinutes(ldt.getMinute());
+			dto.setStartSecond(ldt.getSecond());
+		}
+		
 		//解答をセット
 		AnsHistoryTblEntity ansEntity = ansHistoryTblRepository.getRecentlyOne(eid,qEntity.getQid(),uid);
 		if( ansEntity != null ) {
@@ -59,7 +99,13 @@ public class ServiceBase {
 		
 		return dto;		
 	}
+	
 
+	/**
+	 * 問題文を取得する
+	 * @param qEntity
+	 * @return
+	 */
 	protected QuestionDetailDto getDetailForm(QestionTblEntity qEntity) {
 		if( qEntity == null ) {
 			return null;
@@ -89,7 +135,7 @@ public class ServiceBase {
 			}
 			eventList.add(eventDto);
 		}
-		dto.setEventList(eventList);
+		dto.setEventList(eventList);		
 		
 		return dto;		
 	}
@@ -165,5 +211,23 @@ public class ServiceBase {
 		}
 		
 		return qDto;
+	}
+	
+	/**
+	 * 一時テーブルを挿入または更新する
+	 * @param token
+	 * @param uid
+	 * @param eqid
+	 * @param ldt
+	 */
+	private void insertOrUpdateAnsTempTblEntity(String token,int uid,int eqid,LocalDateTime ldt) {
+		AnsTempTblEntity entity = new AnsTempTblEntity();
+		
+		entity.setToken(token);
+		entity.setUid(uid);
+		entity.setEqid(eqid);
+		entity.setStartTime( Exchange.toDate(ldt) );
+		
+		ansTempTblRepository.save(entity);
 	}
 }

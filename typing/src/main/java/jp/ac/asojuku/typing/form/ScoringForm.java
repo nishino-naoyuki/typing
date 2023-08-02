@@ -15,4 +15,5 @@ public class ScoringForm {
 	private Integer time;
 	private Integer qid;
 	private Integer eid;
+	private String token;
 }

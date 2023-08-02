@@ -68,7 +68,7 @@
 		            		</div>
 		            		<div class="row">
 								<div class="qdisparea form-group col-6 justify-content-start mb-3">
-			            			<div id="question" class="qdisp"></div>
+			            			<div id="question" class="qdisp" oncopy="return false"></div>
 								</div>
 								<div id="sendform" class="qdisparea form-group col-6">
 									<div contenteditable=false class="form-control qdisp" id="answerarea" onkeyup="ShowLength();" rows="30" oncopy="return false" onpaste="return false" oncontextmenu="return false" placeholder="開始ボタンをクリックすると入力できるようになります" autocomplete="off"></div>			
@@ -107,6 +107,31 @@
         </div>
       </div>
     </div>
+    
+    <button type="button" id="startDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-start"></button>
+    <div class="modal fade" id="modal-start" tabindex="-1" role="dialog" aria-labelledby="modal-notification-start" aria-hidden="true">
+      <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h6 class="modal-title" id="modal-title-notification">注意</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="py-3 text-center">
+              <i class="ni ni-bell-55 ni-3x"></i>
+              <h4 class="text-gradient text-danger mt-4" >開始すると問題文を閉じてもカウントはされ続けますのでご注意ください。</h4>
+              <h4 class="text-gradient text-danger mt-4" >タイピングを開始しますか？</h4>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="modaltyping-start" type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">開始する</button>
+            <button id="modalclose-start" type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">まだ始めない</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
   <!--   Core JS Files   -->
   <div id="parent" th:replace="/common/corejs"></div>  
@@ -119,16 +144,22 @@
   	const startbtn = document.getElementById("startbtn");
   	const stopbtn = document.getElementById("stopbtn");
   	const modalclose = document.getElementById("modalclose");
+  	const modaltypingStart = document.getElementById("modaltyping-start");
   	let elapsedTime = 0;
   	let offsetTime = 0;
   	let keycount = 0;
   	let second = 0;
   	let nowTime;
   	
+  	//モーダル画面を表示するボタンを非表示
   	const retDialogTrigger = document.getElementById("retDialogTrigger");
   	retDialogTrigger.style.display ="none";
+  	const startDialogTrigger = document.getElementById("startDialogTrigger");
+  	startDialogTrigger.style.display ="none";
   	
   	const dispchangebtn = document.getElementById("dispchangebtn");
+  	
+  	//表示切替クリック
   	dispchangebtn.addEventListener('click',()=>{
   		let qdispareas = document.getElementsByClassName("qdisparea");
   		for(let i=0;i<qdispareas.length;i++){
@@ -138,9 +169,40 @@
 	   answer.style.height = question.clientHeight + 'px';
   	});
   	
+  	const startTypingTimer = ()=>{
+  	
+	  		timer = setInterval(count, 100);
+	  		answer.innerText = "";
+	  		answer.setAttribute("contenteditable",true);
+	  		//stopbtn.disabled = false;
+	  		startbtn.disabled = true;
+	  		keycount=0;
+	  		let srcString = /*[[${detailDto.getSentenceBR()}]]*/ "";
+	  		//alert(srcString);
+	  		question.innerHTML = srcString;//高さを問題文と合わせる
+		   	answer.style.height = question.clientHeight + 'px';
+  	}
+  	
+  	//画面ロード
   	window.addEventListener("load", function() {
 	   //高さを問題文と合わせる
 	   answer.style.height = question.clientHeight + 'px';
+	   
+  		let started = /*[[${detailDto.isStarted()}]]*/ false;
+  		
+  		if( started ){
+  			startTime = new Date(
+  				/*[[${detailDto.getStartYear()}]]*/ 0,
+  				/*[[${detailDto.getStartMonth0Orgin()}]]*/ 0,
+  				/*[[${detailDto.getStartDay()}]]*/ 0,
+  				/*[[${detailDto.getStartHour()}]]*/ 0,
+  				/*[[${detailDto.getStartMinutes()}]]*/ 0,
+  				/*[[${detailDto.getStartSecond()}]]*/ 0,
+  			);
+  			
+  			startTypingTimer();
+  		}
+  		
 	});
 	
 	
@@ -148,6 +210,8 @@
   		window.close();
   	});
   	
+  	
+  	//タイマーハンドラ
   	const count = ()=>{
   		nowTime = new Date();
 
@@ -158,27 +222,50 @@
     	pasttime.innerHTML  = str;
   	}
   	
+  	//開始ボタンをクリック
   	startbtn.addEventListener('click',()=>{
-  		clearInterval(timer);
-  		startTime = new Date();
-  		timer = setInterval(count, 100);
-  		answer.innerText = "";
-  		answer.setAttribute("contenteditable",true);
-  		//stopbtn.disabled = false;
-  		startbtn.disabled = true;
-  		keycount=0;
-  		let srcString = /*[[${detailDto.getSentenceBR()}]]*/ "";
-  		//alert(srcString);
-  		question.innerHTML = srcString;//高さを問題文と合わせる
-	   	answer.style.height = question.clientHeight + 'px';
+  		//開始時の警告を表示する
+  		startDialogTrigger.click();
   	});
   	
+  	//タイピング開始
+  	modaltypingStart.addEventListener('click',()=>{
+  	
+  		clearInterval(timer);
+  		let started = /*[[${detailDto.isStarted()}]]*/ false;
+  		if( started ){
+  			startTime = new Date(
+  				/*[[${detailDto.getStartYear()}]]*/ 0,
+  				/*[[${detailDto.getStartMonth0Orgin()}]]*/ 0,
+  				/*[[${detailDto.getStartDay()}]]*/ 0,
+  				/*[[${detailDto.getStartHour()}]]*/ 0,
+  				/*[[${detailDto.getStartMinutes()}]]*/ 0,
+  				/*[[${detailDto.getStartSecond()}]]*/ 0,
+  			);
+  		}else{
+  			startTime = new Date();
+	 		const formData = new FormData();
+	 		formData.append('token',/*[[${detailDto.getToken()}]]*/ );
+	 		formData.append('startYear',startTime.getFullYear() );
+	 		formData.append('startMonth',startTime.getMonth()+1 );
+	 		formData.append('startDay',startTime.getDate() );
+	 		formData.append('startHour',startTime.getHours() );
+	 		formData.append('startMinutes',startTime.getMinutes() );
+	 		formData.append('startSecond',startTime.getSeconds() );
+	 		 		
+	        const url = /*[[@{/question/start}]]*/ "/question/start";
+			fetch(url,{method:"post",body: formData});
+  		}
+  		
+  		startTypingTimer();
+  	});
+  	
+  	//提出ボタンクリック
   	stopbtn.addEventListener('click',()=>{
   		clearInterval(timer);
   		answer.setAttribute("contenteditable",false);
   		stopbtn.disabled = true;
   		startbtn.disabled = false;
-  		//alert("本来はここでサーバー側で入力チェックが行われ、誤りがあるとメッセージとともにタイマーが再開される");
   		
  		const formData = new FormData();
  		formData.append('qid',/*[[${detailDto.qid}]]*/ );
@@ -192,6 +279,7 @@
  		formData.append('submitMinutes',nowTime.getMinutes() );
  		formData.append('submitSecond',nowTime.getSeconds() );
  		formData.append('time',elapsedTime );
+	 	formData.append('token',/*[[${detailDto.getToken()}]]*/ );
  		 		
         const url = /*[[@{/question/scoring}]]*/ "/question/scoring";
  		let eid = /*[[${eid}]]*/0;
@@ -229,6 +317,7 @@
  		});;
   	});
   	
+  	//文字列長チェック
   	const ShowLength = ()=>{
   		keycount++;
 	   document.getElementById("inputlength").innerHTML = "文字数:"+answer.innerText.replace(/\r\n|\n|\r/g,"").length + "文字";

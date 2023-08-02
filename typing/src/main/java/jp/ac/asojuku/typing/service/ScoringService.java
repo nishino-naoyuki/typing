@@ -79,6 +79,9 @@ public class ScoringService extends ServiceBase{
 				saveAnswer(scoringForm,result,eqEntity.getEqid(),uid);
 			}
 			
+			//一時テーブルを削除
+			ansTempTblRepository.deleteById( scoringForm.getToken() );
+			
 		}catch(Exception e) {
 			logger.error(e.getMessage());
 			throw new SystemErrorException(e.getMessage());
