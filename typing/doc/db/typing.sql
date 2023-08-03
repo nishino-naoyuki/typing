@@ -66,7 +66,11 @@ CREATE TABLE ANS_TEMP_TBL
 	-- 開始時刻
 	start_time datetime COMMENT '開始時刻',
 	uid int NOT NULL,
-	eqid int NOT NULL,
+	-- 練習問題として解いた時はNULLが入る
+	-- ※先生アカウントでは本番用問題を練習問題として扱うことに注意
+	eid int COMMENT '練習問題として解いた時はNULLが入る
+※先生アカウントでは本番用問題を練習問題として扱うことに注意',
+	qid int NOT NULL,
 	PRIMARY KEY (token)
 ) COMMENT = 'タイピングの画面で、開始ボタンをクリックしたときに開始時刻を保持するための一時テーブル
 タイピング画面表示時にこのテー';
@@ -197,14 +201,6 @@ ALTER TABLE ANS_TBL
 ;
 
 
-ALTER TABLE ANS_TEMP_TBL
-	ADD FOREIGN KEY (eqid)
-	REFERENCES EVENT_QUESTION (eqid)
-	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
-;
-
-
 ALTER TABLE EVENT_QUESTION
 	ADD FOREIGN KEY (eid)
 	REFERENCES EVENT_TBL (eid)
@@ -216,6 +212,14 @@ ALTER TABLE EVENT_QUESTION
 ALTER TABLE EVENT_USER
 	ADD FOREIGN KEY (eid)
 	REFERENCES EVENT_TBL (eid)
+	ON UPDATE RESTRICT
+	ON DELETE RESTRICT
+;
+
+
+ALTER TABLE ANS_TEMP_TBL
+	ADD FOREIGN KEY (qid)
+	REFERENCES QUESTION_TBL (qid)
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 ;

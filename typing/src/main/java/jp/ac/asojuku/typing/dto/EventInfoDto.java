@@ -17,4 +17,5 @@ public class EventInfoDto {
 	private List<QuestionOutlineDto> qList;
 	private List<UserInfoDto> uList;
 	private RankingDto userRanking;
+	private long lefttime;	//開始までの残り時間
 }

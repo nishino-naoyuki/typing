@@ -140,7 +140,14 @@
 		            		</div>
 		            	</div>
 		            	<div class="card-body">
-		            		<div class="row">
+		            		<div class="row" th:if="${!eventDetail.displayQuestion}">
+		            			<div class="mb-3">
+									<h2 th:if="${!eventDetail.pastEvent}">このイベントは開始前です</h2>
+									<h4 id="lefttime"></h4>
+									<h2 th:if="${eventDetail.pastEvent}">このイベントは既に終了しています</h2>
+								</div>
+		            		</div>
+		            		<div class="row" th:if="${eventDetail.displayQuestion}">
 								<div class="nav-wrapper position-relative end-0">
 									<ul class="nav nav-pills nav-fill p-1" role="tablist">
 										<li class="nav-item">
@@ -166,11 +173,7 @@
 									</ul>
 								</div>
 								<div class="tab-content" id="myTabContent">
-									<div class="tab-pane fade show active mb-3" id="qlisttab" role="tabpanel" aria-labelledby="home-tab">
-										<div class="mb-3" th:if="${!eventDetail.displayQuestion}">
-											<h2 th:if="${!eventDetail.pastEvent}">このイベントは開始前です</h2>
-											<h2 th:if="${eventDetail.pastEvent}">このイベントは既に終了しています</h2>
-										</div>
+									<div class="tab-pane fade show active mb-3" id="qlisttab" role="tabpanel" aria-labelledby="home-tab">										
 										<div class="d-flex justify-content-end">
 											<a th:href="|@{/download/result}?eid=${eventDetail.eid}|" target="ranking" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success" id="csvbtn" >問題別結果CSV出力</button></a>
 										</div>
@@ -358,6 +361,23 @@
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
+<script th:inline="javascript" th:if="${!eventDetail.displayQuestion}">
+	let tim = /*[[${eventDetail.lefttime}]]*/ 0;
+	const leftTimDisp = document.getElementById("lefttime");
+	setInterval(()=>{
+		//秒→時間分秒に変換
+		let h = Math.floor(tim / 3600);
+		let m = Math.floor(tim % 3600 / 60);
+		let s = tim % 60;
+		leftTimDisp.innerHTML = "開始まで あと"+ h + "時間 " + m + "分 " + s + "秒";
+		tim--;
+		if( tim <= 0 ){
+			location.reload();
+		}
+
+	}, 1000);
+</script>
+
 <script th:inline="javascript"　th:if="${session['loginInfo'].isStudent()}">
 const countcard = document.getElementById("countcard");
 const rankingcard = document.getElementById("rankingcard");

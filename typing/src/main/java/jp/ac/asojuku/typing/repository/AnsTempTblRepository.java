@@ -8,5 +8,6 @@ import jp.ac.asojuku.typing.entity.AnsTempTblEntity;
 public interface AnsTempTblRepository 
 	extends JpaSpecificationExecutor<AnsTempTblEntity>, JpaRepository<AnsTempTblEntity, String>{
 
-	public AnsTempTblEntity findByUidAndEqid(int uid,int eqid);
+	public AnsTempTblEntity findByUidAndEidAndQid(Integer uid,Integer eid,Integer qid);
+	public AnsTempTblEntity findByUidAndEidIsNullAndQid(Integer uid,Integer qid);
 }

@@ -38,11 +38,10 @@ public class AnsTempTblEntity implements Serializable {
     @JoinColumn(name="uid",insertable=false ,updatable=false)
 	private UserTblEntity userTbl;
 
-	/** イベント問題文. */
-	private Integer eqid;
-	@OneToOne
-    @JoinColumn(name="eqid",insertable=false ,updatable=false)
-	private EventQuestionEntity eventQuestion;
+	/** 問題ID. */
+	private Integer qid;
 
+	/** イベントID. */
+	private Integer eid;
 
 }

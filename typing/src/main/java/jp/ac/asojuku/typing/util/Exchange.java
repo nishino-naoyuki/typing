@@ -3,6 +3,7 @@ package jp.ac.asojuku.typing.util;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -130,5 +131,15 @@ public class Exchange {
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		return sdf.parse(dateString);
+	}
+	
+	/**
+	 * date1 - date2 の差分を秒数で返す
+	 * @param date1
+	 * @param date2
+	 * @return
+	 */
+	public static long differenceDate(Date date1,Date date2) {
+		return (date1.getTime() - date2.getTime())/1000;
 	}
 }

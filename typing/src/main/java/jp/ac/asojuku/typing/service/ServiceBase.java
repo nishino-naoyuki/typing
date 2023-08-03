@@ -60,19 +60,18 @@ public class ServiceBase {
 		QuestionDetailDto dto = getDetailForm(qEntity);
 		//一時テーブルデータを取得
 		//一時テーブルにデータがあるかを取得する
-		EventQuestionEntity pqEntity = null;
+		AnsTempTblEntity ansTempTblEntity = null;
 		if( eid == TypingConst.PRACTICE_EVENTID ) {
-			pqEntity = eventQuestionRepository.findByQidAndEidIsNull(qEntity.getQid());
+			ansTempTblEntity = ansTempTblRepository.findByUidAndEidIsNullAndQid(uid, qEntity.getQid());
 		}else {
-			pqEntity = eventQuestionRepository.findByQidAndEid(qEntity.getQid(),eid);
+			ansTempTblEntity = ansTempTblRepository.findByUidAndEidAndQid(uid, eid,qEntity.getQid());
 		}
-		AnsTempTblEntity ansTempTblEntity = ansTempTblRepository.findByUidAndEqid(uid,pqEntity.getEqid());
 		if( ansTempTblEntity == null || ansTempTblEntity.getStartTime() == null) {
 			dto.setStarted(false);
 			String token;
 			if( ansTempTblEntity == null ) {
 				token = Token.getCsrfToken();
-				insertOrUpdateAnsTempTblEntity(token,uid,pqEntity.getEqid(),null);
+				insertOrUpdateAnsTempTblEntity(token,uid,(eid == TypingConst.PRACTICE_EVENTID?null:eid),qEntity.getQid(),null);
 			}else {
 				token = ansTempTblEntity.getToken();
 			}
@@ -220,12 +219,13 @@ public class ServiceBase {
 	 * @param eqid
 	 * @param ldt
 	 */
-	private void insertOrUpdateAnsTempTblEntity(String token,int uid,int eqid,LocalDateTime ldt) {
+	private void insertOrUpdateAnsTempTblEntity(String token,Integer uid,Integer eid,Integer qid,LocalDateTime ldt) {
 		AnsTempTblEntity entity = new AnsTempTblEntity();
 		
 		entity.setToken(token);
 		entity.setUid(uid);
-		entity.setEqid(eqid);
+		entity.setQid(qid);
+		entity.setEid(eid);
 		entity.setStartTime( Exchange.toDate(ldt) );
 		
 		ansTempTblRepository.save(entity);

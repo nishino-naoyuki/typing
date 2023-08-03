@@ -333,6 +333,9 @@ public class EventService extends ServiceBase{
 		}
 		dto.setUList(uList);
 		
+		long deff = Exchange.differenceDate(entity.getStartDate(),new Date());
+		dto.setLefttime((deff < 0 ? 0:deff));
+		
 		return dto;
 	}
 	
