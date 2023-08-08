@@ -159,7 +159,7 @@
 									</div>
 									<div class="form-group">
 										<label for="example-text-input" class="form-control-label">パスワード</label>
-        								<input class="form-control" type="password" value="" id="passwod-edit">						
+        								<input class="form-control" type="password" value="" id="password-edit">						
 									</div>
 									<div class="form-group">
         								<button class="btn btn-primary" id="changebtn" type="button">変更</button>					
@@ -182,7 +182,7 @@
   <div id="parent" th:replace="/common/corejs"></div>  
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
-   <button type="button" id="retDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-notification"></button>
+   <button type="button" id="retDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-notification" style="display:none"></button>
    <div class="modal fade" id="modal-notification" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
      <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
        <div class="modal-content">
@@ -222,7 +222,7 @@
 	 		formData.append("name",document.getElementById('name-edit').value );
 	 		formData.append("mail",document.getElementById('mail-edit').value );
 	 		formData.append("affiliation",document.getElementById('affiliation-edit').value );
-	 		formData.append("passwod",document.getElementById('passwod-edit').value );
+	 		formData.append("password",document.getElementById('password-edit').value );
 	 		 		
 	        const url = /*[[@{/user/detail}]]*/ "/user/detail";
 	        fetch(url,{method:"post",body: formData})

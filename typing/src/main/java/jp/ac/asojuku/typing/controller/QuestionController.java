@@ -162,6 +162,33 @@ public class QuestionController {
 		return mv;
 	}
 	
+	/**
+	 * 練習問題の中止処理
+	 * 
+	 * @param mv
+	 * @param token
+	 * @param qid
+	 * @return
+	 * @throws SystemErrorException
+	 * @throws PermitionException
+	 */
+	@RequestMapping(value= {"/abort"}, method=RequestMethod.POST)
+	@ResponseBody
+    public Object abort(
+    		ModelAndView mv,
+    		@RequestParam(required = true) String token,
+    		@RequestParam(required = true) Integer qid
+    		) throws SystemErrorException, PermitionException {
+
+		//ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto)session.getAttribute(SessionConst.LOGININFO);
+		
+		//中止処理
+		boolean result = questionService.abortPractice(token, qid, loginInfo.getRole());
+		
+		return (result ? "{\"result\":\"OK\"}":"{\"result\":\"NG\"}");
+	}
+	
 
 	/**
 	 * 採点処理

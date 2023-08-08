@@ -54,7 +54,7 @@ public class UserController {
 		if( loginInfo.isAdmin() ) {
 			//管理者は全員の情報を編集可能
 			userDetail.setEditable(true);
-		}else if( loginInfo.getUid() == uid) {
+		}else if( loginInfo.getUid().equals(uid) ) {
 			//自分の情報は編集可能
 			userDetail.setEditable(true);
 		}else {

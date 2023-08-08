@@ -39,6 +39,30 @@ public class QuestionService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(QuestionService.class);
 	
 	/**
+	 * 練習を中断する
+	 * @param token
+	 * @param qid
+	 * @param role
+	 * @return
+	 */
+	public boolean abortPractice(String token,Integer qid,RoleId role) {
+		//練習問題、もしくは管理者か？
+		QestionTblEntity qEntity = questionRepository.getOne(qid);
+		if ( role != RoleId.ADMIN && qEntity.getPracticeflg() == 0) {
+			return false;
+		}
+		try {
+			//一時テーブル削除
+			ansTempTblRepository.deleteById(token);
+		}catch(Exception e) {
+			logger.warn("一時テーブルの削除に失敗["+token+"]");
+			logger.warn(e.getMessage());
+			return false;
+		}
+		
+		return true;
+	}
+	/**
 	 * 問題を1件挿入
 	 * @param form
 	 */

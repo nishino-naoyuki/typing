@@ -18,7 +18,7 @@
 <head>
   <!-- ヘッダー -->
   <div id="parent" th:replace="/common/head"></div>
-  <link th:href="@{/assets/css/question-detail.css?v=1.0.4}" rel="stylesheet" />
+  <link th:href="@{/assets/css/question-detail.css?v=1.0.5}" rel="stylesheet" />
 </head>
 
 <body class="g-sidenav-show   bg-gray-100">
@@ -60,6 +60,7 @@
 		            			<div class="col d-flex justify-content-start">
 		            				<button type="button" class="mx-1 btn bg-gradient-primary" id="startbtn">開始</button>
 		            				<button type="button" class="mx-1 btn bg-gradient-primary" id="stopbtn" disabled>提出</button>
+		            				<button type="button" class="mx-1 btn bg-gradient-primary" id="abortbtn" disabled th:if="${eid==0}">練習終了</button>
 		            			</div>
 		            			<div class="col d-flex justify-content-start">
 		            				<div id="pasttime" class="mb-1">経過時間 00:00</div>　
@@ -84,7 +85,7 @@
 	  <!--   FOOTER   -->
 	  <div id="parent" th:replace="/common/footer"></div>  
     </div>
-    <button type="button" id="retDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-notification"></button>
+    <button type="button" id="retDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-notification" style="display:none"></button>
     <div class="modal fade" id="modal-notification" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
       <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
         <div class="modal-content">
@@ -108,7 +109,7 @@
       </div>
     </div>
     
-    <button type="button" id="startDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-start"></button>
+    <button type="button" id="startDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-start" style="display:none"></button>
     <div class="modal fade" id="modal-start" tabindex="-1" role="dialog" aria-labelledby="modal-notification-start" aria-hidden="true">
       <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
         <div class="modal-content">
@@ -132,6 +133,32 @@
         </div>
       </div>
     </div>
+    
+    <button type="button" id="abortDialogTrigger" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-abort" th:if="${eid==0}"　style="display:none"></button>
+    <div class="modal fade" id="modal-abort" tabindex="-1" role="dialog" aria-labelledby="modal-notification-abort" aria-hidden="true" th:if="${eid==0}">
+      <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h6 class="modal-title" id="modal-title-notification">確認</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="py-3 text-center">
+              <i class="ni ni-bell-55 ni-3x"></i>
+              <h4 class="text-gradient text-danger mt-4" >練習問題を中止しますか？</h4>
+              <h5 class="text-gradient text-danger mt-4" >中止すると画面が閉じて時間計測がとまります。中止ししても再度開けば、また練習できます</h5>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="modaltyping-abort" type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">中止する</button>
+            <button id="modalclose-abort" type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">中止しない</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
   </main>
   <!--   Core JS Files   -->
   <div id="parent" th:replace="/common/corejs"></div>  
@@ -150,12 +177,7 @@
   	let keycount = 0;
   	let second = 0;
   	let nowTime;
-  	
-  	//モーダル画面を表示するボタンを非表示
-  	const retDialogTrigger = document.getElementById("retDialogTrigger");
-  	retDialogTrigger.style.display ="none";
-  	const startDialogTrigger = document.getElementById("startDialogTrigger");
-  	startDialogTrigger.style.display ="none";
+
   	
   	const dispchangebtn = document.getElementById("dispchangebtn");
   	
@@ -174,7 +196,7 @@
 	  		timer = setInterval(count, 100);
 	  		answer.innerText = "";
 	  		answer.setAttribute("contenteditable",true);
-	  		//stopbtn.disabled = false;
+	  		enableEbortbtn();
 	  		startbtn.disabled = true;
 	  		keycount=0;
 	  		let srcString = /*[[${detailDto.getSentenceBR()}]]*/ "";
@@ -355,8 +377,47 @@
 		}
 	}
   </script>
+  <script th:if="${eid==0}" th:inline="javascript">
+  	const abortDialogTrigger = document.getElementById("abortDialogTrigger");
+  	const modaltypingAbort = document.getElementById("modaltyping-abort");
+  	const abortbtn = document.getElementById("abortbtn");
+  	
+  	const enableEbortbtn = ()=>{
+		abortbtn.disabled = false;
+  	}
+  	//練習中止ボタンクリック
+  	abortbtn.addEventListener('click',()=>{
+  		abortDialogTrigger.click();
+  	});
+  	
+  	//中止処理
+  	modaltypingAbort.addEventListener('click',()=>{  
+ 		const formData = new FormData();
+ 		formData.append('qid',/*[[${detailDto.qid}]]*/ );
+	 	formData.append('token',/*[[${detailDto.getToken()}]]*/ );
+ 		 		
+        const url = /*[[@{/question/abort}]]*/ "/question/abort";
+  		fetch(url,{method:"post",body: formData})
+        //レスポンスの受け取り
+        .then( response => response.json()).then(result => {
+ 			if( result.result == "OK"){
+ 				window.close();
+ 			}else{
+ 				alert("練習問題の中止に失敗しました");
+ 			}
+ 		}).catch((err) => {
+ 			alert("練習問題の中止に失敗しました");
+ 		});
+  	});
+  </script>
+  <script th:if="${eid!=0}" th:inline="javascript">
+  	const enableEbortbtn = ()=>{
+  		//無処理
+  	};
+  </script>
   <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <script async defer src="https://buttons.github.io/buttons.js">
+  </script>
 </body>
 
 </html>
