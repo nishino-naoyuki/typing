@@ -2,6 +2,7 @@ package jp.ac.asojuku.typing.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -43,6 +44,12 @@ public class UserController {
 	@Autowired
 	UserService userService;
 	
+	/**
+	 * 詳細画面表示
+	 * @param mv
+	 * @param uid
+	 * @return
+	 */
 	@RequestMapping(value= {"/detail"}, method=RequestMethod.GET)
 	public ModelAndView getDetail(ModelAndView mv,@ModelAttribute("uid")Integer uid) {
 		// ログイン情報を取得する
@@ -54,7 +61,7 @@ public class UserController {
 		if( loginInfo.isAdmin() ) {
 			//管理者は全員の情報を編集可能
 			userDetail.setEditable(true);
-		}else if( loginInfo.getUid().equals(uid) ) {
+		}else if( Objects.equals(loginInfo.getUid(), uid) ) {
 			//自分の情報は編集可能
 			userDetail.setEditable(true);
 		}else {
@@ -69,6 +76,14 @@ public class UserController {
 		return mv;
 	}
 
+	/**
+	 * 詳細画面での更新処理
+	 * @param userCreateForm
+	 * @param bindingResult
+	 * @return
+	 * @throws SystemErrorException
+	 * @throws JsonProcessingException
+	 */
 	@RequestMapping(value= {"/detail"}, method=RequestMethod.POST)
 	@ResponseBody
 	public Object postDetail(
@@ -80,7 +95,7 @@ public class UserController {
 		//セッションに保存されたトークンから更新対象のユーザーIDを取得
 		Integer uid = (Integer)session.getAttribute(userCreateForm.getToken());
 		if( uid == null || 
-			( loginInfo.getRole() == RoleId.STUDENT && loginInfo.getUid() != uid) ) {
+			( loginInfo.getRole() == RoleId.STUDENT && !uid.equals( loginInfo.getUid() ) ) ) {
 			throw new SystemErrorException("権限無し");
 		}
 		if(bindingResult.hasErrors()) {
@@ -94,6 +109,12 @@ public class UserController {
 		
 	}
 
+	/**
+	 * JSON作成
+	 * @param bindingResult
+	 * @return
+	 * @throws JsonProcessingException
+	 */
 	private String getJson(BindingResult bindingResult) throws JsonProcessingException {
 		ResultJson result = new ResultJson();
 		List<ErrorField> errList = new ArrayList<>();

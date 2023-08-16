@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -342,7 +343,7 @@ public class EventController {
 		boolean isDuplicate = false;
 		for(int i=0; i<qidList.length;i++) {
 			for(int j=i+1; j<qidList.length;j++) {
-				if( qidList[i] == qidList[j] ) {
+				if( Objects.equals(qidList[i] ,qidList[j])  ) {
 					isDuplicate = true;
 					break;
 				}

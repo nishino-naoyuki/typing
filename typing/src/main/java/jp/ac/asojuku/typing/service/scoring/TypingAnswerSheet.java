@@ -15,4 +15,13 @@ public class TypingAnswerSheet implements AnswerSheet {
 		this.time = time;
 		this.keyupCount = keyupCount;
 	}
+	
+	/**
+	 * 改行を除いた入力文字の文字数
+	 * @return
+	 */
+	public int getInputLengthWithoutLineFeedCode() {
+		String inputAnsNoLFC = inputAns.replaceAll("\\r\\n|\\r|\\n", "");
+		return inputAnsNoLFC.length();
+	}
 }	

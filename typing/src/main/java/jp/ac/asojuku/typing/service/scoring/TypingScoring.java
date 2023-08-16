@@ -38,7 +38,7 @@ public class TypingScoring implements Scoring {
 		resultDto.setAccuracyScore(score);
 		
 		//〇入力スピード
-		double inputAnsLen = typingAnsSheet.getInputAns().length();
+		double inputAnsLen = typingAnsSheet.getInputLengthWithoutLineFeedCode();
 		double time = typingAnsSheet.getTime();
 		double wpm = inputAnsLen/(time/60);
 		resultDto.setSppedScore(wpm);
