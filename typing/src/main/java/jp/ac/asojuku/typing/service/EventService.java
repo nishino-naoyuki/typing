@@ -301,11 +301,27 @@ public class EventService extends ServiceBase{
 		}else {
 			dto.setPastEvent(true);
 		}
+		//開始前かどうかをセットする
+		if( roleId == RoleId.ADMIN ||
+			(roleId == RoleId.STUDENT && now.after(entity.getStartDate()))) {
+			dto.setBeforeEvent(false);
+		}else {
+			dto.setBeforeEvent(true);
+		}
+
+		//ユーザーが学生の場合は登録済みかどうかを確認する
+		boolean entryFlag = true;
+		if(roleId == RoleId.STUDENT) {
+			entryFlag = isExistEventUser(uid,entity.getEid());
+		}
+		dto.setEntryFlag(entryFlag);
 		
 		//問題リストをセット
+		//先生：無条件でリストを表示する
+		//学生：公開期限内でそのユーザーがイベントに登録済みの場合リストを表示する
 		List<QuestionOutlineDto> qList = new ArrayList<>();
 		if( roleId == RoleId.ADMIN || 
-		   (roleId == RoleId.STUDENT && now.after(entity.getStartDate()) && now.before(entity.getFinishDate()) )
+		   (roleId == RoleId.STUDENT && now.after(entity.getStartDate()) && now.before(entity.getFinishDate()) && entryFlag )
 		   ) {
 			dto.setDisplayQuestion(true);
 			for( EventQuestionEntity eqEntity : eqEntityList) {

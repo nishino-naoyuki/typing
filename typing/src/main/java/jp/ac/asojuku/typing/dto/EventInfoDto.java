@@ -14,8 +14,10 @@ public class EventInfoDto {
 	private boolean rankingDisplay;
 	private boolean displayQuestion;
 	private boolean pastEvent;
+	private boolean beforeEvent;
 	private List<QuestionOutlineDto> qList;
 	private List<UserInfoDto> uList;
 	private RankingDto userRanking;
 	private long lefttime;	//開始までの残り時間
+	private boolean entryFlag;
 }

@@ -204,11 +204,13 @@ public class EventController {
 			throw new PermitionException("このイベントは表示できません");
 		}
 		List<RankingDto> rankingList =  eventService.getRankingAll(eid);
-		
+
 		if( loginInfo.getRole() == RoleId.STUDENT ) {
+			//個人データを取得
 			PersonalEventInfoDto peiDto = eventService.getPersonalEventInfo(eid, loginInfo.getUid());
-			mv.addObject("peiDto", peiDto);			
+			mv.addObject("peiDto", peiDto);	
 		}
+		
 		
 		mv.addObject("eventDetail", eventDetail);
 		mv.addObject("rankingList", rankingList);

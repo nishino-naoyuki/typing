@@ -136,14 +136,16 @@
 		            <div class="card">
 		            	<div class="card-header">
 		            		<div class="row">
-								<p class="text-sm mb-0 text-uppercase font-weight-bold"><h2 th:text="${eventDetail.name}"></h2></p>
+								<h2 th:if="${!eventDetail.entryFlag}" th:text="${eventDetail.name}+' [未登録]'"></h2>
+								<h2 th:if="${eventDetail.entryFlag}" th:text="${eventDetail.name}"></h2>
 		            		</div>
 		            	</div>
 		            	<div class="card-body">
 		            		<div class="row" th:if="${!eventDetail.displayQuestion}">
 		            			<div class="mb-3">
-									<h2 th:if="${!eventDetail.pastEvent}">このイベントは開始前です</h2>
-									<h4 id="lefttime"></h4>
+									<h4 th:if="${!eventDetail.beforeEvent && !eventDetail.entryFlag}">このイベントに参加登録していないので詳細は表示されません</h4>
+									<h2 th:if="${eventDetail.beforeEvent}">このイベントは開始前です</h2>
+									<h4 th:if="${eventDetail.beforeEvent}" id="lefttime"></h4>
 									<h2 th:if="${eventDetail.pastEvent}">このイベントは既に終了しています</h2>
 								</div>
 		            		</div>
@@ -361,7 +363,7 @@
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
-<script th:inline="javascript" th:if="${!eventDetail.displayQuestion}">
+<script th:inline="javascript" th:if="${!eventDetail.displayQuestion && eventDetail.beforeEvent}">
 	let tim = /*[[${eventDetail.lefttime}]]*/ 0;
 	const leftTimDisp = document.getElementById("lefttime");
 	setInterval(()=>{
