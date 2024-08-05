@@ -4,8 +4,10 @@ package jp.ac.asojuku.typing.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import jp.ac.asojuku.typing.entity.AnsHistoryTblEntity;
 
@@ -19,5 +21,9 @@ public interface AnsHistoryTblRepository
 			,nativeQuery = true)
 	public AnsHistoryTblEntity getRecentlyOne(@Param("eid")Integer eid,@Param("qid")Integer qid,@Param("uid")Integer uid);
 
-	
+
+	@Modifying
+	@Transactional
+	@Query(value="delete from ans_history_tbl where ansid in (select a.ansid from ans_tbl a where a.eqid = :eqid)",nativeQuery = true)
+	public void delteByEqId(@Param("eqid")Integer eqid);
 }

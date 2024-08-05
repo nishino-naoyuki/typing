@@ -45,6 +45,9 @@
                   	<p>パスワード変更<br><video width="200" controls th:src="@{/assets/mv/howtouse_password.mp4?v=1.0.1}"></video></p>
                   	<p>イベント参加登録<br><video width="200" controls th:src="@{/assets/mv/howtouse_evententry.mp4?v=1.0.1}"></video></p>
                   	<p>イベント参加<br><video width="200" controls th:src="@{/assets/mv/howtouse_event.mp4?v=1.0.1}"></video></p>
+                  	<div th:if="${session['loginInfo'].isAdmin()}">
+                  		<p>【管理者編】イベント登録・更新<br><video width="200" controls th:src="@{/assets/mv/admin event entry update.mp4}"></video></p>
+                  	</div>
                 </div>
               </div>
             </div>

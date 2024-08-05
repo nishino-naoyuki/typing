@@ -420,6 +420,8 @@ public class EventService extends ServiceBase{
 				}
 			}
 			if( !bFindFlg ) {
+				//解答履歴を削除
+				ansHistoryTblRepository.delteByEqId(eqElement.getEqid());
 				//解答情報を削除する
 				ansTblRepository.delteByEqId(eqElement.getEqid());
 				//リストから削除する

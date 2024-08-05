@@ -185,7 +185,6 @@
 													<th>No.</th>
 													<th>問題名</th>
 													<th>難易度</th>
-													<th>スコア</th>
 												</tr>
 											</thead>
 											<tbody>
@@ -193,14 +192,13 @@
 													<td th:text="${element.no}"></td>
 													<td><a th:href="|@{/event/question}?eqid=${element.eqid}|" target="eventqestiondetail" rel="noopener noreferrer" th:text="${element.title}"　></a></td>
 													<td th:text="${element.difficulty}"></td>
-													<td th:text="${element.score}"></td>
 												</tr>
 											</tbody>
 											<tfoot>
 												<tr>
+													<th>No.</th>
 													<th>問題名</th>
 													<th>難易度</th>
-													<th>スコア</th>
 												</tr>
 											</tfoot>
 										</table>
