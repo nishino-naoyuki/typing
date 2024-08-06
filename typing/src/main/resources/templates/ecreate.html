@@ -34,6 +34,7 @@
   <main class="main-content position-relative border-radius-lg ">
 <div class="container-fluid py-1">
   <div class="row">
+  <form id="eventform" enctype="multipart/form-data">
     <div class="col-12 mb-4">
     	<div class="card">
       	<div class="card-header">
@@ -47,7 +48,6 @@
       		</div>
       	</div>
         <div class="card-body p-3">
- 		 <form>
            <div class="row">
 	        <div class="alert alert-danger" role="alert" id="alertmsg">
 		      <strong id="errrmessage"></strong>
@@ -144,14 +144,52 @@
 	</div><!-- searchuser -->
 		<div class="tab-pane fade" id="downloadq" role="tabpanel" aria-labelledby="downloadq-tab">
 			<div class="card card-frame dlqcardframe" >
-				<button type="button" class="btn btn-success w-30">問題追加</button>
 				<div class="card card-frame dlqestion" >
 					<div class="card-header d-flex justify-content-between">
-						ダウンロード問題
-						<button type="button" class="btn btn-danger">問題削除</button>
+						ダウンロード問題１
 					</div>
 					<div class="card-body">
-						<input type="file" class="form-control">
+						<input type="file" class="form-control" id="uploadfile1">
+					</div>
+				</div>
+			</div>
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題２
+					</div>
+					<div class="card-body">
+						<input type="file" class="form-control" id="uploadfile2">
+					</div>
+				</div>
+			</div>
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題３
+					</div>
+					<div class="card-body">
+						<input type="file" class="form-control" id="uploadfile3">
+					</div>
+				</div>
+			</div>
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題４
+					</div>
+					<div class="card-body">
+						<input type="file" class="form-control" id="uploadfile4">
+					</div>
+				</div>
+			</div>
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題５
+					</div>
+					<div class="card-body">
+						<input type="file" class="form-control" id="uploadfile5">
 					</div>
 				</div>
 			</div>
@@ -176,10 +214,10 @@
 		</div>
 	</div>
         </div>
-</form>
      </div>
    </div>
    </div>
+   </form>
  </div>
 <!--   FOOTER   -->
 <div id="parent" th:replace="/common/footer"></div>  
@@ -196,7 +234,6 @@
   const addquestion = document.getElementById('addquestion');
 	const alertarea = document.getElementById('alertmsg');
 	
-	alertarea.style.display = "none";
   addquestion.addEventListener('click',()=>{
   	let elements = document.getElementsByClassName("qidcheckbox");
   	let addScript = "";
@@ -277,6 +314,11 @@
   		const rankingdisplay = document.getElementById('rankingdisplay');
   		const hiderankingtime = document.getElementById('hiderankingtime');
   		const filter = document.getElementById('filter');
+  		const uploadfile1 = document.getElementById('uploadfile1');
+  		const uploadfile2 = document.getElementById('uploadfile2');
+  		const uploadfile3 = document.getElementById('uploadfile3');
+  		const uploadfile4 = document.getElementById('uploadfile4');
+  		const uploadfile5 = document.getElementById('uploadfile5');
   		let qidList = [];
   		document.querySelectorAll('.drag-list li').forEach (elm => {
   			qidList.push( elm.id );
@@ -293,6 +335,11 @@
  		formData.append('hiderankingtime',hiderankingtime.value );
  		formData.append('filter',filter.value );
  		formData.append('qidList',qidList );
+ 		formData.append('uploadfile1',uploadfile1.files[0] );
+ 		formData.append('uploadfile2',uploadfile2.files[0] );
+ 		formData.append('uploadfile3',uploadfile3.files[0] );
+ 		formData.append('uploadfile4',uploadfile4.files[0] );
+ 		formData.append('uploadfile5',uploadfile5.files[0] );
  		 		
         const url = /*[[@{/event/save}]]*/ "/event/save";
         fetch(url,{method:"post",body: formData})

@@ -4,6 +4,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.Range;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.Data;
 
@@ -36,4 +37,9 @@ public class EventCreateForm {
 	private Integer hiderankingtime;
 	private String filter;
 	private Integer[] qidList;
+	private MultipartFile uploadfile1;
+	private MultipartFile uploadfile2;
+	private MultipartFile uploadfile3;
+	private MultipartFile uploadfile4;
+	private MultipartFile uploadfile5;
 }

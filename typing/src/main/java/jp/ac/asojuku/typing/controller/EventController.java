@@ -1,5 +1,10 @@
 package jp.ac.asojuku.typing.controller;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,11 +25,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jp.ac.asojuku.typing.config.SystemConfig;
 import jp.ac.asojuku.typing.dto.EventInfoDetailDto;
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
@@ -38,12 +45,14 @@ import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.EventCreateForm;
 import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.param.SessionConst;
+import jp.ac.asojuku.typing.param.TypingConst;
 import jp.ac.asojuku.typing.param.json.ErrorField;
 import jp.ac.asojuku.typing.param.json.RankingListJson;
 import jp.ac.asojuku.typing.param.json.ResultJson;
 import jp.ac.asojuku.typing.service.EventService;
 import jp.ac.asojuku.typing.service.QuestionService;
 import jp.ac.asojuku.typing.util.Exchange;
+import jp.ac.asojuku.typing.util.FileUtils;
 
 @Controller
 @RequestMapping("/event")
@@ -126,13 +135,14 @@ public class EventController {
 	 * @param bindingResult
 	 * @return
 	 * @throws SystemErrorException
-	 * @throws JsonProcessingException
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
 	 */
 	@RequestMapping(value = { "/save" }, method = RequestMethod.POST)
 	@ResponseBody
 	public Object inert(
 			@Valid EventCreateForm eventCreateForm,
-			BindingResult bindingResult) throws SystemErrorException, JsonProcessingException {
+			BindingResult bindingResult) throws SystemErrorException, FileNotFoundException, IOException {
 
 		
 		//IDリストの重複チェック
@@ -144,6 +154,9 @@ public class EventController {
 		if( bindingResult.hasErrors() ) {
 			return getJson(bindingResult);
 		}
+		
+		//ファイルを一時ファイルに保存
+		getUploadFileList(eventCreateForm);
 		
 		eventService.save(eventCreateForm);
 		
@@ -392,5 +405,39 @@ public class EventController {
         logger.trace("jsonString:{}",jsonString);
 
         return jsonString;
+	}
+
+	private List<File> getUploadFileList(EventCreateForm form) throws FileNotFoundException, IOException {
+		MultipartFile[] files = {
+				form.getUploadfile1(),
+				form.getUploadfile2(),
+				form.getUploadfile3(),
+				form.getUploadfile4(),
+				form.getUploadfile5(),
+		};
+		
+		List<File> fileList = new ArrayList<>();
+		String uploadDir = SystemConfig.getInstance().getExcelbasedir() + "/" + TypingConst.EXCELQDIR;
+		
+		FileUtils.makeDir(uploadDir);
+		
+		for( MultipartFile uploadFormFile : files ) {
+			if( uploadFormFile != null && !uploadFormFile.isEmpty()) {
+				//ファイルを作成する
+			    File uploadFile = new File(uploadDir,uploadFormFile.getOriginalFilename());
+	
+			    //出力ストリームを取得
+			    try(BufferedOutputStream uploadFileStream =
+		                new BufferedOutputStream(new FileOutputStream(uploadFile))){
+				    //出力ファイル名を決定する
+					byte[] bytes = uploadFormFile.getBytes();
+				    //ストリームに書き込んでクローズ
+				    uploadFileStream.write(bytes);
+			    }
+			    fileList.add(uploadFile);
+			}
+		}
+		
+		return fileList;
 	}
 }
