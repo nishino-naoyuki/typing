@@ -1,5 +1,6 @@
 package jp.ac.asojuku.typing.service;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,6 +14,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jp.ac.asojuku.typing.config.SystemConfig;
+import jp.ac.asojuku.typing.dto.DownloadQFileDto;
 import jp.ac.asojuku.typing.dto.EventInfoDetailDto;
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
@@ -23,6 +26,7 @@ import jp.ac.asojuku.typing.dto.RankingDto;
 import jp.ac.asojuku.typing.dto.UserInfoDto;
 import jp.ac.asojuku.typing.dto.summary.RankingSummary;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
+import jp.ac.asojuku.typing.entity.DownloadTblEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.EventTblEntity;
 import jp.ac.asojuku.typing.entity.EventUserEntity;
@@ -216,7 +220,7 @@ public class EventService extends ServiceBase{
 	 * @throws SystemErrorException
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void save(EventCreateForm eventCreateForm) throws SystemErrorException {
+	public void save(EventCreateForm eventCreateForm,List<DownloadQFileDto> uploadFileList) throws SystemErrorException {
 		EventTblEntity entity = null;
 		
 		try {
@@ -225,6 +229,14 @@ public class EventService extends ServiceBase{
 			
 			//問題の登録いったん削除し作り直し
 			insertQuestions(entity.getEid(),eventCreateForm);
+			
+			//アップロード問題を登録する
+			int ordinalNum = 1;
+			for(DownloadQFileDto uploadqFile : uploadFileList ) {
+				downloadRepository.save( getFrom( ordinalNum, uploadqFile) );
+				ordinalNum++;
+			}
+			//問題（連関エンティティ）の追加削除 TODO
 			
 		}catch(ParseException e) {
 			logger.warn(e.getMessage());
@@ -502,5 +514,28 @@ public class EventService extends ServiceBase{
 		dto.setToken(Token.getCsrfToken());
 		
 		return dto;
+	}
+	
+	/**
+	 * 
+	 * @param ordinalNum
+	 * @param uploadqFile
+	 * @return
+	 */
+	private DownloadTblEntity getFrom(int ordinalNum,DownloadQFileDto uploadqFile) {
+		
+		DownloadTblEntity entity = null;
+		if( uploadqFile.getUploadfileId() == null ) {
+			entity = new DownloadTblEntity();
+		}else {
+			entity = downloadRepository.getOne(uploadqFile.getUploadfileId());
+		}
+		
+		String baseDir = SystemConfig.getInstance().getExcelbasedir();
+		
+		entity.setOrdinalNum(ordinalNum);
+		entity.setFilename(uploadqFile.getUploadfile().getAbsolutePath().replace(baseDir, ""));
+		
+		return entity;
 	}
 }

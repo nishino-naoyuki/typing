@@ -335,11 +335,20 @@
  		formData.append('hiderankingtime',hiderankingtime.value );
  		formData.append('filter',filter.value );
  		formData.append('qidList',qidList );
- 		formData.append('uploadfile1',uploadfile1.files[0] );
- 		formData.append('uploadfile2',uploadfile2.files[0] );
- 		formData.append('uploadfile3',uploadfile3.files[0] );
- 		formData.append('uploadfile4',uploadfile4.files[0] );
- 		formData.append('uploadfile5',uploadfile5.files[0] );
+ 		updatefiles = 
+		[
+			uploadfile1,uploadfile2,uploadfile3,uploadfile4,uploadfile5
+		];
+ 		
+ 		for( let i = 0; i < updatefiles.length; i++ ){
+	 		if( updatefiles[i].value != ""){
+	 			formData.append('uploadfile'+(i+1),updatefiles[i].files[0] );
+	 		}
+ 		}
+ 		//formData.append('uploadfile2',uploadfile2.files[0] );
+ 		//formData.append('uploadfile3',uploadfile3.files[0] );
+ 		//formData.append('uploadfile4',uploadfile4.files[0] );
+ 		//formData.append('uploadfile5',uploadfile5.files[0] );
  		 		
         const url = /*[[@{/event/save}]]*/ "/event/save";
         fetch(url,{method:"post",body: formData})

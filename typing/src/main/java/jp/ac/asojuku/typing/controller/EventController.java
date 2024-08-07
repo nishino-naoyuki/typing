@@ -32,6 +32,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jp.ac.asojuku.typing.config.SystemConfig;
+import jp.ac.asojuku.typing.dto.DownloadQFileDto;
 import jp.ac.asojuku.typing.dto.EventInfoDetailDto;
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
@@ -156,9 +157,9 @@ public class EventController {
 		}
 		
 		//ファイルを一時ファイルに保存
-		getUploadFileList(eventCreateForm);
+		List<DownloadQFileDto> uploadFileList = getUploadFileList(eventCreateForm);
 		
-		eventService.save(eventCreateForm);
+		eventService.save(eventCreateForm,uploadFileList);
 		
 		return getJson(bindingResult);
 	}
@@ -407,7 +408,7 @@ public class EventController {
         return jsonString;
 	}
 
-	private List<File> getUploadFileList(EventCreateForm form) throws FileNotFoundException, IOException {
+	private List<DownloadQFileDto> getUploadFileList(EventCreateForm form) throws FileNotFoundException, IOException {
 		MultipartFile[] files = {
 				form.getUploadfile1(),
 				form.getUploadfile2(),
@@ -415,15 +416,23 @@ public class EventController {
 				form.getUploadfile4(),
 				form.getUploadfile5(),
 		};
+		Integer fileIds[] = {
+				form.getUplaodfile1Id(),
+				form.getUplaodfile2Id(),
+				form.getUplaodfile3Id(),
+				form.getUplaodfile4Id(),
+				form.getUplaodfile5Id(),
+		};
 		
-		List<File> fileList = new ArrayList<>();
-		String uploadDir = SystemConfig.getInstance().getExcelbasedir() + "/" + TypingConst.EXCELQDIR;
+		List<DownloadQFileDto> fileList = new ArrayList<>();
+		String excelBaseDir = SystemConfig.getInstance().getExcelbasedir();
 		
-		FileUtils.makeDir(uploadDir);
-		
-		for( MultipartFile uploadFormFile : files ) {
+		for( int i=0; i<files.length; i++ ) {
+			MultipartFile uploadFormFile = files[i];
 			if( uploadFormFile != null && !uploadFormFile.isEmpty()) {
 				//ファイルを作成する
+				String uploadDir = FileUtils.createUniqPath(excelBaseDir + "/" + TypingConst.EXCELQDIR) ;
+				FileUtils.makeDir(uploadDir);
 			    File uploadFile = new File(uploadDir,uploadFormFile.getOriginalFilename());
 	
 			    //出力ストリームを取得
@@ -434,7 +443,7 @@ public class EventController {
 				    //ストリームに書き込んでクローズ
 				    uploadFileStream.write(bytes);
 			    }
-			    fileList.add(uploadFile);
+			    fileList.add( new DownloadQFileDto(fileIds[i],uploadFile) );
 			}
 		}
 		

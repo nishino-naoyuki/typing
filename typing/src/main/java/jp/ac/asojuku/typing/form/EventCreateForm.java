@@ -37,6 +37,11 @@ public class EventCreateForm {
 	private Integer hiderankingtime;
 	private String filter;
 	private Integer[] qidList;
+	private Integer uplaodfile1Id;
+	private Integer uplaodfile2Id;
+	private Integer uplaodfile3Id;
+	private Integer uplaodfile4Id;
+	private Integer uplaodfile5Id;
 	private MultipartFile uploadfile1;
 	private MultipartFile uploadfile2;
 	private MultipartFile uploadfile3;
