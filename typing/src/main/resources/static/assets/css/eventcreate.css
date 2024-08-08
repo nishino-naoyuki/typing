@@ -7,3 +7,11 @@
 #alertmsg{
 	display:none;
 }
+
+.dlqfile{
+	color: red;
+}
+
+.dlqfileupdate{
+	display:none;
+}

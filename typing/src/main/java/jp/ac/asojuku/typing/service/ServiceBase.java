@@ -25,6 +25,7 @@ import jp.ac.asojuku.typing.repository.AnsHistoryTblRepository;
 import jp.ac.asojuku.typing.repository.AnsTblRepository;
 import jp.ac.asojuku.typing.repository.AnsTempTblRepository;
 import jp.ac.asojuku.typing.repository.DownloadRepository;
+import jp.ac.asojuku.typing.repository.EventDownloadRepository;
 import jp.ac.asojuku.typing.repository.EventQuestionRepository;
 import jp.ac.asojuku.typing.repository.EventRepository;
 import jp.ac.asojuku.typing.repository.EventUserRepository;
@@ -54,6 +55,8 @@ public class ServiceBase {
 	protected AnsTempTblRepository ansTempTblRepository;
 	@Autowired
 	protected DownloadRepository downloadRepository;
+	@Autowired
+	protected EventDownloadRepository eventDownloadRepository;
 	
 	protected QuestionDetailDto getDetailForm(QestionTblEntity qEntity,Integer uid,Integer eid) {
 		if( qEntity == null ) {

@@ -410,18 +410,18 @@ public class EventController {
 
 	private List<DownloadQFileDto> getUploadFileList(EventCreateForm form) throws FileNotFoundException, IOException {
 		MultipartFile[] files = {
-				form.getUploadfile1(),
-				form.getUploadfile2(),
-				form.getUploadfile3(),
-				form.getUploadfile4(),
-				form.getUploadfile5(),
+				form.getDownloadQFile1(),
+				form.getDownloadQFile2(),
+				form.getDownloadQFile3(),
+				form.getDownloadQFile4(),
+				form.getDownloadQFile5(),
 		};
 		Integer fileIds[] = {
-				form.getUplaodfile1Id(),
-				form.getUplaodfile2Id(),
-				form.getUplaodfile3Id(),
-				form.getUplaodfile4Id(),
-				form.getUplaodfile5Id(),
+				form.getDownloadQFile1Id(),
+				form.getDownloadQFile2Id(),
+				form.getDownloadQFile3Id(),
+				form.getDownloadQFile4Id(),
+				form.getDownloadQFile5Id(),
 		};
 		
 		List<DownloadQFileDto> fileList = new ArrayList<>();
@@ -443,7 +443,7 @@ public class EventController {
 				    //ストリームに書き込んでクローズ
 				    uploadFileStream.write(bytes);
 			    }
-			    fileList.add( new DownloadQFileDto(fileIds[i],uploadFile) );
+			    fileList.add( new DownloadQFileDto(fileIds[i],uploadDir + "/" + uploadFile.getName()) );
 			}
 		}
 		

@@ -27,6 +27,7 @@ import jp.ac.asojuku.typing.dto.UserInfoDto;
 import jp.ac.asojuku.typing.dto.summary.RankingSummary;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
 import jp.ac.asojuku.typing.entity.DownloadTblEntity;
+import jp.ac.asojuku.typing.entity.EventDownloadEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.EventTblEntity;
 import jp.ac.asojuku.typing.entity.EventUserEntity;
@@ -37,6 +38,7 @@ import jp.ac.asojuku.typing.param.EventState;
 import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.repository.specifications.EventQuestionSpecifications;
 import jp.ac.asojuku.typing.util.Exchange;
+import jp.ac.asojuku.typing.util.FileUtils;
 import jp.ac.asojuku.typing.util.Token;
 
 @Service
@@ -146,6 +148,18 @@ public class EventService extends ServiceBase{
 		}
 		dto.setQList(qList);
 		
+		//ダウンロード問題を取得
+		List<EventDownloadEntity> edEntityList =  eventDownloadRepository.findByEidOrderByNo(eid);
+		List<DownloadQFileDto> downloadqFileList = new ArrayList<>();
+		for( EventDownloadEntity edEntity : edEntityList ) {
+			DownloadQFileDto dlDto = new DownloadQFileDto(
+					edEntity.getDownloadTbl().getDownloadId(),
+					FileUtils.getFileNameFromPath( edEntity.getDownloadTbl().getFilename() )
+					);
+			downloadqFileList.add(dlDto);
+		}
+		dto.setDownloadqFileList(downloadqFileList);
+		
 		return dto;
 	}
 	/**
@@ -231,12 +245,22 @@ public class EventService extends ServiceBase{
 			insertQuestions(entity.getEid(),eventCreateForm);
 			
 			//アップロード問題を登録する
-			int ordinalNum = 1;
-			for(DownloadQFileDto uploadqFile : uploadFileList ) {
-				downloadRepository.save( getFrom( ordinalNum, uploadqFile) );
-				ordinalNum++;
+			if( uploadFileList.size() > 0 ) {
+				int no = 1;
+				List<DownloadTblEntity> dlList = new ArrayList<>();
+				for(DownloadQFileDto uploadqFile : uploadFileList ) {
+					DownloadTblEntity dlEntty =
+								downloadRepository.save( getFrom( uploadqFile) );
+					dlList.add(dlEntty);
+					insertUpdateEventDownload(entity.getEid(),dlEntty.getDownloadId(),no);
+					no++;
+				}
+				
+				//問題（連関エンティティ）の削除
+				deleteEventDownload(entity.getEid(),dlList);
+				
 			}
-			//問題（連関エンティティ）の追加削除 TODO
+			
 			
 		}catch(ParseException e) {
 			logger.warn(e.getMessage());
@@ -522,7 +546,7 @@ public class EventService extends ServiceBase{
 	 * @param uploadqFile
 	 * @return
 	 */
-	private DownloadTblEntity getFrom(int ordinalNum,DownloadQFileDto uploadqFile) {
+	private DownloadTblEntity getFrom(DownloadQFileDto uploadqFile) {
 		
 		DownloadTblEntity entity = null;
 		if( uploadqFile.getUploadfileId() == null ) {
@@ -533,9 +557,58 @@ public class EventService extends ServiceBase{
 		
 		String baseDir = SystemConfig.getInstance().getExcelbasedir();
 		
-		entity.setOrdinalNum(ordinalNum);
-		entity.setFilename(uploadqFile.getUploadfile().getAbsolutePath().replace(baseDir, ""));
+		entity.setFilename(uploadqFile.getUploadfile().replace(baseDir, ""));
 		
 		return entity;
+	}
+	
+	/**
+	 * 
+	 * @param eId
+	 * @param dlId
+	 */
+	private void insertUpdateEventDownload(int eId,int dlId,int no) {
+		EventDownloadEntity edlEntity = 
+					eventDownloadRepository.findByEidAndDownloadIdAndNo(eId,dlId,no);
+		
+		if( edlEntity == null ) {
+			edlEntity = new EventDownloadEntity();
+			edlEntity.setEid(eId);
+			edlEntity.setDownloadId(dlId);
+			edlEntity.setNo(no);
+			eventDownloadRepository.save(edlEntity);
+		}
+	}
+	
+	private void deleteEventDownload(int eId,List<DownloadTblEntity> dlList) {
+		List<EventDownloadEntity> edList = eventDownloadRepository.findByEidOrderByNo(eId);
+		
+		for(EventDownloadEntity edlEntity : edList ) {
+			boolean findFlag = false;
+			for(DownloadTblEntity dlEntity : dlList) {
+				if( edlEntity.getDownloadId() == dlEntity.getDownloadId() ) {
+					findFlag = true;
+					break;
+				}
+			}
+			//元データにあって、新データに無い場合は削除
+			if( !findFlag ) {
+				//DB削除
+				eventDownloadRepository.delete(edlEntity);
+				//ファイル削除
+				deleteDownloadFile(edlEntity);
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param edlEntity
+	 */
+	private void deleteDownloadFile(EventDownloadEntity edlEntity) {
+		String baseDir = SystemConfig.getInstance().getExcelbasedir();
+		String filePath = baseDir + edlEntity.getDownloadTbl().getFilename();
+		
+		FileUtils.delete(filePath);
 	}
 }

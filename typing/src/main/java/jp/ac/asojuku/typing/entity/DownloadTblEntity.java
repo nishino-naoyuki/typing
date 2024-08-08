@@ -31,9 +31,6 @@ public class DownloadTblEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer downloadId;
 
-	/** ordinal_num. */
-	private Integer ordinalNum;
-
 	/** filename. */
 	private String filename;
 

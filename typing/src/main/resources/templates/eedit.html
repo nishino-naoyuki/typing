@@ -18,7 +18,7 @@
 <head>
   <!-- ヘッダー -->
   <link th:href="@{/assets/css/jquery.dataTables.min.css}" rel="stylesheet" />
-  <link th:href="@{/assets/css/eventcreate.css}" rel="stylesheet" />
+  <link th:href="@{/assets/css/eventcreate.css?v=1.0.0}" rel="stylesheet" />
   <div id="parent" th:replace="/common/head"></div>  
   <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
@@ -61,7 +61,12 @@
 					</li>
 					<li class="nav-item">
 						<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#searchuser" role="tab" aria-controls="dashboard" aria-selected="false">
-						問題登録
+						タイピング問題登録
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#downloadq" role="tab" aria-controls="dashboard" aria-selected="false">
+						ダウンロード問題登録
 						</a>
 					</li>
 					<li class="nav-item">
@@ -138,6 +143,83 @@
          	</div><!-- col -->
 		</div><!-- row -->
 	</div><!-- searchuser -->
+		<div class="tab-pane fade" id="downloadq" role="tabpanel" aria-labelledby="downloadq-tab">
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題１
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(0) == null}">
+						<input type="file" class="form-control" id="uploadfile1">
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(0) != null}">
+						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(0).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<input type="file" class="dlqfileupdate" id="uploadfile1">
+					</div>
+				</div>
+			</div>
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題２
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(1) == null}">
+						<input type="file" class="form-control" id="uploadfile2">
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(1) != null}">
+						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(1).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<input type="file" class="dlqfileupdate" id="uploadfile2">
+					</div>
+				</div>
+			</div>
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題３
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(2) == null}">
+						<input type="file" class="form-control" id="uploadfile3">
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(2) != null}">
+						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(2).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<input type="file" class="dlqfileupdate" id="uploadfile3">
+					</div>
+				</div>
+			</div>
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題４
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(3) == null}">
+						<input type="file" class="form-control" id="uploadfile4">
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(3) != null}">
+						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(3).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<input type="file" class="dlqfileupdate" id="uploadfile4">
+					</div>
+				</div>
+			</div>
+			<div class="card card-frame dlqcardframe" >
+				<div class="card card-frame dlqestion" >
+					<div class="card-header d-flex justify-content-between">
+						ダウンロード問題５
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(4) == null}">
+						<input type="file" class="form-control" id="uploadfile5">
+					</div>
+					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(4) != null}">
+						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(4).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<input type="file" class="dlqfileupdate" id="uploadfile5">
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
 			<div class="row mt-5 align-items-center">
 				<div class="form-group col-3">
@@ -178,6 +260,7 @@
 	const addquestion = document.getElementById('addquestion');
 	const alertarea = document.getElementById('alertmsg');
 	const draglist = document.getElementById('questionlist');
+	const uploadfile1updateBtn = document.getElementById('uploadfile1updateBtn');
 	
 	alertarea.style.display = "none";
 	
@@ -287,6 +370,16 @@
  		formData.append('hiderankingtime',hiderankingtime.value );
  		formData.append('filter',filter.value );
  		formData.append('qidList',qidList );
+ 		let updatefiles = 
+		[
+			uploadfile1,uploadfile2,uploadfile3,uploadfile4,uploadfile5
+		];
+ 		
+ 		for( let i = 0; i < updatefiles.length; i++ ){
+	 		if( updatefiles[i].value != ""){
+	 			formData.append('downloadQFile'+(i+1),updatefiles[i].files[0] );
+	 		}
+ 		}
  		 		
         const url = /*[[@{/event/save}]]*/ "/event/save";
         fetch(url,{method:"post",body: formData})
@@ -305,6 +398,16 @@
  				alert("登録完了\n【注意】このまま連続で登録をクリックすると同じものが登録されてしまいます！");
  			}
  		});
+  });
+  
+  const displayUpdateInput = ( uploadfile )=>{
+  	const uploadFileInput = document.getElementById(uploadfile);
+  	uploadFileInput.classList.add("form-control");
+  	uploadFileInput.style.display = "block";
+  };
+  
+  uploadfile1updateBtn.addEventListener('click',()=>{
+  	displayUpdateInput("uploadfile1");
   });
   </script>
 </html>

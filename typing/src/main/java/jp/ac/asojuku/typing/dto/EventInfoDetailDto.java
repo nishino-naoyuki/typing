@@ -3,6 +3,8 @@ package jp.ac.asojuku.typing.dto;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jp.ac.asojuku.typing.util.Exchange;
 import lombok.Data;
 
@@ -19,6 +21,7 @@ public class EventInfoDetailDto {
 	private Boolean rankingdisplay;
 	private Integer hiderankingtime;
 	private String filter;
+	private List<DownloadQFileDto> downloadqFileList;
 	
 	private List<QuestionOutlineDto> qList;
 	
@@ -27,5 +30,11 @@ public class EventInfoDetailDto {
 	}
 	public String getPStartDateString() {
 		return Exchange.toFormatString(startdatetime,"yyyy-MM-dd'T'HH:mm:ss");
+	}
+	public DownloadQFileDto getDownloadQFileDto(int index) {
+		if( downloadqFileList == null || downloadqFileList.size() <= index) {
+			return null;
+		}
+		return downloadqFileList.get(index);
 	}
 }

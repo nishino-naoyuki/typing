@@ -44,6 +44,8 @@ public class EventDownloadEntity implements Serializable {
 	@OneToOne
     @JoinColumn(name="downloadId",insertable=false ,updatable=false)
 	private DownloadTblEntity downloadTbl;
+	
+	private Integer no;
 
 
 }

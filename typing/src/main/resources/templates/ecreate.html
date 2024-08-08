@@ -335,14 +335,14 @@
  		formData.append('hiderankingtime',hiderankingtime.value );
  		formData.append('filter',filter.value );
  		formData.append('qidList',qidList );
- 		updatefiles = 
+ 		let updatefiles = 
 		[
 			uploadfile1,uploadfile2,uploadfile3,uploadfile4,uploadfile5
 		];
  		
  		for( let i = 0; i < updatefiles.length; i++ ){
 	 		if( updatefiles[i].value != ""){
-	 			formData.append('uploadfile'+(i+1),updatefiles[i].files[0] );
+	 			formData.append('downloadQFile'+(i+1),updatefiles[i].files[0] );
 	 		}
  		}
  		//formData.append('uploadfile2',uploadfile2.files[0] );

@@ -9,9 +9,9 @@ import lombok.Data;
 @Data
 public class DownloadQFileDto {
 	private Integer uploadfileId;
-	private File uploadfile;
+	private String uploadfile;
 	
-	public DownloadQFileDto(Integer uploadfileId,File uploadfile) {
+	public DownloadQFileDto(Integer uploadfileId,String uploadfile) {
 		this.uploadfileId = uploadfileId;
 		this.uploadfile = uploadfile;
 	}
