@@ -20,4 +20,5 @@ public class EventInfoDto {
 	private RankingDto userRanking;
 	private long lefttime;	//開始までの残り時間
 	private boolean entryFlag;
+	private List<DwonloadQOutlineDto> dqList;
 }

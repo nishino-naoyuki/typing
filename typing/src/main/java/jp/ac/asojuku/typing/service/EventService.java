@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jp.ac.asojuku.typing.config.SystemConfig;
 import jp.ac.asojuku.typing.dto.DownloadQFileDto;
+import jp.ac.asojuku.typing.dto.DwonloadQOutlineDto;
 import jp.ac.asojuku.typing.dto.EventInfoDetailDto;
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
@@ -25,6 +26,7 @@ import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.dto.RankingDto;
 import jp.ac.asojuku.typing.dto.UserInfoDto;
 import jp.ac.asojuku.typing.dto.summary.RankingSummary;
+import jp.ac.asojuku.typing.entity.AnsDlTblEntity;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
 import jp.ac.asojuku.typing.entity.DownloadTblEntity;
 import jp.ac.asojuku.typing.entity.EventDownloadEntity;
@@ -184,9 +186,11 @@ public class EventService extends ServiceBase{
 		List<EventQuestionEntity> eqEntityList =  eventQuestionRepository.findByEidOrderByNo(eid);
 		
 		List<EventUserEntity> euEntityList = eventUserRepository.findByEidOrderByUid(eid);
+		
+		List<EventDownloadEntity> edEntityList = eventDownloadRepository.findByEidOrderByNo(eid);
 
 		
-		return getFrom(entity,eqEntityList,euEntityList,uid,roleId);
+		return getFrom(entity,eqEntityList,euEntityList,edEntityList,uid,roleId);
 	}
 	/**
 	 * 指定のユーザーが指定のイベントに既に登録されているかを取得
@@ -318,6 +322,7 @@ public class EventService extends ServiceBase{
 			EventTblEntity entity,
 			List<EventQuestionEntity> eqEntityList,
 			List<EventUserEntity> euEntityList,
+			List<EventDownloadEntity> edEntityList,
 			Integer uid,
 			RoleId roleId) {
 		EventInfoDto dto = new EventInfoDto();
@@ -355,21 +360,60 @@ public class EventService extends ServiceBase{
 		//問題リストをセット
 		//先生：無条件でリストを表示する
 		//学生：公開期限内でそのユーザーがイベントに登録済みの場合リストを表示する
-		List<QuestionOutlineDto> qList = new ArrayList<>();
-		if( roleId == RoleId.ADMIN || 
-		   (roleId == RoleId.STUDENT && now.after(entity.getStartDate()) && now.before(entity.getFinishDate()) && entryFlag )
-		   ) {
-			dto.setDisplayQuestion(true);
-			for( EventQuestionEntity eqEntity : eqEntityList) {
-				QuestionOutlineDto qDto = getQuestionOutlineDtoForUser(eqEntity,uid);				
-				qList.add(qDto);
-			}
-		}else {
-			dto.setDisplayQuestion(false);
-		}
-		dto.setQList(qList);
+		dto.setQList( getFrom(eqEntityList,entity,dto,now,entryFlag,uid,roleId) );
 		
 		//ユーザーリスト
+		dto.setUList( getFrom(euEntityList,roleId) );
+		
+		//ダウンロード問題リストをセット
+		dto.setDqList( getFrom(edEntityList,uid) );
+		
+		long deff = Exchange.differenceDate(entity.getStartDate(),new Date());
+		dto.setLefttime((deff < 0 ? 0:deff));
+		
+		return dto;
+	}
+	
+	/**
+	 * ダウンロード問題に関しての詳細を取得する
+	 * 
+	 * @param edEntityList
+	 * @param uid
+	 * @return
+	 */
+	private List<DwonloadQOutlineDto> getFrom(List<EventDownloadEntity> edEntityList,Integer uid){
+		List<DwonloadQOutlineDto> dqList = new ArrayList<>();
+		AnsDlTblEntity preAns = null;
+		
+		for( EventDownloadEntity edEntity : edEntityList ) {
+			DwonloadQOutlineDto dqDto = new DwonloadQOutlineDto();
+			dqDto.setNo( edEntity.getNo() );
+			dqDto.setDownloadfileId( edEntity.getDownloadId() );
+			dqDto.setDownloadfilePath( edEntity.getDownloadTbl().getFilename() );
+			dqDto.setDownloadfileName( FileUtils.getFileNameFromPath( edEntity.getDownloadTbl().getFilename() ));
+			//解答済みか
+			AnsDlTblEntity ans = ansDlTblRepository.findByUidAndEdId(uid, edEntity.getEdId());
+			if( ans != null ) {
+				dqDto.setUploaded(true);
+			}else {
+				dqDto.setUploaded(false);
+			}
+			//ダウンロード可能か？
+			if( edEntity.getNo() == 1 || preAns != null) {
+				//1問目は常にダウンロード可能 または一つ前の問題が解答済（アップロード済み）みである
+				dqDto.setDlOk(true);
+			}else {
+				dqDto.setDlOk(false);
+			}
+			dqList.add(dqDto);
+			preAns = ans;
+		}
+		
+		return dqList;
+	}
+	
+	private List<UserInfoDto> getFrom(List<EventUserEntity> euEntityList,RoleId roleId){
+
 		List<UserInfoDto> uList = new ArrayList<>();
 		if( roleId == RoleId.ADMIN ) {
 			for( EventUserEntity euEntity : euEntityList) {
@@ -383,12 +427,44 @@ public class EventService extends ServiceBase{
 				uList.add(uDto);
 			}
 		}
-		dto.setUList(uList);
 		
-		long deff = Exchange.differenceDate(entity.getStartDate(),new Date());
-		dto.setLefttime((deff < 0 ? 0:deff));
-		
-		return dto;
+		return uList;
+	}
+	
+	/**
+	 * 
+	 * @param eqEntityList
+	 * @param entity
+	 * @param dto
+	 * @param now
+	 * @param entryFlag
+	 * @param uid
+	 * @param roleId
+	 * @return
+	 */
+	private List<QuestionOutlineDto> getFrom(
+			List<EventQuestionEntity> eqEntityList,
+			EventTblEntity entity,
+			EventInfoDto dto,
+			Date now,
+			boolean entryFlag,
+			Integer uid,
+			RoleId roleId
+			){
+
+		List<QuestionOutlineDto> qList = new ArrayList<>();
+		if( roleId == RoleId.ADMIN || 
+		   (roleId == RoleId.STUDENT && now.after(entity.getStartDate()) && now.before(entity.getFinishDate()) && entryFlag )
+		   ) {
+			dto.setDisplayQuestion(true);
+			for( EventQuestionEntity eqEntity : eqEntityList) {
+				QuestionOutlineDto qDto = getQuestionOutlineDtoForUser(eqEntity,uid);				
+				qList.add(qDto);
+			}
+		}else {
+			dto.setDisplayQuestion(false);
+		}
+		return qList;
 	}
 	
 	/**

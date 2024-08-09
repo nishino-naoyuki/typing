@@ -408,6 +408,14 @@ public class EventController {
         return jsonString;
 	}
 
+	/**
+	 * アップロードされたファイルを取得する処理
+	 * 
+	 * @param form
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	private List<DownloadQFileDto> getUploadFileList(EventCreateForm form) throws FileNotFoundException, IOException {
 		MultipartFile[] files = {
 				form.getDownloadQFile1(),

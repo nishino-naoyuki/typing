@@ -24,6 +24,7 @@ public class EventInfoDetailDto {
 	private List<DownloadQFileDto> downloadqFileList;
 	
 	private List<QuestionOutlineDto> qList;
+	private List<DwonloadQOutlineDto> dqList;
 	
 	public String getPublicStartDateString() {
 		return Exchange.toFormatString(publicstartdatetime,"yyyy-MM-dd'T'HH:mm:ss");

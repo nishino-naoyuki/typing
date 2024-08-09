@@ -18,11 +18,13 @@
 <head>
   <!-- ヘッダー -->
   <link th:href="@{/assets/css/jquery.dataTables.min.css}" rel="stylesheet" />
+  <link th:href="@{/assets/css/dlqlist.css.css?v=1.0.0}" rel="stylesheet" />
   <div id="parent" th:replace="/common/head"></div>  
   <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
   <script>
   	let rtable;
+  	let exeltable;
     document.addEventListener('DOMContentLoaded', function () {
 	    let qtable = new DataTable('#qlistTable',{
 	   	      "paging": true,
@@ -43,6 +45,19 @@
 	   	      "responsive": true});
 	   	      
 	   	 initRankingTable();
+	   	 
+	   	 
+		exeltable = new DataTable('#exceltable',
+							{
+								autoWidth: false,
+								columns: [
+									{ width: '5%' },
+									{ width: '30%' },
+									{ width: '45%' },
+									{ width: '20%' },
+								]
+							}
+			);
 	});
   </script>
   
@@ -157,6 +172,11 @@
 											問題一覧
 											</a>
 										</li>
+										<li class="nav-item">
+											<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#dlqtab" role="tab" aria-controls="dashboard" aria-selected="false">
+											ダウンロード問題
+											</a>
+										</li>
 										<li class="nav-item"　th:if="${session['loginInfo'].isStudent()}">
 											<a class="nav-link mb-0 px-0 py-1" data-bs-toggle="tab" href="#searchuser" role="tab" aria-controls="dashboard" aria-selected="false">
 											個別情報
@@ -201,6 +221,36 @@
 													<th>難易度</th>
 												</tr>
 											</tfoot>
+										</table>
+									</div>
+									<div class="tab-pane fade" id="dlqtab" role="tabpanel" aria-labelledby="profile-tab">
+										<table id="exceltable" class="display">
+											<thead>
+												<tr>
+													<th>No.</th>
+													<th>問題のダウンロード</th>
+													<th>解答のアップロード</th>
+													<th>提出済</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr th:each="element,status:${eventDetail.dqList}">
+													<td th:text="${element.no}"></td>
+													<td>
+														<button type="button" class="btn btn-primary" th:disabled="{!element.dlOk}" onclick="" >ダウンロード</button>
+													</td>
+													
+													<td　th:if="${element.dlOk}">
+														<input th:if="${!element.uploaded}" class="form-control" type="file" value="" id="example-url-input" >
+														<p th:if="${element.uploaded}" >提出済み</p>
+													</td>
+													
+													<td　th:if="${!element.dlOk}">
+														<p class="alartmsg" >一つ前の問題を解いてください</p>
+													</td>
+													<td th:text="${element.uploaded} ? '提出済み':'未提出'"></td>
+												</tr>
+											</tbody>
 										</table>
 									</div>
 									<div class="tab-pane fade" id="searchuser" role="tabpanel" aria-labelledby="profile-tab"　th:if="${session['loginInfo'].isStudent()}">								
@@ -361,6 +411,11 @@
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
+<script>
+	const downloadFile = ( no )=>{
+		alert("");
+	}
+</script>
 <script th:inline="javascript" th:if="${!eventDetail.displayQuestion && eventDetail.beforeEvent}">
 	let tim = /*[[${eventDetail.lefttime}]]*/ 0;
 	const leftTimDisp = document.getElementById("lefttime");
