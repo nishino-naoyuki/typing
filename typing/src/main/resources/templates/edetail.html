@@ -18,7 +18,7 @@
 <head>
   <!-- ヘッダー -->
   <link th:href="@{/assets/css/jquery.dataTables.min.css}" rel="stylesheet" />
-  <link th:href="@{/assets/css/dlqlist.css.css?v=1.0.0}" rel="stylesheet" />
+  <link th:href="@{/assets/css/dlqlist.css?v=1.0.1}" rel="stylesheet" />
   <div id="parent" th:replace="/common/head"></div>  
   <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
@@ -237,7 +237,7 @@
 												<tr th:each="element,status:${eventDetail.dqList}">
 													<td th:text="${element.no}"></td>
 													<td>
-														<button type="button" class="btn btn-primary" th:disabled="{!element.dlOk}" onclick="" >ダウンロード</button>
+														<button type="button" class="btn btn-primary" th:disabled="${!element.dlOk}" th:onclick="|downloadFile(${element.no})|" >ダウンロード</button>
 													</td>
 													
 													<td　th:if="${element.dlOk}">
@@ -401,6 +401,10 @@
           </div>
         </div>
       </div>
+      <form action="" method="post" id="downloadform" >
+      	<input type="hidden" name="eid" id="dlqformeid">
+      	<input type="hidden" name="no" id="dlqformno">
+      </form>
 	  <!--   FOOTER   -->
 	  <div id="parent" th:replace="/common/footer"></div>  
     </div>
@@ -411,9 +415,19 @@
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
-<script>
+<script th:inline="javascript">
 	const downloadFile = ( no )=>{
-		alert("");
+		const form = document.getElementById("downloadform");
+		const dlqformeid = document.getElementById("dlqformeid");
+		const dlqformno = document.getElementById("dlqformno");
+		//const formData = new FormData(form);
+		dlqformeid.value = /*[[${eventDetail.eid}]]*/ 0;
+		dlqformno.value = no ;
+		
+	    const url = /*[[@{/download/excelq}]]*/ "/download/excelq";
+		form.action = url;
+		form.submit();
+	 	//fetch(url,{method:"post",body: formData});
 	}
 </script>
 <script th:inline="javascript" th:if="${!eventDetail.displayQuestion && eventDetail.beforeEvent}">

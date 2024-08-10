@@ -152,6 +152,21 @@ public class FileController {
 		headers.setContentLength(csvBinary.length);
 		return new HttpEntity<byte[]>(csvBinary, headers);
 	}
+	
+
+	@RequestMapping(value= {"/download/excelq"}, method=RequestMethod.POST)
+	public Object downloadExcelQuestion(
+			@ModelAttribute("eid")Integer eid,
+			@ModelAttribute("no")Integer no
+			) {
+		byte[] csvBinary = "aaaa".getBytes();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		headers.setContentDispositionFormData("filename", RANKINGCSV);
+		headers.setContentLength(csvBinary.length);
+		return new HttpEntity<byte[]>(csvBinary, headers);
+	}
+	/** -private- **/
     /**
      * CSVファイルアップロード用のディレクトリを作成する
      * @return

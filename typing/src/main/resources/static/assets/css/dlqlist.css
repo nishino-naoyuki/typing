@@ -3,3 +3,7 @@
 .alartmsg{
 	color: red;
 }
+
+#dlqformbtn{
+	display:none;
+}
