@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -46,123 +48,17 @@ public class AnsDlTblEntity implements Serializable {
 
 	/** submit_date. */
 	private Date submitDate;
+	
+	private String ansFilepath;
 
-	/**
-	 * コンストラクタ.
-	 */
-	public AnsDlTblEntity() {
-	}
+	@PrePersist
+    public void onPrePersist() {
+		setSubmitDate(new Date());
+    }
 
-	/**
-	 * ansid を設定します.
-	 * 
-	 * @param ansid
-	 *            ansid
-	 */
-	public void setAnsid(Integer ansid) {
-		this.ansid = ansid;
-	}
-
-	/**
-	 * ansid を取得します.
-	 * 
-	 * @return ansid
-	 */
-	public Integer getAnsid() {
-		return this.ansid;
-	}
-
-	/**
-	 * ユーザーテーブル を設定します.
-	 * 
-	 * @param userTbl
-	 *            ユーザーテーブル
-	 */
-	public void setUserTbl(UserTblEntity userTbl) {
-		this.userTbl = userTbl;
-	}
-
-	/**
-	 * ユーザーテーブル を取得します.
-	 * 
-	 * @return ユーザーテーブル
-	 */
-	public UserTblEntity getUserTbl() {
-		return this.userTbl;
-	}
-
-	/**
-	 * 新規テーブル を設定します.
-	 * 
-	 * @param eventDownload
-	 *            新規テーブル
-	 */
-	public void setEventDownload(EventDownloadEntity eventDownload) {
-		this.eventDownload = eventDownload;
-	}
-
-	/**
-	 * 新規テーブル を取得します.
-	 * 
-	 * @return 新規テーブル
-	 */
-	public EventDownloadEntity getEventDownload() {
-		return this.eventDownload;
-	}
-
-	/**
-	 * submit_date を設定します.
-	 * 
-	 * @param submitDate
-	 *            submit_date
-	 */
-	public void setSubmitDate(Date submitDate) {
-		this.submitDate = submitDate;
-	}
-
-	/**
-	 * submit_date を取得します.
-	 * 
-	 * @return submit_date
-	 */
-	public Date getSubmitDate() {
-		return this.submitDate;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((ansid == null) ? 0 : ansid.hashCode());
-		return result;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		AnsDlTblEntity other = (AnsDlTblEntity) obj;
-		if (ansid == null) {
-			if (other.ansid != null) {
-				return false;
-			}
-		} else if (!ansid.equals(other.ansid)) {
-			return false;
-		}
-		return true;
-	}
+    @PreUpdate
+    public void onPreUpdate() {
+		setSubmitDate(new Date());
+    }
 
 }

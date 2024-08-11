@@ -52,9 +52,9 @@
 								autoWidth: false,
 								columns: [
 									{ width: '5%' },
-									{ width: '30%' },
-									{ width: '45%' },
 									{ width: '20%' },
+									{ width: '65%' },
+									{ width: '10%' },
 								]
 							}
 			);
@@ -241,7 +241,10 @@
 													</td>
 													
 													<td　th:if="${element.dlOk}">
-														<input th:if="${!element.uploaded}" class="form-control" type="file" value="" id="example-url-input" >
+														<div class="input-group mb-3 mx-2">
+															<input th:if="${!element.uploaded}" class="form-control" type="file" value="" th:data-filename="${element.downloadfileName}" th:id="|uplaad${element.no}|" >
+															<button type="button" class="btn btn-primary mb-0" th:disabled="${!element.dlOk}"  th:onclick="|uploadFile(${element.no})|" >アップロード</button>
+														</div>
 														<p th:if="${element.uploaded}" >提出済み</p>
 													</td>
 													
@@ -416,6 +419,37 @@
   <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 <script th:inline="javascript">
+	const uploadFile = ( no )=>{
+		const upFilenameInput = document.getElementById("uplaad"+no);
+		if( upFilenameInput.value == "" ){
+			alert("ファイルを選択してください");
+		}
+		const dlfilename = upFilenameInput.dataset.filename;		
+		const upfilename = upFilenameInput.files[0].name;
+		
+		//ダウンロードしたファイルと同じ名前か？
+		if( dlfilename != upfilename ){
+			alert("ダウンロードしたファイルと同じファイルをアップロードしてください（ファイル名："+dlfilename+")");
+			return;
+		}
+		
+		const formData = new FormData();
+		formData.append('no',no);
+		formData.append('eId',/*[[${eventDetail.eid}]]*/ );
+		formData.append('uploadFile',upFilenameInput.files[0] );
+				
+        const url = /*[[@{/event/excelupload}]]*/ "/event/excelupload";
+        fetch(url,{method:"post",body: formData})
+        //レスポンスの受け取り
+        .then( response => response.json()).then(result => {
+ 			if( result == "OK"){
+ 				alert("アップロードOK");
+ 			}else{
+ 				alertarea.style.display = "none";
+ 				alert("登録完了\n【注意】このまま連続で登録をクリックすると同じものが登録されてしまいます！");
+ 			}
+ 		});
+	}
 	const downloadFile = ( no )=>{
 		const form = document.getElementById("downloadform");
 		const dlqformeid = document.getElementById("dlqformeid");

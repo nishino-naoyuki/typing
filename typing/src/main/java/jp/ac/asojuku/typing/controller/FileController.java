@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -30,9 +31,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jp.ac.asojuku.typing.config.SystemConfig;
 import jp.ac.asojuku.typing.csv.UserCSV;
 import jp.ac.asojuku.typing.dto.CSVProgressDto;
+import jp.ac.asojuku.typing.dto.ExcelFileDto;
+import jp.ac.asojuku.typing.dto.LoginInfoDto;
 import jp.ac.asojuku.typing.dto.RankingDto;
+import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.UserInputCSVForm;
+import jp.ac.asojuku.typing.param.SessionConst;
 import jp.ac.asojuku.typing.service.CsvService;
 import jp.ac.asojuku.typing.service.EventService;
 import jp.ac.asojuku.typing.service.UserService;
@@ -48,6 +53,8 @@ public class FileController {
 	UserService userService;
 	@Autowired
 	CsvService csvService;
+	@Autowired
+	HttpSession session;
 	
 	/**
 	 * CSV登録処理
@@ -153,18 +160,37 @@ public class FileController {
 		return new HttpEntity<byte[]>(csvBinary, headers);
 	}
 	
-
+	/**
+	 * エクセル問題のダウンロード
+	 * 
+	 * @param eid
+	 * @param no
+	 * @return
+	 * @throws PermitionException 
+	 * @throws SystemErrorException 
+	 */
 	@RequestMapping(value= {"/download/excelq"}, method=RequestMethod.POST)
 	public Object downloadExcelQuestion(
 			@ModelAttribute("eid")Integer eid,
 			@ModelAttribute("no")Integer no
-			) {
-		byte[] csvBinary = "aaaa".getBytes();
+			) throws PermitionException, SystemErrorException {
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+		//ダウンロード可能かをチェック
+		if( csvService.isExcelDownload(loginInfo.getUid(), eid, no) != true ) {
+			logger.warn("不正に問題をダウンロードしようとしました。eid="+eid+" uid="+loginInfo.getUid());
+			throw new PermitionException("この問題はダウンロードできません");
+		}
+		
+		ExcelFileDto excelFileDto = csvService.getExcelQuestion(eid,no);
+		
+		byte[] fileBinary = excelFileDto.getData();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-		headers.setContentDispositionFormData("filename", RANKINGCSV);
-		headers.setContentLength(csvBinary.length);
-		return new HttpEntity<byte[]>(csvBinary, headers);
+		headers.setContentDispositionFormData("filename", excelFileDto.getFileName());
+		headers.setContentLength(fileBinary.length);
+		return new HttpEntity<byte[]>(fileBinary, headers);
 	}
 	/** -private- **/
     /**

@@ -48,7 +48,38 @@ public class EventService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(EventService.class);
 	private final String DATE_FMT = "yyyy-MM-dd'T'HH:mm";
 	private final Integer RANKING_DISP = 1;
+	
+	/**
+	 * 答えをDBにアップする
+	 * 
+	 * @param eId
+	 * @param no
+	 * @param uid
+	 */
+	public void insertAns(Integer eId,Integer no,Integer uid,String filepath) {
+		AnsDlTblEntity entity = new AnsDlTblEntity();
+		EventDownloadEntity dlEntity = eventDownloadRepository.findByEidAndNo(eId, no);
 		
+		entity.setEdId( dlEntity.getDownloadId() );
+		entity.setUid(uid);
+		entity.setAnsFilepath(filepath);
+		
+		ansDlTblRepository.save(entity);
+	}
+	/**
+	 * ファイル名を取得する
+	 * @param eqId
+	 * @param no
+	 * @return
+	 */
+	public String getExcelQFileName(Integer eId,Integer no) {
+		EventDownloadEntity dlEntity = eventDownloadRepository.findByEidAndNo(eId, no);
+		if( dlEntity == null ) {
+			return "";
+		}
+		
+		return FileUtils.getFileNameFromPath( dlEntity.getDownloadTbl().getFilename() );
+	}
 	/**
 	 * ランキングが表示可能かどうかを返す
 	 * @param role

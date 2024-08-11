@@ -9,4 +9,5 @@ public class TypingConst {
 	//練習用のイベントID
 	public static final Integer PRACTICE_EVENTID = 0;
 	public static final String EXCELQDIR = "question";
+	public static final String UPLOADDIR = "upload";
 }

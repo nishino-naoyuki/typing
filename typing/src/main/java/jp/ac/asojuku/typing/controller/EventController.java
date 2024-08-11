@@ -44,6 +44,7 @@ import jp.ac.asojuku.typing.dto.RankingDto;
 import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.EventCreateForm;
+import jp.ac.asojuku.typing.form.EventExcelUploadForm;
 import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.param.SessionConst;
 import jp.ac.asojuku.typing.param.TypingConst;
@@ -66,8 +67,53 @@ public class EventController {
 	@Autowired
 	QuestionService questionService;
 	
-	
-	
+	/**
+	 * エクセルファイルアップロード処理
+	 * 
+	 * @param eventExcelUploadForm
+	 * @return
+	 * @throws SystemErrorException
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	@RequestMapping(value = { "/excelupload" }, method = RequestMethod.POST)
+	@ResponseBody
+	public Object excelupload(
+			@Valid EventExcelUploadForm eventExcelUploadForm) throws SystemErrorException, FileNotFoundException, IOException {
+		
+		String upFileName = eventExcelUploadForm.getUploadFile().getOriginalFilename();
+		String eqFileName =  eventService.getExcelQFileName(eventExcelUploadForm.getEId(), eventExcelUploadForm.getNo());
+		if( !eqFileName.equals(upFileName) ) {
+			return "NG";
+		}
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+		
+		Integer eId = eventExcelUploadForm.getEId();
+		Integer no = eventExcelUploadForm.getNo();
+		MultipartFile uploadFile = eventExcelUploadForm.getUploadFile();
+		
+		//ファイルを出力
+		String excelBaseDir = SystemConfig.getInstance().getExcelbasedir();
+		String uploadDir = excelBaseDir + "/" + TypingConst.UPLOADDIR + "/" + eId ;
+		FileUtils.makeDir(uploadDir);
+	    File uploadFileObj = new File(uploadDir,uploadFile.getOriginalFilename());
+
+	    //出力ストリームを取得
+	    try(BufferedOutputStream uploadFileStream =
+                new BufferedOutputStream(new FileOutputStream(uploadFileObj))){
+		    //出力ファイル名を決定する
+			byte[] bytes = uploadFile.getBytes();
+		    //ストリームに書き込んでクローズ
+		    uploadFileStream.write(bytes);
+	    }
+	    
+	    //データベースに登録
+	    eventService.insertAns(eId, no, loginInfo.getUid(),uploadFileObj.getAbsolutePath());
+	    
+		return "OK";
+	}
 	/**
 	 * イベントリストの表示
 	 * @param mv

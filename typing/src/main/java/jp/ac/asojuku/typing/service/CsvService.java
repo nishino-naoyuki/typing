@@ -2,6 +2,7 @@ package jp.ac.asojuku.typing.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,14 +25,18 @@ import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 import jp.ac.asojuku.typing.config.SystemConfig;
+import jp.ac.asojuku.typing.dto.ExcelFileDto;
 import jp.ac.asojuku.typing.dto.summary.RankingSummary;
+import jp.ac.asojuku.typing.entity.AnsDlTblEntity;
 import jp.ac.asojuku.typing.entity.AnsTblEntity;
+import jp.ac.asojuku.typing.entity.EventDownloadEntity;
 import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.EventUserEntity;
 import jp.ac.asojuku.typing.entity.UserTblEntity;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.param.csv.EventResultCSV;
 import jp.ac.asojuku.typing.param.csv.RankingCSV;
+import jp.ac.asojuku.typing.util.FileUtils;
 
 @Service
 public class CsvService extends ServiceBase{
@@ -43,6 +48,73 @@ public class CsvService extends ServiceBase{
 	@Autowired
 	ResourceLoader resourceLoader;
 	
+	/**
+	 * エクセル問題がダウンロード可能かを返す
+	 * 
+	 * @param uid
+	 * @param eid
+	 * @param no
+	 * @return
+	 */
+	public boolean isExcelDownload(Integer uid,Integer eid,Integer no) {
+		//no1はいつでもDL可能
+		if( no == 1 ) {
+			return true;
+		}
+		boolean isDownloadOk = false;
+		//一つ前の問題を取得
+		EventDownloadEntity eldEntity = eventDownloadRepository.findByEidAndNo(eid, no-1);
+		//解答済みかをチェック
+		if( eldEntity != null ) {
+			AnsDlTblEntity ansDlEntity = ansDlTblRepository.findByUidAndEdId(uid, eldEntity.getEdId());
+			isDownloadOk = (ansDlEntity != null);
+		}
+		
+		return isDownloadOk;
+	}
+	
+	/**
+	 * エクセル問題を取得しバイナリを返す
+	 * 
+	 * @param eid
+	 * @param no
+	 * @return
+	 * @throws SystemErrorException 
+	 */
+	public ExcelFileDto getExcelQuestion(Integer eid,Integer no) throws SystemErrorException {
+		ExcelFileDto excelFileDto = new ExcelFileDto();
+		//問題を取得
+		EventDownloadEntity eldEntity = eventDownloadRepository.findByEidAndNo(eid, no);
+
+		if( eldEntity == null ) {
+			excelFileDto.setFileName("error");
+			excelFileDto.setData(new byte[1]);
+			return excelFileDto;
+		}
+	    //出力ファイル名を決定する
+		String excelqDir = SystemConfig.getInstance().getExcelbasedir();
+	    File excelFile = new File(excelqDir + "/" + eldEntity.getDownloadTbl().getFilename());
+
+	    byte[] b = {};
+
+	    try {
+			//バイナリ変換
+			Resource resource = resourceLoader.getResource("file:" + excelFile.getAbsolutePath());
+			InputStream csvStream = resource.getInputStream();
+			
+			// byteへ変換
+			b = IOUtils.toByteArray(csvStream);
+	    	
+	    } catch (IOException e) {
+			e.printStackTrace();
+			throw new SystemErrorException(e);
+		}
+
+		excelFileDto.setFileName( FileUtils.getFileNameFromPath(excelFile.getAbsolutePath()) );
+		excelFileDto.setData(b);
+		
+		return excelFileDto;
+	}
 	/**
 	 * 大会結果を問題ごとで切り出す
 	 * @param eid
