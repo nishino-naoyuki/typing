@@ -34,6 +34,7 @@ import jp.ac.asojuku.typing.entity.EventQuestionEntity;
 import jp.ac.asojuku.typing.entity.EventUserEntity;
 import jp.ac.asojuku.typing.entity.UserTblEntity;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
+import jp.ac.asojuku.typing.param.TypingConst;
 import jp.ac.asojuku.typing.param.csv.EventResultCSV;
 import jp.ac.asojuku.typing.param.csv.RankingCSV;
 import jp.ac.asojuku.typing.util.FileUtils;
@@ -48,6 +49,39 @@ public class CsvService extends ServiceBase{
 	@Autowired
 	ResourceLoader resourceLoader;
 	
+	/**
+	 * 解答のZIPファイルを作成する
+	 * @param eId
+	 * @param uId
+	 * @return
+	 */
+	public byte[] getExcelAnsZip(Integer eId,Integer uId) {
+
+		//生徒が提出したフォルダを取得
+		String excelBaseDir = SystemConfig.getInstance().getExcelbasedir();
+		String uploadDir = excelBaseDir + "/" + TypingConst.UPLOADDIR + "/" + eId;
+		String downloadDir = excelBaseDir + "/" + TypingConst.DOWNLOADDIR + "/" + eId;
+		String zipfilepath = downloadDir + "/" + TypingConst.ANSZIPFNAME ;
+		
+		FileUtils.makeDir(downloadDir);
+		
+		byte[] b = null;
+		try {
+			File zipFile = FileUtils.compressZip(uploadDir,zipfilepath);
+			//バイナリ変換
+			Resource resource = resourceLoader.getResource("file:" + zipFile.getAbsolutePath());
+			InputStream zipStream;
+			zipStream = resource.getInputStream();
+			b = IOUtils.toByteArray(zipStream);
+			
+			FileUtils.delete(zipfilepath);
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		
+		return b;
+	}
 	/**
 	 * エクセル問題がダウンロード可能かを返す
 	 * 

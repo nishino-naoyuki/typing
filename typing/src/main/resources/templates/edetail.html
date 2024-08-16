@@ -46,7 +46,7 @@
 	   	      
 	   	 initRankingTable();
 	   	 
-	   	 
+	   	 /*
 		exeltable = new DataTable('#exceltable',
 							{
 								autoWidth: false,
@@ -58,9 +58,74 @@
 								]
 							}
 			);
+			*/
+		intExceltbl();
 	});
   </script>
-  
+  	<script th:inline="javascript">
+  		const intExceltbl = ()=>{
+  			const url = /*[[@{/event/excelqlist}]]*/ "/event/excelqlist";
+			exeltable = new DataTable('#exceltable',
+				{
+				  autoWidth: false,
+		   	      "ajax" : {
+			   	      	"url": url,
+			   	      	"type" : "post",
+			   	      	"data" : function( d ) {
+						      d.eid = /*[[${eid}]]*/0;
+						    },
+						"dataSrc": "dlqList"
+					},
+					columns: [
+							{ 
+								width: '5%',
+								data:"no" 
+							},
+							{ 
+								width: '20%',
+								data:"dlOk" ,
+								render: function( data, type, row ){
+									let disabled = "";
+									if( row.no == 1 || row.dlOk ){
+										disabled = "";
+									}else{
+										disabled = "disabled";
+									}
+									return '<button type="button" class="btn btn-primary" '+disabled+' onclick="downloadFile('+row.no+')" >ダウンロード</button>';
+								}
+							},
+							{ 
+								width: '65%',
+								data:"no",
+								render: function( data, type, row ){
+									let htmltxt = "";
+									if( row.no == 1 || row.dlOk ){
+										htmltxt = '<div class="input-group mb-3 mx-2">';
+										htmltxt += '<input class="form-control" type="file" value="" data-filename="'+row.downloadfileName+'" id="uplaad'+row.no+'" >';
+										htmltxt += '<button type="button" class="btn btn-primary mb-0" onclick="uploadFile('+row.no+')" >アップロード</button>';
+										htmltxt += '</div>';
+									}else{
+										htmltxt = '<p class="alartmsg" >一つ前の問題を解いてください</p>';
+									}
+									return htmltxt;									
+								}
+							},
+							{ 
+								width: '10%',
+			            		data:"uploaded" ,
+			                	render: function ( data, type, row ) {
+			                		if( data ){
+			                			return '<div class="alartmsg">提出済み</div>';
+			                		}else{
+			                			return '未提出';
+			                		}
+			                	}
+							}
+						]
+					}
+				);
+  		}
+  	</script>
 	<script th:inline="javascript" th:if="${eventDetail.rankingDisplay && session['loginInfo'].isAdmin()}">
 		const initRankingTable = ()=>{
 			const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";
@@ -196,7 +261,7 @@
 								</div>
 								<div class="tab-content" id="myTabContent">
 									<div class="tab-pane fade show active mb-3" id="qlisttab" role="tabpanel" aria-labelledby="home-tab">										
-										<div class="d-flex justify-content-end">
+										<div class="d-flex justify-content-end mt-3">
 											<a th:href="|@{/download/result}?eid=${eventDetail.eid}|" target="ranking" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success" id="csvbtn" >問題別結果CSV出力</button></a>
 										</div>
 										<table id="qlistTable" class="display mb-3" style="width:100%" th:if="${eventDetail.displayQuestion}">
@@ -224,6 +289,9 @@
 										</table>
 									</div>
 									<div class="tab-pane fade" id="dlqtab" role="tabpanel" aria-labelledby="profile-tab">
+										<div th:if="${session['loginInfo'].isAdmin()}" class="d-flex justify-content-end mt-3">
+											<a th:href="|@{/download/excelanszip}?eid=${eventDetail.eid}" target="ansdl" rel="noopener noreferrer"><button type="button" class="btn bg-gradient-success mx-3" id="ansdlbtn" >提出ファイル一括ダウンロード</button></a>
+										</div>
 										<table id="exceltable" class="display">
 											<thead>
 												<tr>
@@ -257,7 +325,7 @@
 										</table>
 									</div>
 									<div class="tab-pane fade" id="searchuser" role="tabpanel" aria-labelledby="profile-tab"　th:if="${session['loginInfo'].isStudent()}">								
-									<div class="d-flex justify-content-end">
+									<div class="d-flex justify-content-end mt-3">
 										<h6 id="gettime" th:text="|${peiDto.getTime} 現在|"></h6>
 									</div>
 									<div class="row mt-4">
@@ -328,7 +396,7 @@
 									</div>
 									</div>
 									<div class="tab-pane fade" id="ranking" role="tabpanel" aria-labelledby="contact-tab"　th:if="${eventDetail.rankingDisplay}">
-										<div class="d-flex justify-content-end">
+										<div class="d-flex justify-content-end mt-3" >
 											<h6 id="gettimeforranking"></h6>
 											<a th:href="|@{/event/rankingforstudent}?eid=${eventDetail.eid}&etitle=${eventDetail.name}|" target="ranking" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success mx-3" id="rnkbtn" >学生用ランキング表示</button></a>
 											<a th:href="|@{/download/ranking}?eid=${eventDetail.eid}|" target="ranking" rel="noopener noreferrer"　th:if="${session['loginInfo'].isAdmin()}"><button type="button" class="btn bg-gradient-success" id="csvbtn" >ランキングCSV出力</button></a>
@@ -417,8 +485,35 @@
   <div id="parent" th:replace="/common/corejs"></div>  
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
+  
+   <!-- modal -->
+   <button type="button" id="uploadCompleteBtn" class="btn btn-block bg-gradient-warning mb-3" data-bs-toggle="modal" data-bs-target="#modal-notification" style="display:none"></button>
+   <div class="modal fade" id="modal-notification" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
+     <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h6 class="modal-title" id="modal-title-notification">アップロード結果</h6>
+           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+             <span aria-hidden="true">×</span>
+           </button>
+         </div>
+         <div class="modal-body">
+           <div class="py-3 text-center">
+             <i class="ni ni-bell-55 ni-3x"></i>
+             <h4 class="text-gradient text-danger mt-4" id="modalmsg" >アップロード（提出）が完了しました</h4>
+           </div>
+         </div>
+         <div class="modal-footer">
+           <button id="modalclose" type="button" class="btn btn-white ml-auto" data-bs-dismiss="modal">Close</button>
+         </div>
+       </div>
+     </div>
+   </div>
 </body>
 <script th:inline="javascript">
+	const uploadCompleteBtn = document.getElementById("uploadCompleteBtn");
+	const modalmsg = document.getElementById("modalmsg");
+	
 	const uploadFile = ( no )=>{
 		const upFilenameInput = document.getElementById("uplaad"+no);
 		if( upFilenameInput.value == "" ){
@@ -442,11 +537,16 @@
         fetch(url,{method:"post",body: formData})
         //レスポンスの受け取り
         .then( response => response.json()).then(result => {
- 			if( result == "OK"){
- 				alert("アップロードOK");
+ 			if( result.result == "OK"){
+ 				exeltable.ajax.reload(
+					(json)=>{
+		 				uploadCompleteBtn.click();
+		 				modalmsg.innerText = "アップロード（提出）が完了しました";
+					},true
+				);
  			}else{
- 				alertarea.style.display = "none";
- 				alert("登録完了\n【注意】このまま連続で登録をクリックすると同じものが登録されてしまいます！");
+ 				uploadCompleteBtn.click();
+ 				modalmsg.innerText = "アップロード（提出）に失敗しました。再度試してください";
  			}
  		});
 	}
@@ -458,7 +558,7 @@
 		dlqformeid.value = /*[[${eventDetail.eid}]]*/ 0;
 		dlqformno.value = no ;
 		
-	    const url = /*[[@{/download/excelq}]]*/ "/download/excelq";
+	    const url = /*[[@{/sdownload/excelq}]]*/ "/sdownload/excelq";
 		form.action = url;
 		form.submit();
 	 	//fetch(url,{method:"post",body: formData});

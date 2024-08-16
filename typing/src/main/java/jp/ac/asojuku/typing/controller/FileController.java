@@ -38,6 +38,7 @@ import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.UserInputCSVForm;
 import jp.ac.asojuku.typing.param.SessionConst;
+import jp.ac.asojuku.typing.param.TypingConst;
 import jp.ac.asojuku.typing.service.CsvService;
 import jp.ac.asojuku.typing.service.EventService;
 import jp.ac.asojuku.typing.service.UserService;
@@ -169,7 +170,7 @@ public class FileController {
 	 * @throws PermitionException 
 	 * @throws SystemErrorException 
 	 */
-	@RequestMapping(value= {"/download/excelq"}, method=RequestMethod.POST)
+	@RequestMapping(value= {"/sdownload/excelq"}, method=RequestMethod.POST)
 	public Object downloadExcelQuestion(
 			@ModelAttribute("eid")Integer eid,
 			@ModelAttribute("no")Integer no
@@ -192,6 +193,26 @@ public class FileController {
 		headers.setContentLength(fileBinary.length);
 		return new HttpEntity<byte[]>(fileBinary, headers);
 	}
+	
+
+	@RequestMapping(value= {"/download/excelanszip"}, method=RequestMethod.GET)
+	public Object excelanszip(
+			@ModelAttribute("eid")Integer eId
+			) throws SystemErrorException {
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+		
+		byte[] zipBinary = csvService.getExcelAnsZip(eId, loginInfo.getUid());
+				
+		// レスポンスデータとして返却
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		headers.setContentDispositionFormData("filename", TypingConst.ANSZIPFNAME);
+		headers.setContentLength(zipBinary.length);
+		return new HttpEntity<byte[]>(zipBinary, headers);
+	}
+	
 	/** -private- **/
     /**
      * CSVファイルアップロード用のディレクトリを作成する

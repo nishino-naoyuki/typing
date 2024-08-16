@@ -223,6 +223,13 @@ public class EventService extends ServiceBase{
 		
 		return getFrom(entity,eqEntityList,euEntityList,edEntityList,uid,roleId);
 	}
+	
+	public List<DwonloadQOutlineDto> getEventDownloadList(Integer eid,Integer uid){
+		List<EventDownloadEntity> edEntityList = eventDownloadRepository.findByEidOrderByNo(eid);
+		
+		return getFrom(edEntityList,uid);
+	}
+	
 	/**
 	 * 指定のユーザーが指定のイベントに既に登録されているかを取得
 	 * @param uid

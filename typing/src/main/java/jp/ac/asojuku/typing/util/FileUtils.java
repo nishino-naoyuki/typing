@@ -1,5 +1,6 @@
 package jp.ac.asojuku.typing.util;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,6 +15,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,7 +38,8 @@ import jp.ac.asojuku.typing.config.SystemConfig;
 
 public class FileUtils {
 	Logger logger = LoggerFactory.getLogger(FileUtils.class);
-
+	 private static final int BUFFER_SIZE = 4096;
+	 
 	/**
 	 * ファイルの中身をStringに読み込む
 	 * 
@@ -175,7 +180,21 @@ public class FileUtils {
 	    }
 	    return fileName;
 	}
-
+	
+	/**
+	 * ファイル名から拡張子を返します。
+	 * @param fileName ファイル名
+	 * @return ファイルの拡張子
+	 */
+	public static String getSuffix(String fileName) {
+	    if (fileName == null)
+	        return null;
+	    int point = fileName.lastIndexOf(".");
+	    if (point != -1) {
+	        return fileName.substring(point + 1);
+	    }
+	    return fileName;
+	}
 	/**
 	 * ファイルを比較する
 	 * @param fileA
@@ -423,4 +442,91 @@ public class FileUtils {
 	public static String createUniqPath(String baseDir) {
 		return baseDir +"/" + Token.getCsrfToken();
 	}
+	
+	/**
+	 * 与えられたファイル名にサフィックス（設備後）をつけて返す
+	 * @param filePath
+	 * @param suffixStr
+	 * @return
+	 */
+	public static String makeFilenameSuffix(String filename,String suffixStr) {
+		String ext = getSuffix(filename);
+		
+		return filename+"_"+suffixStr+"."+ext;
+	}
+	
+	public static File getZipFile(String dir,String outputFilename) {
+		try(
+            // 入力ファイルのストリームを作成
+            FileInputStream fis = new FileInputStream(dir);
+            // 出力ZIPファイルのストリームを作成
+            FileOutputStream fos = new FileOutputStream(outputFilename);
+            // ZIP出力ストリームを作成
+            ZipOutputStream zos = new ZipOutputStream(fos);
+				) {
+            // ZIPエントリを作成
+            ZipEntry zipEntry = new ZipEntry(dir);
+            // ZIPエントリを追加
+            zos.putNextEntry(zipEntry);
+            // 入力ファイルを読み込んでZIPに書き込む
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) > 0) {
+                zos.write(buffer, 0, length);
+            }
+            System.out.println("ファイルが正常に圧縮されました。");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		
+		return new File(outputFilename);
+	}
+	
+    public static File compressZip(String srcPath, String destPath) throws IOException {
+    	  
+        //圧縮先ファイルの出力ストリームを作成
+        try(FileOutputStream fos = new FileOutputStream(destPath);
+            ZipOutputStream zos = new ZipOutputStream(fos);){
+ 
+            Path entryPath = Paths.get(srcPath);
+ 
+            //フォルダ内のファイルとサブフォルダを再帰的にZIPに追加
+            compressEntry(entryPath, entryPath.getFileName().toString(), zos);
+        }
+
+		return new File(destPath);
+    }
+ 
+    private static void compressEntry(Path targetPath, String parentDirName, ZipOutputStream zos) throws IOException {
+        
+        //フォルダ内のフォルダ、ファイルを取得
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(targetPath)) {
+            for (Path filePath : ds) {
+                
+                if (Files.isDirectory(filePath)) {
+                    //フォルダの場合、再帰的に処置
+                    compressEntry(filePath, parentDirName + "/" + filePath.getFileName(), zos);
+                }
+                else {
+                    //ファイルの場合、圧縮
+                    //System.out.println("-> 圧縮中.. " + parentDirName + "/" + filePath.getFileName().toString());
+                    
+                    ZipEntry zipEntry = new ZipEntry(parentDirName + "/" + filePath.getFileName().toString());
+                    zos.putNextEntry(zipEntry);
+ 
+                    try(FileInputStream fis = new FileInputStream(filePath.toFile());
+                        BufferedInputStream bis = new BufferedInputStream(fis);){
+ 
+                        byte[] buffer = new byte[BUFFER_SIZE];
+                        int len = -1;
+                        while ((len = bis.read(buffer, 0, buffer.length)) != -1) {
+                            zos.write(buffer, 0, len);
+                        }
+                    }
+ 
+                    zos.closeEntry();
+                }
+            }
+        }
+    }
 }

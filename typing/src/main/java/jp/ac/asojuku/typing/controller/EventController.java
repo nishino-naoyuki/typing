@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jp.ac.asojuku.typing.config.SystemConfig;
 import jp.ac.asojuku.typing.dto.DownloadQFileDto;
+import jp.ac.asojuku.typing.dto.DwonloadQOutlineDto;
 import jp.ac.asojuku.typing.dto.EventInfoDetailDto;
 import jp.ac.asojuku.typing.dto.EventInfoDto;
 import jp.ac.asojuku.typing.dto.EventOutlineDto;
@@ -41,6 +42,7 @@ import jp.ac.asojuku.typing.dto.PersonalEventInfoDto;
 import jp.ac.asojuku.typing.dto.QuestionDetailDto;
 import jp.ac.asojuku.typing.dto.QuestionOutlineDto;
 import jp.ac.asojuku.typing.dto.RankingDto;
+import jp.ac.asojuku.typing.entity.EventDownloadEntity;
 import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.EventCreateForm;
@@ -49,6 +51,7 @@ import jp.ac.asojuku.typing.param.RoleId;
 import jp.ac.asojuku.typing.param.SessionConst;
 import jp.ac.asojuku.typing.param.TypingConst;
 import jp.ac.asojuku.typing.param.json.ErrorField;
+import jp.ac.asojuku.typing.param.json.ExcelQuestionJson;
 import jp.ac.asojuku.typing.param.json.RankingListJson;
 import jp.ac.asojuku.typing.param.json.ResultJson;
 import jp.ac.asojuku.typing.service.EventService;
@@ -98,7 +101,8 @@ public class EventController {
 		String excelBaseDir = SystemConfig.getInstance().getExcelbasedir();
 		String uploadDir = excelBaseDir + "/" + TypingConst.UPLOADDIR + "/" + eId ;
 		FileUtils.makeDir(uploadDir);
-	    File uploadFileObj = new File(uploadDir,uploadFile.getOriginalFilename());
+		String fileName = FileUtils.makeFilenameSuffix(uploadFile.getOriginalFilename(), loginInfo.getMail());
+	    File uploadFileObj = new File(uploadDir,fileName);
 
 	    //出力ストリームを取得
 	    try(BufferedOutputStream uploadFileStream =
@@ -112,7 +116,7 @@ public class EventController {
 	    //データベースに登録
 	    eventService.insertAns(eId, no, loginInfo.getUid(),uploadFileObj.getAbsolutePath());
 	    
-		return "OK";
+		return getJson();
 	}
 	/**
 	 * イベントリストの表示
@@ -400,6 +404,38 @@ public class EventController {
 
 		return mv;
 	}
+	
+
+	/**
+	 * @param eid
+	 * @return
+	 * @throws JsonProcessingException
+	 */
+	@RequestMapping(value = { "/excelqlist" }, method = RequestMethod.POST)
+	@ResponseBody
+	public Object getExcelQList(
+			@ModelAttribute("eid")Integer eid
+			) throws JsonProcessingException {
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+		
+		ExcelQuestionJson jsonObj = new ExcelQuestionJson();
+		
+		List<DwonloadQOutlineDto> dlqList =  eventService.getEventDownloadList(eid, loginInfo.getUid());
+		
+		if( dlqList != null ) {
+			jsonObj.setDlqList(dlqList);
+		}
+		
+		ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(jsonObj);
+
+        logger.info("jsonString:{}",jsonString);
+
+        return jsonString;
+	}
+	
 	/* ----private---- */
 	private boolean isDuplicateQid(Integer[] qidList) {
 		boolean isDuplicate = false;
@@ -428,6 +464,11 @@ public class EventController {
 		}
 		session.setAttribute(SessionConst.EIDMAP, eidMap);
 	}
+	
+
+	private String getJson() throws JsonProcessingException {
+		return getJson(null);
+	}
 	/**
 	 * JSON変換
 	 * @param bindingResult
@@ -437,11 +478,13 @@ public class EventController {
 	private String getJson(BindingResult bindingResult) throws JsonProcessingException {
 		ResultJson result = new ResultJson();
 		List<ErrorField> errList = new ArrayList<>();
-		for(FieldError error : bindingResult.getFieldErrors() ) {
-			ErrorField errField = new ErrorField();
-			errField.setField( error.getField() );
-			errField.setMsg( error.getDefaultMessage() );
-			errList.add(errField);
+		if( bindingResult != null ) {
+			for(FieldError error : bindingResult.getFieldErrors() ) {
+				ErrorField errField = new ErrorField();
+				errField.setField( error.getField() );
+				errField.setMsg( error.getDefaultMessage() );
+				errList.add(errField);
+			}
 		}
 		result.setErrorList(errList);
 		result.setResult( (errList.size() > 0 ? "NG":"OK") );
