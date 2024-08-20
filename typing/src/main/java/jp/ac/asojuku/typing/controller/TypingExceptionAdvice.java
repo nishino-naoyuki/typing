@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import jp.ac.asojuku.typing.exception.DonwloadfileNotFoundException;
 import jp.ac.asojuku.typing.exception.EventFinishedException;
 import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
@@ -26,8 +27,13 @@ public class TypingExceptionAdvice {
 	}
 	
 	@ExceptionHandler(EventFinishedException.class)
-	public String eventFinishedExceptionHandle(PermitionException e) {
+	public String eventFinishedExceptionHandle(EventFinishedException e) {
 		logger.error("EventFinishedException",e.getMessage());
 		return "/error/alreadfinished.html";
+	}
+	@ExceptionHandler(DonwloadfileNotFoundException.class)
+	public String donwloadfileNotFoundException(DonwloadfileNotFoundException e) {
+		logger.error("DonwloadfileNotFoundException",e.getMessage());
+		return "/error/dlfnotfound.html";
 	}
 }

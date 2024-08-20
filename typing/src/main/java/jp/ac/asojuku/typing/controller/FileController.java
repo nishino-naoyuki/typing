@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,6 +35,7 @@ import jp.ac.asojuku.typing.dto.CSVProgressDto;
 import jp.ac.asojuku.typing.dto.ExcelFileDto;
 import jp.ac.asojuku.typing.dto.LoginInfoDto;
 import jp.ac.asojuku.typing.dto.RankingDto;
+import jp.ac.asojuku.typing.exception.DonwloadfileNotFoundException;
 import jp.ac.asojuku.typing.exception.PermitionException;
 import jp.ac.asojuku.typing.exception.SystemErrorException;
 import jp.ac.asojuku.typing.form.UserInputCSVForm;
@@ -169,12 +171,14 @@ public class FileController {
 	 * @return
 	 * @throws PermitionException 
 	 * @throws SystemErrorException 
+	 * @throws UnsupportedEncodingException 
+	 * @throws DonwloadfileNotFoundException 
 	 */
 	@RequestMapping(value= {"/sdownload/excelq"}, method=RequestMethod.POST)
 	public Object downloadExcelQuestion(
 			@ModelAttribute("eid")Integer eid,
 			@ModelAttribute("no")Integer no
-			) throws PermitionException, SystemErrorException {
+			) throws PermitionException, SystemErrorException, UnsupportedEncodingException, DonwloadfileNotFoundException {
 
 		// ログイン情報を取得する
 		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
@@ -189,7 +193,7 @@ public class FileController {
 		byte[] fileBinary = excelFileDto.getData();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-		headers.setContentDispositionFormData("filename", excelFileDto.getFileName());
+		headers.setContentDispositionFormData("filename", URLEncoder.encode(excelFileDto.getFileName(),"UTF-8"));
 		headers.setContentLength(fileBinary.length);
 		return new HttpEntity<byte[]>(fileBinary, headers);
 	}
@@ -198,13 +202,17 @@ public class FileController {
 	@RequestMapping(value= {"/download/excelanszip"}, method=RequestMethod.GET)
 	public Object excelanszip(
 			@ModelAttribute("eid")Integer eId
-			) throws SystemErrorException {
+			) throws SystemErrorException, DonwloadfileNotFoundException {
 
 		// ログイン情報を取得する
 		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
 		
 		byte[] zipBinary = csvService.getExcelAnsZip(eId, loginInfo.getUid());
-				
+
+		if( zipBinary == null ) {
+			logger.warn("解答ファイルがありません。eid="+eId+" uid="+loginInfo.getUid());
+			throw new DonwloadfileNotFoundException("解答ファイルが無いためにダウンロードできません");
+		}
 		// レスポンスデータとして返却
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);

@@ -541,6 +541,9 @@ public class EventController {
 				    uploadFileStream.write(bytes);
 			    }
 			    fileList.add( new DownloadQFileDto(fileIds[i],uploadDir + "/" + uploadFile.getName()) );
+			}else if(uploadFormFile == null && fileIds[i] != null) {
+				//ダウンロードIDのみある場合は更新画面で更新がかからなかった項目。IDだけをセットしておく
+				fileList.add( new DownloadQFileDto(fileIds[i],"") );
 			}
 		}
 		

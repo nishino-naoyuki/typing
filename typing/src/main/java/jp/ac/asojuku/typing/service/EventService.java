@@ -291,8 +291,7 @@ public class EventService extends ServiceBase{
 				int no = 1;
 				List<DownloadTblEntity> dlList = new ArrayList<>();
 				for(DownloadQFileDto uploadqFile : uploadFileList ) {
-					DownloadTblEntity dlEntty =
-								downloadRepository.save( getFrom( uploadqFile) );
+					DownloadTblEntity dlEntty = downloadRepository.save( getFrom( uploadqFile) );
 					dlList.add(dlEntty);
 					insertUpdateEventDownload(entity.getEid(),dlEntty.getDownloadId(),no);
 					no++;
@@ -669,9 +668,10 @@ public class EventService extends ServiceBase{
 			entity = downloadRepository.getOne(uploadqFile.getUploadfileId());
 		}
 		
-		String baseDir = SystemConfig.getInstance().getExcelbasedir();
-		
-		entity.setFilename(uploadqFile.getUploadfile().replace(baseDir, ""));
+		if( StringUtils.isNoneEmpty(uploadqFile.getUploadfile())) {
+			String baseDir = SystemConfig.getInstance().getExcelbasedir();			
+			entity.setFilename(uploadqFile.getUploadfile().replace(baseDir, ""));
+		}
 		
 		return entity;
 	}

@@ -144,7 +144,7 @@
 		</div><!-- row -->
 	</div><!-- searchuser -->
 		<div class="tab-pane fade" id="downloadq" role="tabpanel" aria-labelledby="downloadq-tab">
-			<div class="card card-frame dlqcardframe" >
+			<div class="card card-frame dlqcardframe mt-2" >
 				<div class="card card-frame dlqestion" >
 					<div class="card-header d-flex justify-content-between">
 						ダウンロード問題１
@@ -153,13 +153,13 @@
 						<input type="file" class="form-control" id="uploadfile1">
 					</div>
 					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(0) != null}">
-						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(0).uploadfile}|">設定あり</p>
+						<p class="dlqfile" id="uploadfileId1" data-th-data-upfid="${eventDetail.getDownloadQFileDto(0).uploadfileId}" th:text="|設定あり:${eventDetail.getDownloadQFileDto(0).uploadfile}|">設定あり</p>
 						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
 						<input type="file" class="dlqfileupdate" id="uploadfile1">
 					</div>
 				</div>
 			</div>
-			<div class="card card-frame dlqcardframe" >
+			<div class="card card-frame dlqcardframe mt-2" >
 				<div class="card card-frame dlqestion" >
 					<div class="card-header d-flex justify-content-between">
 						ダウンロード問題２
@@ -168,13 +168,13 @@
 						<input type="file" class="form-control" id="uploadfile2">
 					</div>
 					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(1) != null}">
-						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(1).uploadfile}|">設定あり</p>
-						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<p class="dlqfile"  id="uploadfileId2" data-th-data-upfid="${eventDetail.getDownloadQFileDto(1).uploadfileId}" th:text="|設定あり:${eventDetail.getDownloadQFileDto(1).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile2updateBtn" >設定変更</button>
 						<input type="file" class="dlqfileupdate" id="uploadfile2">
 					</div>
 				</div>
 			</div>
-			<div class="card card-frame dlqcardframe" >
+			<div class="card card-frame dlqcardframe mt-2" >
 				<div class="card card-frame dlqestion" >
 					<div class="card-header d-flex justify-content-between">
 						ダウンロード問題３
@@ -183,13 +183,13 @@
 						<input type="file" class="form-control" id="uploadfile3">
 					</div>
 					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(2) != null}">
-						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(2).uploadfile}|">設定あり</p>
-						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<p class="dlqfile"  id="uploadfileId3" data-th-data-upfid="${eventDetail.getDownloadQFileDto(2).uploadfileId}" th:text="|設定あり:${eventDetail.getDownloadQFileDto(2).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile3updateBtn" >設定変更</button>
 						<input type="file" class="dlqfileupdate" id="uploadfile3">
 					</div>
 				</div>
 			</div>
-			<div class="card card-frame dlqcardframe" >
+			<div class="card card-frame dlqcardframe mt-2" >
 				<div class="card card-frame dlqestion" >
 					<div class="card-header d-flex justify-content-between">
 						ダウンロード問題４
@@ -198,13 +198,13 @@
 						<input type="file" class="form-control" id="uploadfile4">
 					</div>
 					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(3) != null}">
-						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(3).uploadfile}|">設定あり</p>
-						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<p class="dlqfile"  id="uploadfileId4" data-th-data-upfid="${eventDetail.getDownloadQFileDto(3).uploadfileId}" th:text="|設定あり:${eventDetail.getDownloadQFileDto(3).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile4updateBtn" >設定変更</button>
 						<input type="file" class="dlqfileupdate" id="uploadfile4">
 					</div>
 				</div>
 			</div>
-			<div class="card card-frame dlqcardframe" >
+			<div class="card card-frame dlqcardframe mt-2" >
 				<div class="card card-frame dlqestion" >
 					<div class="card-header d-flex justify-content-between">
 						ダウンロード問題５
@@ -213,8 +213,8 @@
 						<input type="file" class="form-control" id="uploadfile5">
 					</div>
 					<div class="card-body" th:if="${eventDetail.getDownloadQFileDto(4) != null}">
-						<p class="dlqfile" th:text="|設定あり:${eventDetail.getDownloadQFileDto(4).uploadfile}|">設定あり</p>
-						<button type="button" class="btn bg-gradient-primary" id="uploadfile1updateBtn" >設定変更</button>
+						<p class="dlqfile"  id="uploadfileId5" data-th-data-upfid="${eventDetail.getDownloadQFileDto(4).uploadfileId}" th:text="|設定あり:${eventDetail.getDownloadQFileDto(4).uploadfile}|">設定あり</p>
+						<button type="button" class="btn bg-gradient-primary" id="uploadfile5updateBtn" >設定変更</button>
 						<input type="file" class="dlqfileupdate" id="uploadfile5">
 					</div>
 				</div>
@@ -261,6 +261,10 @@
 	const alertarea = document.getElementById('alertmsg');
 	const draglist = document.getElementById('questionlist');
 	const uploadfile1updateBtn = document.getElementById('uploadfile1updateBtn');
+	const uploadfile2updateBtn = document.getElementById('uploadfile2updateBtn');
+	const uploadfile3updateBtn = document.getElementById('uploadfile3updateBtn');
+	const uploadfile4updateBtn = document.getElementById('uploadfile4updateBtn');
+	const uploadfile5updateBtn = document.getElementById('uploadfile5updateBtn');
 	
 	alertarea.style.display = "none";
 	
@@ -351,6 +355,11 @@
   		const rankingdisplay = document.getElementById('rankingdisplay');
   		const hiderankingtime = document.getElementById('hiderankingtime');
   		const filter = document.getElementById('filter');
+  		const uploadfileId1 = document.getElementById('uploadfileId1');
+  		const uploadfileId2 = document.getElementById('uploadfileId2');
+  		const uploadfileId3 = document.getElementById('uploadfileId3');
+  		const uploadfileId4 = document.getElementById('uploadfileId4');
+  		const uploadfileId5 = document.getElementById('uploadfileId5');
   		let qidList = [];
   		document.querySelectorAll('.drag-list li').forEach (elm => {
   			qidList.push( elm.id );
@@ -374,10 +383,16 @@
 		[
 			uploadfile1,uploadfile2,uploadfile3,uploadfile4,uploadfile5
 		];
+ 		let updatefileIds = 
+		[
+			uploadfileId1,uploadfileId2,uploadfileId3,uploadfileId4,uploadfileId5
+		];
  		
  		for( let i = 0; i < updatefiles.length; i++ ){
 	 		if( updatefiles[i].value != ""){
 	 			formData.append('downloadQFile'+(i+1),updatefiles[i].files[0] );
+	 		}else if(updatefileIds[i] != null){
+	 			formData.append('downloadQFile'+(i+1) + 'Id',updatefileIds[i].dataset.upfid );
 	 		}
  		}
  		 		
@@ -408,6 +423,18 @@
   
   uploadfile1updateBtn.addEventListener('click',()=>{
   	displayUpdateInput("uploadfile1");
+  });
+  uploadfile2updateBtn.addEventListener('click',()=>{
+  	displayUpdateInput("uploadfile2");
+  });
+  uploadfile3updateBtn.addEventListener('click',()=>{
+  	displayUpdateInput("uploadfile3");
+  });
+  uploadfile4updateBtn.addEventListener('click',()=>{
+  	displayUpdateInput("uploadfile4");
+  });
+  uploadfile5updateBtn.addEventListener('click',()=>{
+  	displayUpdateInput("uploadfile5");
   });
   </script>
 </html>

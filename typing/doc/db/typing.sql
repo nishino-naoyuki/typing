@@ -21,11 +21,12 @@ DROP TABLE IF EXISTS USER_TBL;
 
 CREATE TABLE ANS_DL_TBL
 (
-	ansid int NOT NULL,
+	ansid int NOT NULL AUTO_INCREMENT,
 	uid int NOT NULL,
 	ed_id int NOT NULL,
 	-- 提出時間
 	submit_date datetime NOT NULL COMMENT '提出時間',
+	ans_filepath varchar(512) NOT NULL,
 	PRIMARY KEY (ansid)
 );
 
@@ -92,9 +93,7 @@ CREATE TABLE ANS_TEMP_TBL
 
 CREATE TABLE DOWNLOAD_TBL
 (
-	download_id int NOT NULL,
-	-- 表示順
-	ordinal_num int NOT NULL COMMENT '表示順',
+	download_id int NOT NULL AUTO_INCREMENT,
 	-- ファイル名
 	filename varchar(256) NOT NULL COMMENT 'ファイル名',
 	PRIMARY KEY (download_id)
@@ -103,9 +102,10 @@ CREATE TABLE DOWNLOAD_TBL
 
 CREATE TABLE EVENT_DOWNLOAD
 (
-	ed_id int NOT NULL,
+	ed_id int NOT NULL AUTO_INCREMENT,
 	eid int NOT NULL,
 	download_id int NOT NULL,
+	no int NOT NULL,
 	PRIMARY KEY (ed_id)
 );
 
