@@ -22,44 +22,11 @@
   <div id="parent" th:replace="/common/head"></div>  
   <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
-  <script>
+  <script th:inline="javascript">
   	let rtable;
   	let exeltable;
     document.addEventListener('DOMContentLoaded', function () {
-	    let qtable = new DataTable('#qlistTable',{
-	   	      "paging": true,
-	   	      "lengthChange": true,
-	   	      "searching": true,
-	   	      "ordering": true,
-	   	      "info": true,
-	   	      "autoWidth": false,
-	   	      "responsive": true});
-	   	      
-	    let utable = new DataTable('#ulistTable',{
-	   	      "paging": true,
-	   	      "lengthChange": true,
-	   	      "searching": true,
-	   	      "ordering": true,
-	   	      "info": true,
-	   	      "autoWidth": false,
-	   	      "responsive": true});
-	   	      
-	   	 initRankingTable();
-	   	 
-	   	 /*
-		exeltable = new DataTable('#exceltable',
-							{
-								autoWidth: false,
-								columns: [
-									{ width: '5%' },
-									{ width: '20%' },
-									{ width: '65%' },
-									{ width: '10%' },
-								]
-							}
-			);
-			*/
-		intExceltbl();
+	    initTables();
 	});
   </script>
   	<script th:inline="javascript">
@@ -126,6 +93,54 @@
 				);
   		}
   	</script>
+  	
+	<script th:inline="javascript" th:if="${!eventDetail.rankingDisplay}">
+		const initTables = ()=>{
+		    let qtable = new DataTable('#qlistTable',{
+		   	      "paging": true,
+		   	      "lengthChange": true,
+		   	      "searching": true,
+		   	      "ordering": true,
+		   	      "info": true,
+		   	      "autoWidth": false,
+		   	      "responsive": true});
+		   	      
+		    let utable = new DataTable('#ulistTable',{
+		   	      "paging": true,
+		   	      "lengthChange": true,
+		   	      "searching": true,
+		   	      "ordering": true,
+		   	      "info": true,
+		   	      "autoWidth": false,
+		   	      "responsive": true});
+		   	
+			intExceltbl();
+		}
+	</script>
+	<script th:inline="javascript" th:if="${eventDetail.rankingDisplay}">
+		const initTables = ()=>{
+		    let qtable = new DataTable('#qlistTable',{
+		   	      "paging": true,
+		   	      "lengthChange": true,
+		   	      "searching": true,
+		   	      "ordering": true,
+		   	      "info": true,
+		   	      "autoWidth": false,
+		   	      "responsive": true});
+		   	      
+		    let utable = new DataTable('#ulistTable',{
+		   	      "paging": true,
+		   	      "lengthChange": true,
+		   	      "searching": true,
+		   	      "ordering": true,
+		   	      "info": true,
+		   	      "autoWidth": false,
+		   	      "responsive": true});
+		   	
+			intExceltbl();
+			initRankingTable();
+		}
+	</script>
 	<script th:inline="javascript" th:if="${eventDetail.rankingDisplay && session['loginInfo'].isAdmin()}">
 		const initRankingTable = ()=>{
 			const url = /*[[@{/event/rankingInfo}]]*/ "/event/rankingInfo";

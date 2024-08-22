@@ -54,6 +54,19 @@ public class QuestionController {
 	@Autowired
 	HttpSession session;
 
+
+	@RequestMapping(value= {"/delete"}, method=RequestMethod.POST)
+	@ResponseBody
+    public Object delete(
+    		@RequestParam(required = true) Integer qid
+    		) throws SystemErrorException, JsonProcessingException  {
+		
+		//登録処理
+		questionService.delete(qid);
+		
+		return getJson();
+	}
+	
 	@RequestMapping(value= {"/edit"}, method=RequestMethod.GET)
     public ModelAndView edit(
     		ModelAndView mv,
@@ -235,6 +248,21 @@ public class QuestionController {
 	}
 	
 	/* ---private method--- */
+
+	private String getJson() throws JsonProcessingException {
+
+		ResultJson result = new ResultJson();
+		List<ErrorField> errList = new ArrayList<>();
+		result.setErrorList(errList);
+		result.setResult( (errList.size() > 0 ? "NG":"OK") );
+
+		ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(result);
+
+        logger.trace("jsonString:{}",jsonString);
+
+        return jsonString;
+	}
 	/**
 	 * JSON変換
 	 * @param bindingResult

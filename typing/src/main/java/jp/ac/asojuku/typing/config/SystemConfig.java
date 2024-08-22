@@ -32,4 +32,5 @@ public class SystemConfig {
 	private String csvoutputencode;	//CSVの出力ファイルのエンコード
 	private String csvuploaddir;	//CSVのアップロードディレクトリ
 	private String excelbasedir;	//エクセル関連のディレクトリ
+	private String excelsamplefile;	//エクセルサンプルファイルのパス
 }

@@ -3,6 +3,8 @@ package jp.ac.asojuku.typing.controller;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -13,9 +15,11 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -58,6 +62,30 @@ public class FileController {
 	CsvService csvService;
 	@Autowired
 	HttpSession session;
+
+	@RequestMapping(value= {"/sdownload/sampleexcel"}, method=RequestMethod.GET)
+    public Object dlsampleexcel(
+    		) throws SystemErrorException,Exception {
+
+		// ログイン情報を取得する
+		LoginInfoDto loginInfo = (LoginInfoDto) session.getAttribute(SessionConst.LOGININFO);
+		if( loginInfo == null ) {
+			throw new SystemErrorException("不正なダウンロードです");
+		}
+
+		//ファイルパス取得
+		String excelSampleFilePath = SystemConfig.getInstance().getExcelsamplefile();
+		
+		logger.info("excelSampleFilePath:"+excelSampleFilePath);
+	    byte[] sampleBinary = csvService.getSampleExcelFile(excelSampleFilePath);
+		
+		// レスポンスデータとして返却
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		headers.setContentDispositionFormData("filename", URLEncoder.encode(FileUtils.getFileNameFromPath(excelSampleFilePath),"UTF-8"));
+		headers.setContentLength(sampleBinary.length);
+		return new HttpEntity<byte[]>(sampleBinary, headers);
+	}
 	
 	/**
 	 * CSV登録処理

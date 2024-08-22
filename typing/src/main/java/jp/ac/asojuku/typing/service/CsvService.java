@@ -108,6 +108,29 @@ public class CsvService extends ServiceBase{
 	}
 	
 	/**
+	 * エクセルのサンプルファイルのバイナリ取得
+	 * @return
+	 * @throws SystemErrorException
+	 */
+	public byte[] getSampleExcelFile(String excelSampleFilePath) throws SystemErrorException {
+	    byte[] b = {};
+
+	    try {
+			//バイナリ変換
+			Resource resource = resourceLoader.getResource("file:" + excelSampleFilePath);
+			InputStream csvStream = resource.getInputStream();
+			
+			// byteへ変換
+			b = IOUtils.toByteArray(csvStream);
+	    	
+	    } catch (IOException e) {
+			e.printStackTrace();
+			throw new SystemErrorException(e);
+		}
+	    
+	    return b;
+	}
+	/**
 	 * エクセル問題を取得しバイナリを返す
 	 * 
 	 * @param eid

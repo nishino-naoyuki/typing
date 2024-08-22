@@ -38,6 +38,13 @@ import jp.ac.asojuku.typing.util.Exchange;
 public class QuestionService extends ServiceBase{
 	Logger logger = LoggerFactory.getLogger(QuestionService.class);
 	
+	public void delete(Integer qId) {
+		//QestionTblEntity qEntity = questionRepository.getOne(qId);
+		
+		eventQuestionRepository.findByEidOrderByNo(qId);
+		
+		questionRepository.deleteById(qId);
+	}
 	/**
 	 * 練習を中断する
 	 * @param token

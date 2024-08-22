@@ -56,6 +56,12 @@
 							</tr>
 						</thead>
 						<tbody>
+							<tr>
+								<td><a th:href="@{/sdownload/sampleexcel}">エクセル実技サンプル問題サンプルダウンロード</a></td>
+								<td>---</td>
+								<td>---</td>
+								<td　th:if="${session['loginInfo'].isAdmin()}">練習用</td>
+							</tr>
 							<tr th:each="element,status:${qList}">
 								<td><a th:href="|@{/question/detail}?id=${element.qid}|" target="qestiondetail" rel="noopener noreferrer" th:text="${element.title}"　></a></td>
 								<td th:text="${element.difficulty}"></td>
