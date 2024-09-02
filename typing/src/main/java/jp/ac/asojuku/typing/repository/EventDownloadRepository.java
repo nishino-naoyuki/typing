@@ -15,4 +15,5 @@ public interface EventDownloadRepository
 	List<EventDownloadEntity> findByEidOrderByNo(Integer eId);
 	
 	EventDownloadEntity findByEidAndNo(Integer eid,Integer no);
+
 }

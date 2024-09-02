@@ -56,9 +56,17 @@ public class EventService extends ServiceBase{
 	 * @param no
 	 * @param uid
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void insertAns(Integer eId,Integer no,Integer uid,String filepath) {
 		AnsDlTblEntity entity = new AnsDlTblEntity();
+		
 		EventDownloadEntity dlEntity = eventDownloadRepository.findByEidAndNo(eId, no);
+
+		Integer count = ansDlTblRepository.countByUidAndEdId( uid,dlEntity.getEdId() );
+		if( count != null && count > 0) {
+			//既に解答済みの場合は解答データを削除（最新のものだけ残す）
+			ansDlTblRepository.deleteByUidAndEdId(uid, dlEntity.getEdId());
+		}
 		
 		entity.setEdId( dlEntity.getDownloadId() );
 		entity.setUid(uid);

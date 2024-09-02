@@ -8,5 +8,9 @@ import jp.ac.asojuku.typing.entity.AnsDlTblEntity;
 public interface AnsDlTblRepository 
 	extends JpaSpecificationExecutor<AnsDlTblEntity>, JpaRepository<AnsDlTblEntity, Integer>{
 
-	AnsDlTblEntity findByUidAndEdId(Integer udi,Integer edId);
+	AnsDlTblEntity findByUidAndEdId(Integer uid,Integer edId);
+
+	Integer countByUidAndEdId(Integer uid,Integer edId);
+
+	void deleteByUidAndEdId(Integer uid,Integer edId);
 }
